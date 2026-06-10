@@ -1,4 +1,4 @@
-# KRR-Flatland
+# TRailMix
 
 ![Flatland animation](https://i.imgur.com/9cNtWjs.gif)
 

@@ -5,7 +5,7 @@ passengers(1, 200).
 
 % Allocate cost per train from weights and passengers
 % total_driving_time(ID, Total_driving_time)
-total_driving_time(ID, T * P) :- finish(ID, T), passengers(ID, P).
+total_driving_time(ID, (T_finish - T_start) * P) :- finish(ID, T_finish), passengers(ID, P), start(ID, (_,_), T_start, _).
 
 % Minimize cost
 #minimize { Total_driving_time@2, ID, Total_driving_time : total_driving_time(ID, Total_driving_time) }.
@@ -26,7 +26,7 @@ passengers(1, (10, 15), 400).
 
 % Allocate cost per train from weights and passengers
 % total_driving_time(ID, Total_driving_time)
-total_driving_time(ID, S) :- train(ID), S = #sum {T * P, X, Y : finish(ID, (X, Y), T), passengers(ID, (X, Y), P)}.
+total_driving_time(ID, S) :- train(ID), S = #sum {(T_finish - T_start) * P, X, Y : finish(ID, (X, Y), T_finish), passengers(ID, (X, Y), P), start(ID, (_,_), T_start, _)}.
 
 % Minimize cost
 #minimize { Total_driving_time@2, ID, Total_driving_time : total_driving_time(ID, Total_driving_time) }.

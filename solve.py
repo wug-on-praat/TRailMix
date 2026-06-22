@@ -26,7 +26,7 @@ class TrackMalManager():
 
     def get(self) -> list:
         """ get the list of malfunctions """
-        return(self._track_malfunctions)
+        return(self.track_malfunctions)
 
     def deduct(self) -> None:
         """ decrease the duration of each malfunction by one and delete expired malfunctions """
@@ -40,16 +40,14 @@ class TrackMalManager():
         for i in sorted(malfunctions_to_remove, reverse=True):
             del self.track_malfunctions[i]
 
-    def check(self, info) -> set:       # malfunction generator???
+    def check(self) -> set:       # malfunction generator???
         # 2badjusted
         """ check current state of the env for new malfunctions """
-        malfunctioning_info = info['malfunction']
         malfunction_cell = (10,10)
-        malfunction_timestep = 20
-        
+        malfunction_duration = 5
 
-        # add new ones to malfunctions
-        self.track_malfunctions.append((malfunction_cell, malfunction_timestep))
+        # add new track malfunctions to current list
+        self.track_malfunctions.append((malfunction_cell, malfunction_duration))
 
         return([malfunction_cell])
     
@@ -115,7 +113,7 @@ class SimulationManager():
         present = convert_malfunctions_to_clingo(malfunctions, timestep)
         track_present = convert_trackmalfunctions_to_clingo(trk_malfunction, timestep)
         future = convert_futures_to_clingo(actions[timestep:])
-        return(past + present + future)
+        return(past + present + track_present + future)
 
     def update_actions(self, context) -> list:
         """ update list of actions following malfunction """
@@ -202,6 +200,7 @@ def main():
 
     actions = sim.build_actions()
 
+    new_trkmalfs = []
     timestep = 0
     while len(actions) > timestep:
         # add to the log
@@ -217,11 +216,15 @@ def main():
 
         # check for new malfunctions
         new_malfs = mal.check(info)
-        new_trkmalfs = trk.check()
 
-        if len(new_malfs) > 0:
-            context = sim.provide_context(actions, timestep, mal.get())
+        if timestep == 27:        
+            new_trkmalfs = trk.check()  # generates the malfunction
+
+        if len(new_malfs) > 0 or timestep == 27:
+            print(trk.get())
+            context = sim.provide_context(actions, timestep, mal.get(), trk.get())
             actions = sim.update_actions(context)
+        
 
         mal.deduct() #??? where in the loop should this go - before context?
         trk.deduct()

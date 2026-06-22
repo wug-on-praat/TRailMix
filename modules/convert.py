@@ -74,7 +74,7 @@ def convert_trackmalfunctions_to_clingo(malfs, timestep) -> str:
         cell, duration = m[0], m[1]
         facts.append(f'track_malfunction({cell},{duration},{timestep}).\n')
         for t in range(timestep+1, timestep+1+m[1]): # remove: make sure this duration should be included (aka remove +1 or keep it?)
-            facts.append(f':- not position( _, {cell}, {t}, _).\n') #remove: can this be a list of strings or should it be one long string?
+            facts.append(f':- position( _, {cell}, {t}, _).\n') #remove: can this be a list of strings or should it be one long string?
 
     return(facts)
 

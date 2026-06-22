@@ -104,16 +104,15 @@ class SimulationManager():
         clingo_main(app, self.primary)
         return(app.action_list)
 
-    def provide_context(self, actions, timestep, malfunctions, trk_malfunction) -> str:
+    def provide_context(self, actions, timestep, malfunctions) -> str:
         """ provide additional facts when updating list """
         # actions that have already been executed
         # wait actions that are enforced because of malfunctions
         # future actions that were previously planned
         past = convert_formers_to_clingo(actions[:timestep])
         present = convert_malfunctions_to_clingo(malfunctions, timestep)
-        track_present = convert_trackmalfunctions_to_clingo(trk_malfunction, timestep)
         future = convert_futures_to_clingo(actions[timestep:])
-        return(past + present + track_present + future)
+        return(past + present + future)
 
     def update_actions(self, context) -> list:
         """ update list of actions following malfunction """
@@ -122,6 +121,15 @@ class SimulationManager():
         clingo_main(app, self.primary)
         return(app.action_list)
 
+    def provide_context_trk(self, actions, timestep, trk_malfunction) -> str:
+        """ provide additional facts when updating list """
+        # actions that have already been executed
+        # wait actions that are enforced because of malfunctions
+        # future actions that were previously planned
+        past = convert_formers_to_clingo(actions[:timestep+1])
+        track_present = convert_trackmalfunctions_to_clingo(trk_malfunction, timestep)
+        future = convert_futures_to_clingo(actions[timestep+1:])
+        return(past + track_present + future)
 
 class OutputLogManager():
     def __init__(self) -> None:
@@ -217,17 +225,20 @@ def main():
         # check for new malfunctions
         new_malfs = mal.check(info)
 
-        if timestep == 27:        
+        if timestep == 20:
             new_trkmalfs = trk.check()  # generates the malfunction
 
-        if len(new_malfs) > 0 or timestep == 27:
-            print(trk.get())
-            context = sim.provide_context(actions, timestep, mal.get(), trk.get())
+        if len(new_malfs) > 0:
+            context = sim.provide_context(actions, timestep, mal.get())
             actions = sim.update_actions(context)
-        
 
         mal.deduct() #??? where in the loop should this go - before context?
-        trk.deduct()
+
+        if timestep == 20:
+            context = sim.provide_context_trk(actions, timestep, trk.get())
+            actions = sim.update_actions(context)
+
+        #trk.deduct()
         
         # render an image
         filename = 'tmp/frames/flatland_frame_{:04d}.png'.format(timestep)

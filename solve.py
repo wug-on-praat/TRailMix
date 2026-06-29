@@ -43,7 +43,9 @@ class TrackMalManager():
     def check(self) -> set:       # malfunction generator???
         # 2badjusted
         """ check current state of the env for new malfunctions """
-        malfunction_cell = (17, 16)
+        #for test env: malfunction_cell = (17, 16)
+        #for test env: malfunction_duration = 20
+        malfunction_cell = (24, 22)
         malfunction_duration = 20
 
         # add new track malfunctions to current list
@@ -225,7 +227,10 @@ def main():
         # check for new malfunctions
         new_malfs = mal.check(info)
 
-        if timestep == 2:
+        #for test env: if timestep == 2:
+        #for env_003--2_2-wait if timestep == 15:
+        if timestep == 12:
+
             new_trkmalfs = trk.check()  # generates the malfunction
 
         if len(new_malfs) > 0:
@@ -234,7 +239,7 @@ def main():
 
         mal.deduct() #??? where in the loop should this go - before context?
 
-        if timestep == 2:
+        if timestep == 12:
             context = sim.provide_context_trk(actions, timestep, trk.get())
             actions = sim.update_actions(context)
 

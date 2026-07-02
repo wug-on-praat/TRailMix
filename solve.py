@@ -5,6 +5,8 @@ import time
 import pickle
 import json
 from argparse import ArgumentParser, Namespace
+import random
+import numpy as np
 
 # custom modules
 from asp import params
@@ -21,12 +23,13 @@ import imageio.v2 as imageio
 from PIL import Image, ImageDraw, ImageFont
 
 class TrackMalManager():
-    def __init__(self, ):
+    def __init__(self, grid):
         self.track_malfunctions = []
+        self.grid = grid
 
     def get(self) -> list:
-        """ get the list of malfunctions """
-        return(self.track_malfunctions)
+        """ get a list containing the last malfunctions """
+        return(self.track_malfunctions[-1:])
 
     def deduct(self) -> None:
         """ decrease the duration of each malfunction by one and delete expired malfunctions """
@@ -45,9 +48,12 @@ class TrackMalManager():
         """ check current state of the env for new malfunctions """
         #for test env: malfunction_cell = (17, 16)
         #for test env: malfunction_duration = 20
-        malfunction_cell = (24, 22)
-        malfunction_duration = 20
+        # malfunction_cell = (24, 22)
+        # malfunction_duration = 20
 
+        malfunction_cell = tuple(random.choice(self.grid))
+        malfunction_duration = random.randint(2,20)    # maybe define with function (make 5 more likely than 20)
+        
         # add new track malfunctions to current list
         self.track_malfunctions.append((malfunction_cell, malfunction_duration))
 
@@ -132,6 +138,36 @@ class SimulationManager():
         track_present = convert_trackmalfunctions_to_clingo(trk_malfunction, timestep)
         future = convert_futures_to_clingo(actions[timestep+1:])
         return(past + track_present + future)
+    
+    def get_tracks(self):
+        """get all meaningfull cells that can malfunction"""
+        
+        rail = self.env.rail.grid
+
+        return np.column_stack(rail.nonzero())
+        
+        
+        # sample first 10 cells in row-major order
+        # hmax, wmax = rail.shape[:2]
+        # shown = 0
+        # for r in range(hmax):
+        #     for c in range(wmax):
+        #         print((r, c), rail.grid[r, c])
+        #         grid[r,c] = rail.grid[r,c]
+        #         shown += 1
+        #         if shown >= 10:
+        #             raise SystemExit
+    
+        # # create an atom for each cell in the environment
+        # #row_num = len(rail_map) - 1
+        # for row, row_array in enumerate(rail_map):
+        #     for col, cval in enumerate(row_array):
+        #         clingo_str += f"cell(({row},{col}), {cval}).\n"
+        #     #row_num -= 1
+        #     clingo_str+="\n"
+            
+
+
 
 class OutputLogManager():
     def __init__(self) -> None:
@@ -189,11 +225,15 @@ def main():
         env = pickle.load(open(args.env[0], "rb"))
         no_render = args.no_render
 
+    
+
     # create manager objects
-    trk = TrackMalManager()
     mal = MalfunctionManager(env.get_num_agents())
     sim = SimulationManager(env, params.primary, params.secondary)
     log = OutputLogManager()
+
+    grid = sim.get_tracks()
+    trk = TrackMalManager(grid)
 
     # envrionment rendering
     env_renderer = None
@@ -229,9 +269,12 @@ def main():
 
         #for test env: if timestep == 2:
         #for env_003--2_2-wait if timestep == 15:
-        if timestep == 12:
-
+        malfunction_ind = random.random()   # create value btw 0-1
+                
+        if malfunction_ind > 0.9:       # if indicator (value 0-1) over 0.9 malfunction triggers
             new_trkmalfs = trk.check()  # generates the malfunction
+            print(new_trkmalfs)
+        
 
         if len(new_malfs) > 0:
             context = sim.provide_context(actions, timestep, mal.get())
@@ -239,11 +282,13 @@ def main():
 
         mal.deduct() #??? where in the loop should this go - before context?
 
-        if timestep == 12:
+        if malfunction_ind > 0.9:
             context = sim.provide_context_trk(actions, timestep, trk.get())
             actions = sim.update_actions(context)
 
-        #trk.deduct()
+    
+        trk.deduct()
+        
         
         # render an image
         filename = 'tmp/frames/flatland_frame_{:04d}.png'.format(timestep)

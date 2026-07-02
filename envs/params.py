@@ -1,12 +1,12 @@
 # basic parameters
-width=40
-height=40
+width=20
+height=20
 number_of_agents=2
-max_num_cities=2
-seed=2
+max_num_cities=3
+seed=1
 grid_mode=False
-max_rails_between_cities=2
-max_rail_pairs_in_city=2
+max_rails_between_cities=1
+max_rail_pairs_in_city=1
 remove_agents_at_target=True
 
 # speed

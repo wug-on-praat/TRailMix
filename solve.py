@@ -26,10 +26,12 @@ class TrackMalManager():
     def __init__(self, grid):
         self.track_malfunctions = []
         self.grid = grid
+        self.track_record = []
 
     def get(self) -> list:
-        """ get a list containing the last malfunctions """
+        """ get a list containing the last malfunction """
         return(self.track_malfunctions[-1:])
+
 
     def deduct(self) -> None:
         """ decrease the duration of each malfunction by one and delete expired malfunctions """
@@ -51,13 +53,19 @@ class TrackMalManager():
         # malfunction_cell = (24, 22)
         # malfunction_duration = 20
 
-        malfunction_cell = tuple(random.choice(self.grid))
-        malfunction_duration = random.randint(2,20)    # maybe define with function (make 5 more likely than 20)
+        malfunction_ind = random.random()   # decider for malfunction: create value btw 0-1
+                
+        if malfunction_ind > 0.9:
+            malfunction_cell = tuple(random.choice(self.grid))
+            malfunction_duration = random.randint(2,20)    # maybe define with function (make 5 more likely than 20)
         
-        # add new track malfunctions to current list
-        self.track_malfunctions.append((malfunction_cell, malfunction_duration))
+            # add new track malfunctions to current list
+            self.track_malfunctions.append((malfunction_cell, malfunction_duration))
+            self.track_record.append((malfunction_cell, malfunction_duration))
 
-        return([malfunction_cell])
+            return([malfunction_cell])
+        else: 
+            return([])
     
 
 
@@ -144,29 +152,7 @@ class SimulationManager():
         
         rail = self.env.rail.grid
 
-        return np.column_stack(rail.nonzero())
-        
-        
-        # sample first 10 cells in row-major order
-        # hmax, wmax = rail.shape[:2]
-        # shown = 0
-        # for r in range(hmax):
-        #     for c in range(wmax):
-        #         print((r, c), rail.grid[r, c])
-        #         grid[r,c] = rail.grid[r,c]
-        #         shown += 1
-        #         if shown >= 10:
-        #             raise SystemExit
-    
-        # # create an atom for each cell in the environment
-        # #row_num = len(rail_map) - 1
-        # for row, row_array in enumerate(rail_map):
-        #     for col, cval in enumerate(row_array):
-        #         clingo_str += f"cell(({row},{col}), {cval}).\n"
-        #     #row_num -= 1
-        #     clingo_str+="\n"
-            
-
+        return np.column_stack(rail.nonzero())          
 
 
 class OutputLogManager():
@@ -269,11 +255,9 @@ def main():
 
         #for test env: if timestep == 2:
         #for env_003--2_2-wait if timestep == 15:
-        malfunction_ind = random.random()   # create value btw 0-1
-                
-        if malfunction_ind > 0.9:       # if indicator (value 0-1) over 0.9 malfunction triggers
-            new_trkmalfs = trk.check()  # generates the malfunction
-            print(new_trkmalfs)
+        # if indicator (value 0-1) over 0.9 malfunction triggers
+        new_trkmalfs = trk.check()  # generates the malfunction
+        
         
 
         if len(new_malfs) > 0:
@@ -282,7 +266,7 @@ def main():
 
         mal.deduct() #??? where in the loop should this go - before context?
 
-        if malfunction_ind > 0.9:
+        if len(new_trkmalfs) > 0:
             context = sim.provide_context_trk(actions, timestep, trk.get())
             actions = sim.update_actions(context)
 
@@ -327,6 +311,9 @@ def main():
         # images.append(imageio.imread(filename))
 
         timestep = timestep + 1
+    
+    print("All reported malfunctions:")
+    print(trk.track_record)
 
     # get time stamp for gif and output log
     stamp = time.time()

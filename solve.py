@@ -5,11 +5,13 @@ import time
 import pickle
 import json
 from argparse import ArgumentParser, Namespace
+import random
+import numpy as np
 
 # custom modules
 from asp import params
 from modules.api import FlatlandPlan, FlatlandReplan
-from modules.convert import convert_malfunctions_to_clingo, convert_formers_to_clingo, convert_futures_to_clingo
+from modules.convert import convert_malfunctions_to_clingo, convert_formers_to_clingo, convert_futures_to_clingo, convert_trackmalfunctions_to_clingo
 
 # clingo
 import clingo
@@ -19,6 +21,52 @@ from clingo.application import Application, clingo_main
 from flatland.utils.rendertools import RenderTool
 import imageio.v2 as imageio
 from PIL import Image, ImageDraw, ImageFont
+
+class TrackMalManager():
+    def __init__(self, grid):
+        self.track_malfunctions = []
+        self.grid = grid
+        self.track_record = []
+
+    def get(self) -> list:
+        """ get a list containing the last malfunction """
+        return(self.track_malfunctions[-1:])
+
+
+    def deduct(self) -> None:
+        """ decrease the duration of each malfunction by one and delete expired malfunctions """
+        malfunctions_to_remove = []
+        for i, malf in enumerate(self.track_malfunctions):
+            self.track_malfunctions[i] = (self.track_malfunctions[i][0], self.track_malfunctions[i][1] - 1)
+            if self.track_malfunctions[i][1] == 0:
+                malfunctions_to_remove.append(i)
+        
+        # delete expired malfunctions
+        for i in sorted(malfunctions_to_remove, reverse=True):
+            del self.track_malfunctions[i]
+
+    def check(self) -> set:       # malfunction generator???
+        # 2badjusted
+        """ check current state of the env for new malfunctions """
+        #for test env: malfunction_cell = (17, 16)
+        #for test env: malfunction_duration = 20
+        # malfunction_cell = (24, 22)
+        # malfunction_duration = 20
+
+        malfunction_ind = random.random()   # decider for malfunction: create value btw 0-1
+                
+        if malfunction_ind > 0.9:
+            malfunction_cell = tuple(random.choice(self.grid))
+            malfunction_duration = random.randint(2,20)    # maybe define with function (make 5 more likely than 20)
+        
+            # add new track malfunctions to current list
+            self.track_malfunctions.append((malfunction_cell, malfunction_duration))
+            self.track_record.append((malfunction_cell, malfunction_duration))
+
+            return([malfunction_cell])
+        else: 
+            return([])
+    
 
 
 class MalfunctionManager():
@@ -89,6 +137,23 @@ class SimulationManager():
         clingo_main(app, self.primary)
         return(app.action_list)
 
+    def provide_context_trk(self, actions, timestep, trk_malfunction) -> str:
+        """ provide additional facts when updating list """
+        # actions that have already been executed
+        # wait actions that are enforced because of malfunctions
+        # future actions that were previously planned
+        past = convert_formers_to_clingo(actions[:timestep+1])
+        track_present = convert_trackmalfunctions_to_clingo(trk_malfunction, timestep)
+        future = convert_futures_to_clingo(actions[timestep+1:])
+        return(past + track_present + future)
+    
+    def get_tracks(self):
+        """get all meaningfull cells that can malfunction"""
+        
+        rail = self.env.rail.grid
+
+        return np.column_stack(rail.nonzero())          
+
 
 class OutputLogManager():
     def __init__(self) -> None:
@@ -146,10 +211,15 @@ def main():
         env = pickle.load(open(args.env[0], "rb"))
         no_render = args.no_render
 
+    
+
     # create manager objects
     mal = MalfunctionManager(env.get_num_agents())
     sim = SimulationManager(env, params.primary, params.secondary)
     log = OutputLogManager()
+
+    grid = sim.get_tracks()
+    trk = TrackMalManager(grid)
 
     # envrionment rendering
     env_renderer = None
@@ -166,6 +236,7 @@ def main():
 
     actions = sim.build_actions()
 
+    new_trkmalfs = []
     timestep = 0
     while len(actions) > timestep:
         # add to the log
@@ -182,11 +253,26 @@ def main():
         # check for new malfunctions
         new_malfs = mal.check(info)
 
+        #for test env: if timestep == 2:
+        #for env_003--2_2-wait if timestep == 15:
+        # if indicator (value 0-1) over 0.9 malfunction triggers
+        new_trkmalfs = trk.check()  # generates the malfunction
+        
+        
+
         if len(new_malfs) > 0:
             context = sim.provide_context(actions, timestep, mal.get())
             actions = sim.update_actions(context)
 
         mal.deduct() #??? where in the loop should this go - before context?
+
+        if len(new_trkmalfs) > 0:
+            context = sim.provide_context_trk(actions, timestep, trk.get())
+            actions = sim.update_actions(context)
+
+    
+        trk.deduct()
+        
         
         # render an image
         filename = 'tmp/frames/flatland_frame_{:04d}.png'.format(timestep)
@@ -225,6 +311,9 @@ def main():
         # images.append(imageio.imread(filename))
 
         timestep = timestep + 1
+    
+    print("All reported malfunctions:")
+    print(trk.track_record)
 
     # get time stamp for gif and output log
     stamp = time.time()

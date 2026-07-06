@@ -22,6 +22,7 @@ trainjacent((X,Y), In, Out, (X', Y')) :- cell((X,Y), TY), adjacent((X,Y),Out,(X'
 %trainjacent((X,Y),In, Out, (X', Y')) :- cell((X,Y), TY), adjacent((X,Y),Out,(X',Y')), 
 %   connection(TY, (In, Out)).
 % set train in "Fahrtrichtung"
+% starting the train at timestep=0 created a problem, clingo rerouted the train correctly but flatland did not visualize it properly
 position(ID, (X,Y), T, D) :- train(ID), start(ID, (X,Y), T, D), time(T).
 position(ID, (X,Y), T+1, D) :- train(ID), start(ID, (X,Y), T, D), time(T).
 

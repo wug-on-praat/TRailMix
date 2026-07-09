@@ -56,7 +56,7 @@ class TrackMalManager():
         malfunction_ind = random.random()   # decider for malfunction: create value btw 0-1
                 
         if malfunction_ind > 0.95:
-            malfunction_cell = tuple(random.choice(self.grid))
+            malfunction_cell = (0,0) #tuple(random.choice(self.grid))
             malfunction_duration = random.randint(2,20)    # maybe define with function (make 5 more likely than 20)
         
             # add new track malfunctions to current list
@@ -134,7 +134,7 @@ class SimulationManager():
         """ update list of actions following malfunction """
         # pass env, secondary, context
         app = FlatlandPlan(self.env, context)
-        clingo_main(app, self.primary)
+        clingo_main(app, self.secondary)
         return(app.action_list)
 
     def provide_context_trk(self, actions, timestep, trk_malfunction) -> str:

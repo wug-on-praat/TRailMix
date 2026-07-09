@@ -30,7 +30,7 @@ class TrackMalManager():
 
     def get(self) -> list:
         """ get a list containing the last malfunction """
-        return(self.track_malfunctions[-1:])
+        return(self.track_malfunctions)
 
 
     def deduct(self) -> None:
@@ -303,6 +303,18 @@ def main():
                 for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (-1, 1), (1, -1), (1, 1)]:
                     draw.text((x + dx, y + dy), text, fill=border_color, font=font)
                 
+                # draw track malfunctions
+                mals = trk.get()
+                cell_width = img.width / env.width
+                cell_height = img.height / env.height
+                for malfunction in mals:
+                    row = malfunction[0][0]
+                    col = malfunction[0][1]
+                    x = col * cell_width
+                    y = row * cell_height
+                    draw.line((x, y, x + cell_width, y + cell_height), fill="red", width=3)
+                    draw.line((x, y + cell_height, x + cell_width, y), fill="red", width=3)
+
                 # draw text
                 draw.text(text_position, text, fill="red", font=font)
                 img.save(filename)

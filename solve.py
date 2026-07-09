@@ -55,7 +55,7 @@ class TrackMalManager():
 
         malfunction_ind = random.random()   # decider for malfunction: create value btw 0-1
                 
-        if malfunction_ind > 0.9:
+        if malfunction_ind > 0.95:
             malfunction_cell = tuple(random.choice(self.grid))
             malfunction_duration = random.randint(2,20)    # maybe define with function (make 5 more likely than 20)
         
@@ -63,7 +63,7 @@ class TrackMalManager():
             self.track_malfunctions.append((malfunction_cell, malfunction_duration))
             self.track_record.append((malfunction_cell, malfunction_duration))
 
-            return([malfunction_cell])
+            return([(malfunction_cell, malfunction_duration)])
         else: 
             return([])
     
@@ -158,6 +158,7 @@ class SimulationManager():
 class OutputLogManager():
     def __init__(self) -> None:
         self.logs = []
+        self.track_mal_logs = []
 
     def add(self,info) -> None:
         """ add info from a timestep to the log """
@@ -171,6 +172,18 @@ class OutputLogManager():
             f.write("agent;timestep;position;direction;status;given_command\n")
             for log in self.logs:
                 f.write(log)
+    
+    def add_track_mal(self,info) -> None:
+        """ add info from a timestep to the log """
+        self.track_mal_logs.append(info)
+    
+    def save_track_mal(self,filename) -> None:
+        """ save track malfunction log to local drive """
+        if len(self.track_mal_logs) != 0:
+            with open(f"output/{filename}/track_malfunctions.csv", "w") as f:
+                f.write("timestep;cell;duration\n")
+                for log in self.track_mal_logs:
+                    f.write(log)
 
 def check_params(par):
     """
@@ -269,8 +282,11 @@ def main():
         if len(new_trkmalfs) > 0:
             context = sim.provide_context_trk(actions, timestep, trk.get())
             actions = sim.update_actions(context)
-
-    
+            
+            for (coords, duration) in new_trkmalfs:
+                log.add_track_mal(f'{timestep}; {coords}; {duration}\n')  
+                 
+                
         trk.deduct()
         
         
@@ -325,6 +341,8 @@ def main():
 
     # save output log
     log.save(stamp)
+    # save track malfunction log
+    log.save_track_mal(stamp)
 
 
 if __name__ == "__main__":

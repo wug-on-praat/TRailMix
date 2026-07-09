@@ -33,8 +33,10 @@ def build_action_list(models):
     """
     given a model from clingo, build an python action list
     """
+    if not models:
+        raise ValueError("No solution found: the encoding is unsatisfiable.")
     action_list = []
-    for func in models[0]: # only the first model
+    for func in models[-1]:  #last model
         func_name = func.name
         if func_name == "action":
             action = func.arguments[1].name
@@ -44,3 +46,12 @@ def build_action_list(models):
 
     sorted_list = sorted(action_list, key=lambda x: (x[2], x[0]))
     return(to_dicts(sorted_list))
+
+def extract_position_atoms(models):
+    # TODO: cast the positions into Python object in order for easier transformations downstream
+    position_string = ""
+    for func in models[-1]: # only the last model
+        func_name = func.name
+        if func_name == "position":
+            position_string += str(func) + ".\n"
+    return position_string

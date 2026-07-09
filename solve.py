@@ -56,7 +56,7 @@ class TrackMalManager():
         malfunction_ind = random.random()   # decider for malfunction: create value btw 0-1
                 
         if malfunction_ind > 0.95:
-            malfunction_cell = (0,0) #tuple(random.choice(self.grid))
+            malfunction_cell = tuple(random.choice(self.grid))
             malfunction_duration = random.randint(2,20)    # maybe define with function (make 5 more likely than 20)
         
             # add new track malfunctions to current list
@@ -118,7 +118,7 @@ class SimulationManager():
         # pass env, primary
         app = FlatlandPlan(self.env, None)
         clingo_main(app, self.primary)
-        return(app.action_list)
+        return(app.action_list, self.position_list)
 
     def provide_context(self, actions, timestep, malfunctions) -> str:
         """ provide additional facts when updating list """
@@ -135,9 +135,9 @@ class SimulationManager():
         # pass env, secondary, context
         app = FlatlandPlan(self.env, context)
         clingo_main(app, self.secondary)
-        return(app.action_list)
+        return(app.action_list, self.position_list)
 
-    def provide_context_trk(self, actions, timestep, trk_malfunction) -> str:
+    def provide_context_trk(self, actions, timestep, trk_malfunction, positions) -> str:
         """ provide additional facts when updating list """
         # actions that have already been executed
         # wait actions that are enforced because of malfunctions
@@ -145,7 +145,8 @@ class SimulationManager():
         past = convert_formers_to_clingo(actions[:timestep+1])
         track_present = convert_trackmalfunctions_to_clingo(trk_malfunction, timestep)
         future = convert_futures_to_clingo(actions[timestep+1:])
-        return(past + track_present + future)
+        #planned_positions = 
+        return(past + track_present + future + positions)
     
     def get_tracks(self):
         """get all meaningfull cells that can malfunction"""
@@ -247,7 +248,7 @@ def main():
     state_map = {0:'waiting', 1:'ready to depart', 2:'malfunction (off map)', 3:'moving', 4:'stopped', 5:'malfunction (on map)', 6:'done'}
     dir_map = {0:'n', 1:'e', 2:'s', 3:'w'}
 
-    actions = sim.build_actions()
+    actions, positions = sim.build_actions()
 
     new_trkmalfs = []
     timestep = 0
@@ -280,7 +281,7 @@ def main():
         mal.deduct() #??? where in the loop should this go - before context?
 
         if len(new_trkmalfs) > 0:
-            context = sim.provide_context_trk(actions, timestep, trk.get())
+            context = sim.provide_context_trk(actions, timestep, trk.get(), positions)
             actions = sim.update_actions(context)
             
             for (coords, duration) in new_trkmalfs:

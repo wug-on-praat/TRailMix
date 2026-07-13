@@ -145,8 +145,7 @@ class SimulationManager():
         past = convert_formers_to_clingo(actions[:timestep+1])
         track_present = convert_trackmalfunctions_to_clingo(trk_malfunction, timestep)
         future = convert_futures_to_clingo(actions[timestep+1:])
-        planned_positions = convert_future_positions_to_clingo(positions)
-        print(planned_positions)
+        planned_positions = convert_future_positions_to_clingo(positions, timestep)
         return(past + track_present + future + planned_positions)
     
     def get_tracks(self):
@@ -277,13 +276,13 @@ def main():
 
         if len(new_malfs) > 0:
             context = sim.provide_context(actions, timestep, mal.get())
-            actions = sim.update_actions(context)
+            actions, positions = sim.update_actions(context)
 
         mal.deduct() #??? where in the loop should this go - before context?
 
         if len(new_trkmalfs) > 0:
             context = sim.provide_context_trk(actions, timestep, trk.get(), positions)
-            actions = sim.update_actions(context)
+            actions, positions = sim.update_actions(context)
             
             for (coords, duration) in new_trkmalfs:
                 log.add_track_mal(f'{timestep}; {coords}; {duration}\n')  

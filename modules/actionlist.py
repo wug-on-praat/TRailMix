@@ -56,10 +56,11 @@ def extract_position_atoms(models):
     for func in models[-1]: # only the last model
         func_name = func.name
         if func_name == "position":
-            agent, position, timestep = func.arguments[0], func.arguments[1], func.arguments[2]
+            agent, timestep = func.arguments[0].number, func.arguments[2].number
+            pos_tuple = func.arguments[1]
+            X_val, Y_val = pos_tuple.arguments[0].number, pos_tuple.arguments[1].number
             direction = func.arguments[3].name
-            position_list.append((agent,position,timestep,direction))
+            position_list.append((agent,(X_val,Y_val),timestep,direction))
             
     sorted_list = sorted(position_list, key=lambda x: (x[2], x[0])) # sorts positions by time and agent ID
-    #print(sorted_list)
     return sorted_list

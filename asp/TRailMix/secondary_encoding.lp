@@ -17,4 +17,4 @@ action(train(ID), ACT, T+Time+1):- planned_action(train(ID), ACT, T), track_malf
 :- time(T), train(ID), {action(train(ID), ACT, T)}>1.
  
 
-#show action/3.
+%#show action/3.

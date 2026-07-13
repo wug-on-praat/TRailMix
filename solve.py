@@ -11,7 +11,7 @@ import numpy as np
 # custom modules
 from asp import params
 from modules.api import FlatlandPlan, FlatlandReplan
-from modules.convert import convert_malfunctions_to_clingo, convert_formers_to_clingo, convert_futures_to_clingo, convert_trackmalfunctions_to_clingo
+from modules.convert import convert_malfunctions_to_clingo, convert_formers_to_clingo, convert_futures_to_clingo, convert_trackmalfunctions_to_clingo, convert_future_positions_to_clingo
 
 # clingo
 import clingo
@@ -118,7 +118,7 @@ class SimulationManager():
         # pass env, primary
         app = FlatlandPlan(self.env, None)
         clingo_main(app, self.primary)
-        return(app.action_list, self.position_list)
+        return(app.action_list, app.position_list)
 
     def provide_context(self, actions, timestep, malfunctions) -> str:
         """ provide additional facts when updating list """
@@ -135,7 +135,7 @@ class SimulationManager():
         # pass env, secondary, context
         app = FlatlandPlan(self.env, context)
         clingo_main(app, self.secondary)
-        return(app.action_list, self.position_list)
+        return(app.action_list, app.position_list)
 
     def provide_context_trk(self, actions, timestep, trk_malfunction, positions) -> str:
         """ provide additional facts when updating list """
@@ -145,8 +145,9 @@ class SimulationManager():
         past = convert_formers_to_clingo(actions[:timestep+1])
         track_present = convert_trackmalfunctions_to_clingo(trk_malfunction, timestep)
         future = convert_futures_to_clingo(actions[timestep+1:])
-        #planned_positions = 
-        return(past + track_present + future + positions)
+        planned_positions = convert_future_positions_to_clingo(positions)
+        print(planned_positions)
+        return(past + track_present + future + planned_positions)
     
     def get_tracks(self):
         """get all meaningfull cells that can malfunction"""

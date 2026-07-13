@@ -15,7 +15,7 @@ class FlatlandPlan(Application):
         self.env = env
         self.actions = actions
         self.action_list = None
-        self.position_string = None
+        self.position_list = None
 
     def main(self, ctl, files):
         # add encodings
@@ -45,8 +45,8 @@ class FlatlandPlan(Application):
         # capture output actions for renderer
         #return(build_action_list(models))
         self.action_list = build_action_list(models)
-        self.position_string = extract_position_atoms(models)
-        print(self.position_string)
+        self.position_list = extract_position_atoms(models)
+        #print(self.position_string)
 
 
 # let's see later whether we even need this

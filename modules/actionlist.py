@@ -44,14 +44,22 @@ def build_action_list(models):
             agent_num = agent.arguments[0].number
             action_list.append((agent_num,action,timestep.number))
 
-    sorted_list = sorted(action_list, key=lambda x: (x[2], x[0]))
+    sorted_list = sorted(action_list, key=lambda x: (x[2], x[0]))   # sorts actions in list by time and agent ID
     return(to_dicts(sorted_list))
 
 def extract_position_atoms(models):
+    """
+    given a model from clingo, build a python positions list
+    """
     # TODO: cast the positions into Python object in order for easier transformations downstream
-    position_string = ""
+    position_list = []
     for func in models[-1]: # only the last model
         func_name = func.name
         if func_name == "position":
-            position_string += str(func) + ".\n"
-    return position_string
+            agent, position, timestep = func.arguments[0], func.arguments[1], func.arguments[2]
+            direction = func.arguments[3].name
+            position_list.append((agent,position,timestep,direction))
+            
+    sorted_list = sorted(position_list, key=lambda x: (x[2], x[0])) # sorts positions by time and agent ID
+    #print(sorted_list)
+    return sorted_list

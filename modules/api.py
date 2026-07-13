@@ -46,7 +46,6 @@ class FlatlandPlan(Application):
         #return(build_action_list(models))
         self.action_list = build_action_list(models)
         self.position_list = extract_position_atoms(models)
-        #print(self.position_string)
 
 
 # let's see later whether we even need this

@@ -45,19 +45,19 @@ class TrackMalManager():
         for i in sorted(malfunctions_to_remove, reverse=True):
             del self.track_malfunctions[i]
 
-    def check(self) -> set:       # malfunction generator???
+    def check(self, timestep) -> set:       # malfunction generator???
         # 2badjusted
         """ check current state of the env for new malfunctions """
-        #for test env: malfunction_cell = (17, 16)
-        #for test env: malfunction_duration = 20
+        malfunction_cell = (13, 16)
+        malfunction_duration = 20
         # malfunction_cell = (24, 22)
         # malfunction_duration = 20
 
         malfunction_ind = random.random()   # decider for malfunction: create value btw 0-1
                 
-        if malfunction_ind > 0.95:
-            malfunction_cell = tuple(random.choice(self.grid))
-            malfunction_duration = random.randint(2,20)    # maybe define with function (make 5 more likely than 20)
+        if timestep == 20:
+            #malfunction_cell = tuple(random.choice(self.grid))
+            #malfunction_duration = random.randint(2,20)    # maybe define with function (make 5 more likely than 20)
         
             # add new track malfunctions to current list
             self.track_malfunctions.append((malfunction_cell, malfunction_duration))
@@ -270,7 +270,7 @@ def main():
         #for test env: if timestep == 2:
         #for env_003--2_2-wait if timestep == 15:
         # if indicator (value 0-1) over 0.9 malfunction triggers
-        new_trkmalfs = trk.check()  # generates the malfunction
+        new_trkmalfs = trk.check(timestep)  # generates the malfunction
         
         
 

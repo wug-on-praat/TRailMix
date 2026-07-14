@@ -51,7 +51,6 @@ def extract_position_atoms(models):
     """
     given a model from clingo, build a python positions list
     """
-    # TODO: cast the positions into Python object in order for easier transformations downstream
     position_list = []
     for func in models[-1]: # only the last model
         func_name = func.name

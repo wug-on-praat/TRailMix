@@ -26,3 +26,5 @@ action(train(ID), ACT, T+Time+1):- planned_action(train(ID), ACT, T), track_malf
 % Idea: if there is a consequence, reschedule everything after N rescheduled trains 
 
 #show action/3.
+#show planned_position/4.
+#show position/4.

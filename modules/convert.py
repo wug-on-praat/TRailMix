@@ -93,6 +93,15 @@ def convert_futures_to_clingo(actions) -> str:
     
     return(facts)
 
+def convert_future_positions_to_clingo(positions, timestep) -> str:
+    facts = []
+    # change from list into facts
+    future_positions = [clingo_arg for clingo_arg in positions if clingo_arg[2] > timestep]
+    for agent, pos, time, dir in future_positions:
+        facts.append(f'planned_position({agent},{pos},{time},{dir}).\n') #remove: can this be a list of strings or should it be one long string?
+    
+    return(facts)
+
 def convert_actions_to_flatland(actions) -> list:
     mapping = {"move_forward":RailEnvActions.MOVE_FORWARD, "move_right":RailEnvActions.MOVE_RIGHT, "move_left":RailEnvActions.MOVE_LEFT, "wait":RailEnvActions.STOP_MOVING}
     for index, dict in enumerate(actions):

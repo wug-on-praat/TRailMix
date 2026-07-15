@@ -18,7 +18,7 @@ possible_action(move_right).
 
 % Create actions after malfunction
 % Consequence denotes of trains ride over a track malfunction
-consequence(train(ID), (X, Y), T) :- planned_position(train(ID), (X, Y), T, _), track_malfunction((X, Y), _, T).
+consequence(train(ID), (X, Y), T) :- planned_position(ID, (X, Y), T, _), track_malfunction((X, Y), Dur_mal, T_mal), Dur_mal + T_mal >= T.
 
 action(train(ID), ACT, T+Time+1) :- planned_action(train(ID), ACT, T), track_malfunction((_, _), _, Time), not consequence(train(ID), (_, _), _).
 
@@ -59,6 +59,8 @@ action(train(ID), move_left, T) :- position(ID, (X,Y), T, Dir),  position(ID, (X
 action(train(ID), move_right, T) :- position(ID, (X,Y), T, Dir),  position(ID, (X+DX,Y+DY), T+1, Dir2), cell((X,Y), TY), choice(TY, Dir), move_right(Dir, Dir2), move(Dir2, DX, DY), consequence(train(ID), (_, _), _).
 
 action(train(ID), move_forward, T) :- not finish(ID, T), position(ID, (_,_), T, _), not action(train(ID), wait, T), not action(train(ID), move_left, T), not action(train(ID), move_right, T), consequence(train(ID), (_, _), _).
+
+action(train(ID), wait, T) :- position(ID, (X,Y), T, _),  position(ID, (X,Y), T+1, _), consequence(train(ID), (_, _), _).
 
 
 %% SINGLE TRAIN CONSTRAINTS

@@ -48,14 +48,15 @@ class TrackMalManager():
     def check(self, timestep) -> set:       # malfunction generator???
         # 2badjusted
         """ check current state of the env for new malfunctions """
-        malfunction_cell = (13, 16)
-        malfunction_duration = 20
+        #for test env: malfunction_cell = (13, 16)
+        #for test env: malfunction_duration = 20
         # malfunction_cell = (24, 22)
         # malfunction_duration = 20
-
+        malfunction_cell = (16, 20)
+        malfunction_duration = 15 #14 # 21
         malfunction_ind = random.random()   # decider for malfunction: create value btw 0-1
                 
-        if timestep == 20:
+        if timestep == 10:
             #malfunction_cell = tuple(random.choice(self.grid))
             #malfunction_duration = random.randint(2,20)    # maybe define with function (make 5 more likely than 20)
         

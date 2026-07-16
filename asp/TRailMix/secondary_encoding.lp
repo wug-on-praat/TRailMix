@@ -3,7 +3,8 @@
 
 % Create actions before malfunction
 % Rely on past constraint rules we get from the malfunction
-past_time(0..T):- track_malfunction((_,_), _, T).
+% TODO: Seperate the past_time and time?
+past_time(0..T-1):- track_malfunction((_,_), _, T).
 
 time(T_mal..T):- track_malfunction((_,_), _, T_mal), global(T).
 
@@ -12,6 +13,7 @@ possible_action(wait).
 possible_action(move_left).
 possible_action(move_right).
 
+% For actions until the malfunction happened
 {action(train(ID), ACT, T)} :- train(ID), possible_action(ACT), past_time(T).
 
 :- past_time(T), train(ID), {action(train(ID), ACT, T)} > 1.
@@ -20,6 +22,7 @@ possible_action(move_right).
 % Consequence denotes of trains ride over a track malfunction
 consequence(train(ID), (X, Y), T) :- planned_position(ID, (X, Y), T, _), track_malfunction((X, Y), Dur_mal, T_mal), Dur_mal + T_mal >= T.
 
+% For trains which do not have a consequence
 action(train(ID), ACT, T+Time+1) :- planned_action(train(ID), ACT, T), track_malfunction((_, _), _, Time), not consequence(train(ID), (_, _), _).
 
 % Create positions from planned_position
@@ -36,7 +39,7 @@ can_dir((X,Y), D, D') :- cell((X,Y), TY), connection(TY, (D,D')), consequence(tr
 trainjacent((X,Y), In, Out, (X', Y')) :- cell((X,Y), TY), adjacent((X,Y),Out,(X',Y')), 
    can_dir((X,Y), In, Out), consequence(train(_), (_, _), _).
 
-
+% incorrect for T_mal/ We need to force the position
 {position(ID, (X',Y'), T', Out)} :- position(ID, (X,Y), T, D),
    inverse(D,In), trainjacent((X,Y), In, Out, (X',Y')), 
    time(T), time(T'), T' = T+1, consequence(train(ID), (_, _), _).
@@ -54,13 +57,13 @@ finish(ID, T) :- position(ID,(X,Y),T,D), end(ID,(X,Y),T'),
 
 action(train(ID), move_left, T) :- position(ID, (X,Y), T, Dir),  position(ID, (X+DX,Y+DY), 
 			T+1, Dir2), cell((X,Y), TY), choice(TY, Dir), 
-			move_left(Dir, Dir2), move(Dir2, DX, DY), consequence(train(ID), (_, _), _).
+			move_left(Dir, Dir2), move(Dir2, DX, DY), consequence(train(ID), (_, _), _), time(Mal_time), T > Mal_time.
 
-action(train(ID), move_right, T) :- position(ID, (X,Y), T, Dir),  position(ID, (X+DX,Y+DY), T+1, Dir2), cell((X,Y), TY), choice(TY, Dir), move_right(Dir, Dir2), move(Dir2, DX, DY), consequence(train(ID), (_, _), _).
+action(train(ID), move_right, T) :- position(ID, (X,Y), T, Dir),  position(ID, (X+DX,Y+DY), T+1, Dir2), cell((X,Y), TY), choice(TY, Dir), move_right(Dir, Dir2), move(Dir2, DX, DY), consequence(train(ID), (_, _), _), time(Mal_time), T > Mal_time.
 
-action(train(ID), move_forward, T) :- not finish(ID, T), position(ID, (_,_), T, _), not action(train(ID), wait, T), not action(train(ID), move_left, T), not action(train(ID), move_right, T), consequence(train(ID), (_, _), _).
+action(train(ID), move_forward, T) :- not finish(ID, T), position(ID, (_,_), T, _), not action(train(ID), wait, T), not action(train(ID), move_left, T), not action(train(ID), move_right, T), consequence(train(ID), (_, _), _), time(Mal_time), T > Mal_time.
 
-action(train(ID), wait, T) :- position(ID, (X,Y), T, _),  position(ID, (X,Y), T+1, _), consequence(train(ID), (_, _), _).
+action(train(ID), wait, T) :- position(ID, (X,Y), T, _),  position(ID, (X,Y), T+1, _), consequence(train(ID), (_, _), _), time(Mal_time), T > Mal_time.
 
 
 %% SINGLE TRAIN CONSTRAINTS
@@ -94,5 +97,6 @@ action(train(ID), wait, T) :- position(ID, (X,Y), T, _),  position(ID, (X,Y), T+
 % Idea: if there is a consequence, reschedule everything after N rescheduled trains 
 
 #show action/3.
-#show planned_position/4.
+%#show planned_position/4.
 #show position/4.
+#show consequence/3.

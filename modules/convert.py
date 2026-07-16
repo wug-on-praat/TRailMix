@@ -99,7 +99,7 @@ def convert_future_positions_to_clingo(positions, timestep) -> str: # TODO: adju
     future_positions = [clingo_arg for clingo_arg in positions if clingo_arg[2] > timestep]
     for agent, pos, time, dir in future_positions:
         facts.append(f'planned_position({agent},{pos},{time},{dir}).\n') #remove: can this be a list of strings or should it be one long string?
-    current_positions = [clingo_arg for clingo_arg in positions if clingo_arg[2] == timestep]
+    current_positions = [clingo_arg for clingo_arg in positions if clingo_arg[2] == timestep+1]
     for agent, pos, time, dir in current_positions:
         facts.append(f'position({agent},{pos},{time},{dir}).\n') #remove: can this be a list of strings or should it be one long string?
 

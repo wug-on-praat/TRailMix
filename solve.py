@@ -29,9 +29,17 @@ class TrackMalManager():
         self.track_record = []
 
     def get(self) -> list:
-        """ get a list containing the last malfunction """
+        """ get the list of malfunctions """
         return(self.track_malfunctions)
 
+    def get_active_malfunctions(self, timestep) -> list:
+        """ get the list of all active malfunctions """
+        active_malfunctions = []
+        for malfunction in self.track_record:
+            if malfunction[1] < timestep <= malfunction[1] + malfunction[2]:
+                active_malfunctions.append(malfunction)
+
+        return active_malfunctions
 
     def deduct(self) -> None:
         """ decrease the duration of each malfunction by one and delete expired malfunctions """
@@ -55,9 +63,9 @@ class TrackMalManager():
         # malfunction_cell = (17, 19) interesting
         malfunction_cell = (17, 19)
         # 16 does not work. 
-        malfunction_duration = 21 # very interesting collision (17,19),35
+        #malfunction_duration = 21 # very interesting collision (17,19),35
 
-        #malfunction_duration = 20
+        malfunction_duration = 20 # good interesting collision (17,19),35
         malfunction_ind = random.random()   # decider for malfunction: create value btw 0-1
              # 12 does not work.   
         if timestep == 13:
@@ -66,7 +74,7 @@ class TrackMalManager():
         
             # add new track malfunctions to current list
             self.track_malfunctions.append((malfunction_cell, malfunction_duration))
-            self.track_record.append((malfunction_cell, malfunction_duration))
+            self.track_record.append((malfunction_cell, timestep, malfunction_duration))
 
             return([(malfunction_cell, malfunction_duration)])
         else: 
@@ -327,7 +335,7 @@ def main():
                 
                 # draw track malfunctions
                 # incorrect depiction
-                mals = trk.get()
+                mals = trk.get_active_malfunctions(timestep)
                 cell_width = img.width / env.width
                 cell_height = img.height / env.height
                 for malfunction in mals:

@@ -40,8 +40,7 @@ position(ID, (X,Y), T+1, D) :- train(ID), start(ID, (X,Y), T, D), time(T).
     T'= T+1.
 
 % end train when it reaches its destination
-finish(ID, T) :- position(ID,(X,Y),T,D), end(ID,(X,Y),T'), 
-   T<=T'.
+finish(ID, T) :- position(ID,(X,Y),T,D), end(ID,(X,Y),T').
 
 % translate train moves into action
 

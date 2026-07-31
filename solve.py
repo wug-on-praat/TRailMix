@@ -52,11 +52,15 @@ class TrackMalManager():
         #for test env: malfunction_duration = 20
         # malfunction_cell = (24, 22)
         # malfunction_duration = 20
-        malfunction_cell = (16, 20)
-        malfunction_duration = 15 #14 # 21
+        # malfunction_cell = (17, 19) interesting
+        malfunction_cell = (17, 19)
+        # 16 does not work. 
+        malfunction_duration = 21 # very interesting collision (17,19),35
+
+        #malfunction_duration = 20
         malfunction_ind = random.random()   # decider for malfunction: create value btw 0-1
-                
-        if timestep == 10:
+             # 12 does not work.   
+        if timestep == 13:
             #malfunction_cell = tuple(random.choice(self.grid))
             #malfunction_duration = random.randint(2,20)    # maybe define with function (make 5 more likely than 20)
         
@@ -322,6 +326,7 @@ def main():
                     draw.text((x + dx, y + dy), text, fill=border_color, font=font)
                 
                 # draw track malfunctions
+                # incorrect depiction
                 mals = trk.get()
                 cell_width = img.width / env.width
                 cell_height = img.height / env.height

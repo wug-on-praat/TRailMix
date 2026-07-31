@@ -3,10 +3,9 @@
 
 % Create actions before malfunction
 % Rely on past constraint rules we get from the malfunction
-% TODO: Seperate the past_time and time?
-past_time(0..T-1):- track_malfunction((_,_), _, T).
+past_time(0..T):- track_malfunction((_,_), _, T).
 
-time(T_mal..T):- track_malfunction((_,_), _, T_mal), global(T).
+time(T_mal+1..T):- track_malfunction((_,_), _, T_mal), global(T).
 
 possible_action(move_forward).
 possible_action(wait).
@@ -49,28 +48,27 @@ trainjacent((X,Y), In, Out, (X', Y')) :- cell((X,Y), TY), adjacent((X,Y),Out,(X'
     T'= T+1, consequence(train(ID), (_, _), _).
 
 % end train when it reaches its destination
-finish(ID, T) :- position(ID,(X,Y),T,D), end(ID,(X,Y),T'), 
-   T<=T', consequence(train(ID), (_, _), _).
+finish(ID, T) :- position(ID,(X,Y),T,D), end(ID,(X,Y),T'), consequence(train(ID), (_, _), _).
 
 % translate train moves into action
 
 
 action(train(ID), move_left, T) :- position(ID, (X,Y), T, Dir),  position(ID, (X+DX,Y+DY), 
 			T+1, Dir2), cell((X,Y), TY), choice(TY, Dir), 
-			move_left(Dir, Dir2), move(Dir2, DX, DY), consequence(train(ID), (_, _), _), time(Mal_time), T > Mal_time.
+			move_left(Dir, Dir2), move(Dir2, DX, DY), consequence(train(ID), (_, _), _), time(T).
 
-action(train(ID), move_right, T) :- position(ID, (X,Y), T, Dir),  position(ID, (X+DX,Y+DY), T+1, Dir2), cell((X,Y), TY), choice(TY, Dir), move_right(Dir, Dir2), move(Dir2, DX, DY), consequence(train(ID), (_, _), _), time(Mal_time), T > Mal_time.
+action(train(ID), move_right, T) :- position(ID, (X,Y), T, Dir),  position(ID, (X+DX,Y+DY), T+1, Dir2), cell((X,Y), TY), choice(TY, Dir), move_right(Dir, Dir2), move(Dir2, DX, DY), consequence(train(ID), (_, _), _), time(T).
 
-action(train(ID), move_forward, T) :- not finish(ID, T), position(ID, (_,_), T, _), not action(train(ID), wait, T), not action(train(ID), move_left, T), not action(train(ID), move_right, T), consequence(train(ID), (_, _), _), time(Mal_time), T > Mal_time.
+action(train(ID), move_forward, T) :- not finish(ID, T), position(ID, (_,_), T, _), not action(train(ID), wait, T), not action(train(ID), move_left, T), not action(train(ID), move_right, T), consequence(train(ID), (_, _), _), time(T).
 
-action(train(ID), wait, T) :- position(ID, (X,Y), T, _),  position(ID, (X,Y), T+1, _), consequence(train(ID), (_, _), _), time(Mal_time), T > Mal_time.
+action(train(ID), wait, T) :- position(ID, (X,Y), T, _),  position(ID, (X,Y), T+1, _), consequence(train(ID), (_, _), _), time(T).
 
 
 %% SINGLE TRAIN CONSTRAINTS
 
 % trains are not allowed to do a U-turn
 :- position(ID, (X,Y), T, D), position(ID, (X',Y'), T', DI), inverse(D,DI), consequence(train(ID), (_, _), _),
-   T'=T+1.
+   T'=T+1, time(T).
 
 % we can't have ONE train in two positions at any time step
 :- time(T), train(ID), {position(ID, _, T, _)} > 1, consequence(train(ID), (_, _), _).
@@ -92,6 +90,20 @@ action(train(ID), wait, T) :- position(ID, (X,Y), T, _),  position(ID, (X,Y), T+
 % trains can't be in the same cell at the same time
 %:- position(ID,K,T,_), position(ID',K,T,_), ID>ID'.
 
+%% OBJECTIVES
+% Finish as many trains as possible 
+#maximize { 1@4, ID, T : finish(ID, T) }.	% maybe not needed
+
+% Finish as early as possible
+#minimize { T@3, ID : finish(ID, T) }.
+
+% Reduce unnecessary waiting
+#minimize { 1@2, ID, T : action(train(ID), wait, T) }.		% maybe not needed
+
+% Prefer fewer distinct waiting episodes
+% prefer wait, wait, go over go, wait, go wait
+wait_start(ID, T) :- action(train(ID), wait, T), not action(train(ID), wait, T-1).
+#minimize { 1@1, ID, T : wait_start(ID, T) }.
 
 % Loop: Next next step: if there is a collision, reschedule only these trains 
 % Idea: if there is a consequence, reschedule everything after N rescheduled trains 

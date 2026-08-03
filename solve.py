@@ -63,9 +63,9 @@ class TrackMalManager():
         # malfunction_cell = (17, 19) interesting
         malfunction_cell = (17, 19)
         # 16 does not work. 
-        #malfunction_duration = 21 # very interesting collision (17,19),35
+        malfunction_duration = 21 # very interesting collision (17,19),35
 
-        malfunction_duration = 20 # good interesting
+        #malfunction_duration = 20 # good interesting
         malfunction_ind = random.random()   # decider for malfunction: create value btw 0-1
              # 12 does not work.   
         if timestep == 13:

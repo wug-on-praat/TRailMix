@@ -33,8 +33,10 @@ def build_action_list(models):
     """
     given a model from clingo, build an python action list
     """
+    if not models:
+        raise ValueError("No solution found: the encoding is unsatisfiable.")
     action_list = []
-    for func in models[0]: # only the first model
+    for func in models[-1]:  #last model
         func_name = func.name
         if func_name == "action":
             action = func.arguments[1].name
@@ -42,5 +44,22 @@ def build_action_list(models):
             agent_num = agent.arguments[0].number
             action_list.append((agent_num,action,timestep.number))
 
-    sorted_list = sorted(action_list, key=lambda x: (x[2], x[0]))
+    sorted_list = sorted(action_list, key=lambda x: (x[2], x[0]))   # sorts actions in list by time and agent ID
     return(to_dicts(sorted_list))
+
+def extract_position_atoms(models):
+    """
+    given a model from clingo, build a python positions list
+    """
+    position_list = []
+    for func in models[-1]: # only the last model
+        func_name = func.name
+        if func_name == "position":
+            agent, timestep = func.arguments[0].number, func.arguments[2].number
+            pos_tuple = func.arguments[1]
+            X_val, Y_val = pos_tuple.arguments[0].number, pos_tuple.arguments[1].number
+            direction = func.arguments[3].name
+            position_list.append((agent,(X_val,Y_val),timestep,direction))
+            
+    sorted_list = sorted(position_list, key=lambda x: (x[2], x[0])) # sorts positions by time and agent ID
+    return sorted_list

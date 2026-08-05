@@ -3,4 +3,4 @@
 
 #primary=['asp/test.lp']
 primary=['asp/TRailMix/encoding.lp']
-secondary=[]
+secondary=['asp/TRailMix/secondary_encoding.lp']

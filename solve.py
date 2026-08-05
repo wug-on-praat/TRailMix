@@ -11,7 +11,7 @@ import numpy as np
 # custom modules
 from asp import params
 from modules.api import FlatlandPlan, FlatlandReplan
-from modules.convert import convert_malfunctions_to_clingo, convert_formers_to_clingo, convert_futures_to_clingo, convert_trackmalfunctions_to_clingo
+from modules.convert import convert_malfunctions_to_clingo, convert_formers_to_clingo, convert_futures_to_clingo, convert_trackmalfunctions_to_clingo, convert_future_positions_to_clingo
 
 # clingo
 import clingo
@@ -29,9 +29,17 @@ class TrackMalManager():
         self.track_record = []
 
     def get(self) -> list:
-        """ get a list containing the last malfunction """
+        """ get the list of malfunctions """
         return(self.track_malfunctions)
 
+    def get_active_malfunctions(self, timestep) -> list:
+        """ get the list of all active malfunctions """
+        active_malfunctions = []
+        for malfunction in self.track_record:
+            if malfunction[1] < timestep <= malfunction[1] + malfunction[2]:
+                active_malfunctions.append(malfunction)
+
+        return active_malfunctions
 
     def deduct(self) -> None:
         """ decrease the duration of each malfunction by one and delete expired malfunctions """
@@ -45,23 +53,28 @@ class TrackMalManager():
         for i in sorted(malfunctions_to_remove, reverse=True):
             del self.track_malfunctions[i]
 
-    def check(self) -> set:       # malfunction generator???
+    def check(self, timestep) -> set:       # malfunction generator???
         # 2badjusted
         """ check current state of the env for new malfunctions """
-        #for test env: malfunction_cell = (17, 16)
+        #for test env: malfunction_cell = (13, 16)
         #for test env: malfunction_duration = 20
         # malfunction_cell = (24, 22)
         # malfunction_duration = 20
+        # malfunction_cell = (17, 19) interesting
+        malfunction_cell = (17, 19)
+        # 16 does not work. 
+        malfunction_duration = 21 # very interesting collision (17,19),35
 
+        #malfunction_duration = 20 # good interesting
         malfunction_ind = random.random()   # decider for malfunction: create value btw 0-1
-                
-        if malfunction_ind > 0.95:
-            malfunction_cell = tuple(random.choice(self.grid))
-            malfunction_duration = random.randint(2,20)    # maybe define with function (make 5 more likely than 20)
+             # 12 does not work.   
+        if timestep == 13:
+            #malfunction_cell = tuple(random.choice(self.grid))
+            #malfunction_duration = random.randint(2,20)    # maybe define with function (make 5 more likely than 20)
         
             # add new track malfunctions to current list
             self.track_malfunctions.append((malfunction_cell, malfunction_duration))
-            self.track_record.append((malfunction_cell, malfunction_duration))
+            self.track_record.append((malfunction_cell, timestep, malfunction_duration))
 
             return([(malfunction_cell, malfunction_duration)])
         else: 
@@ -118,7 +131,7 @@ class SimulationManager():
         # pass env, primary
         app = FlatlandPlan(self.env, None)
         clingo_main(app, self.primary)
-        return(app.action_list)
+        return(app.action_list, app.position_list)
 
     def provide_context(self, actions, timestep, malfunctions) -> str:
         """ provide additional facts when updating list """
@@ -134,10 +147,10 @@ class SimulationManager():
         """ update list of actions following malfunction """
         # pass env, secondary, context
         app = FlatlandPlan(self.env, context)
-        clingo_main(app, self.primary)
-        return(app.action_list)
+        clingo_main(app, self.secondary)
+        return(app.action_list, app.position_list)
 
-    def provide_context_trk(self, actions, timestep, trk_malfunction) -> str:
+    def provide_context_trk(self, actions, timestep, trk_malfunction, positions) -> str:
         """ provide additional facts when updating list """
         # actions that have already been executed
         # wait actions that are enforced because of malfunctions
@@ -145,7 +158,8 @@ class SimulationManager():
         past = convert_formers_to_clingo(actions[:timestep+1])
         track_present = convert_trackmalfunctions_to_clingo(trk_malfunction, timestep)
         future = convert_futures_to_clingo(actions[timestep+1:])
-        return(past + track_present + future)
+        planned_positions = convert_future_positions_to_clingo(positions, timestep)
+        return(past + track_present + future + planned_positions)
     
     def get_tracks(self):
         """get all meaningfull cells that can malfunction"""
@@ -247,7 +261,7 @@ def main():
     state_map = {0:'waiting', 1:'ready to depart', 2:'malfunction (off map)', 3:'moving', 4:'stopped', 5:'malfunction (on map)', 6:'done'}
     dir_map = {0:'n', 1:'e', 2:'s', 3:'w'}
 
-    actions = sim.build_actions()
+    actions, positions = sim.build_actions()
 
     new_trkmalfs = []
     timestep = 0
@@ -269,19 +283,19 @@ def main():
         #for test env: if timestep == 2:
         #for env_003--2_2-wait if timestep == 15:
         # if indicator (value 0-1) over 0.9 malfunction triggers
-        new_trkmalfs = trk.check()  # generates the malfunction
+        new_trkmalfs = trk.check(timestep)  # generates the malfunction
         
         
 
         if len(new_malfs) > 0:
             context = sim.provide_context(actions, timestep, mal.get())
-            actions = sim.update_actions(context)
+            actions, positions = sim.update_actions(context)
 
         mal.deduct() #??? where in the loop should this go - before context?
 
         if len(new_trkmalfs) > 0:
-            context = sim.provide_context_trk(actions, timestep, trk.get())
-            actions = sim.update_actions(context)
+            context = sim.provide_context_trk(actions, timestep, trk.get(), positions)
+            actions, positions = sim.update_actions(context)
             
             for (coords, duration) in new_trkmalfs:
                 log.add_track_mal(f'{timestep}; {coords}; {duration}\n')  
@@ -320,7 +334,8 @@ def main():
                     draw.text((x + dx, y + dy), text, fill=border_color, font=font)
                 
                 # draw track malfunctions
-                mals = trk.get()
+                # incorrect depiction
+                mals = trk.get_active_malfunctions(timestep)
                 cell_width = img.width / env.width
                 cell_height = img.height / env.height
                 for malfunction in mals:

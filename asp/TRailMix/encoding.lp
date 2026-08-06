@@ -63,13 +63,8 @@ action(train(ID), move_forward, T) :- not finish(ID, T), position(ID, (_,_), T, 
 
 %% SINGLE TRAIN CONSTRAINTS
 
-% trains are not allowed to do a U-turn
-:- position(ID, (X,Y), T, D), position(ID, (X',Y'), T', DI), inverse(D,DI),
-   T'=T+1.
-
 % we can't have ONE train in two positions at any time step
-:- time(T), train(ID), {position(ID, _, T, _)} > 1.
-
+:- time(T), train(ID), 2 {position(ID, _, T, _)}.
 
 % we can't have multiple finishes for one train
 % train must stop after finish
@@ -85,25 +80,25 @@ action(train(ID), move_forward, T) :- not finish(ID, T), position(ID, (_,_), T, 
    inverse(D,D'), ID<ID'. 
 
 % trains can't be in the same cell at the same time
-:- position(ID,K,T,_), position(ID',K,T,_), ID>ID'.
+:- cell(K, _), time(T), 2 { position(ID,K,T,_) : train(ID) }.
 
 %% OBJECTIVES
 % Finish as many trains as possible 
-#maximize { 1@4, ID, T : finish(ID, T) }.	% maybe not needed
+%#maximize { 1@4, ID : finish(ID, T) }.	% maybe not needed
 
 % Finish as early as possible
 #minimize { T@3, ID : finish(ID, T) }.
 
-% Reduce unnecessary waiting
-#minimize { 1@2, ID, T : action(train(ID), wait, T) }.		% maybe not needed
+% Prefer waiting over moving
+%#maximize { 1@2, ID, T : action(train(ID), wait, T) }.		% maybe not needed
 
 % Prefer fewer distinct waiting episodes
 % prefer wait, wait, go over go, wait, go wait
-wait_start(ID, T) :- action(train(ID), wait, T), not action(train(ID), wait, T-1).
+wait_start(ID, T) :- action(train(ID), wait, T), action(train(ID), A, T-1), A != wait.
 #minimize { 1@1, ID, T : wait_start(ID, T) }.
 
-%#show finish/2.
+#show finish/2.
 %#show position/4.
-#show action/3.
+%#show action/3.
 %#show trainjacent/4.
 %#show adjacent/3.

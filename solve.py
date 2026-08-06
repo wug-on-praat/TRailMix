@@ -59,18 +59,15 @@ class TrackMalManager():
         #for test env: malfunction_cell = (13, 16)
         #for test env: malfunction_duration = 20
         # malfunction_cell = (24, 22)
-        # malfunction_duration = 20
-        # malfunction_cell = (17, 19) interesting
-        malfunction_cell = (17, 19)
-        # 16 does not work. 
-        malfunction_duration = 21 # very interesting collision (17,19),35
+        # malfunction_cell = (17, 19) # interesting
+        # malfunction_duration = 21 # very interesting collision (17,19),35
 
-        #malfunction_duration = 20 # good interesting
+        # malfunction_duration = 20 # good interesting
         malfunction_ind = random.random()   # decider for malfunction: create value btw 0-1
-             # 12 does not work.   
-        if timestep == 13:
-            #malfunction_cell = tuple(random.choice(self.grid))
-            #malfunction_duration = random.randint(2,20)    # maybe define with function (make 5 more likely than 20)
+        #if timestep == 13:
+        if malfunction_ind > 0.95:
+            malfunction_cell = tuple(random.choice(self.grid))
+            malfunction_duration = random.randint(2,20)    # maybe define with function (make 5 more likely than 20)
         
             # add new track malfunctions to current list
             self.track_malfunctions.append((malfunction_cell, malfunction_duration))

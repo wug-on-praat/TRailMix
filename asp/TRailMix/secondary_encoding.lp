@@ -74,13 +74,8 @@ action(train(ID), wait, T) :- position(ID, (X,Y), T, _),  position(ID, (X,Y), T+
 
 %% SINGLE TRAIN CONSTRAINTS
 
-% trains are not allowed to do a U-turn
-:- position(ID, (X,Y), T, D), position(ID, (X',Y'), T', DI), inverse(D,DI), calculate(ID),
-   T'=T+1, time(T).
-
 % we can't have ONE train in two positions at any time step
 :- time(T), train(ID), {position(ID, _, T, _)} > 1, calculate(ID).
-
 
 % we can't have multiple finishes for one train
 % train must stop after finish
@@ -101,7 +96,7 @@ action(train(ID), wait, T) :- position(ID, (X,Y), T, _),  position(ID, (X,Y), T+
 %% OBJECTIVES
 
 % Finish as many trains as possible 
-#maximize { 1@5, ID, T : finish(ID, T) }.	% maybe not needed
+%#maximize { 1@5, ID : finish(ID, T) }.	% maybe not needed
 
 % we want as many OG train plans as possible
 #maximize { 1@4, train : planned(train)}.
@@ -109,20 +104,23 @@ action(train(ID), wait, T) :- position(ID, (X,Y), T, _),  position(ID, (X,Y), T+
 % Finish as early as possible
 #minimize { T@3, ID : finish(ID, T) }.
 
-% Reduce unnecessary waiting
-#minimize { 1@2, ID, T : action(train(ID), wait, T) }.		% maybe not needed
+% Prefer waiting over moving
+%#maximize { 1@2, ID, T : action(train(ID), wait, T) }.		% maybe not needed
 
 % Prefer fewer distinct waiting episodes
 % prefer wait, wait, go over go, wait, go wait
-wait_start(ID, T) :- action(train(ID), wait, T), not action(train(ID), wait, T-1).
+%wait_start(ID, T) :- action(train(ID), wait, T), not action(train(ID), wait, T-1).
+
+% Using non negative atoms decreased the running time from 2 seconds to 1 second
+wait_start(ID, T) :- action(train(ID), wait, T), action(train(ID), A, T-1), A != wait.
 #minimize { 1@1, ID, T : wait_start(ID, T) }.
 
 % Loop: Next next step: if there is a collision, reschedule only these trains 
 % Idea: if there is a consequence, reschedule everything after N rescheduled trains 
 
-#show action/3.
+%#show action/3.
 %#show planned_position/4.
-#show position/4.
+%#show position/4.
 #show consequence/3.
 #show planned/1.
 #show calculate/1.

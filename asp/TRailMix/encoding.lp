@@ -87,7 +87,7 @@ action(train(ID), move_forward, T) :- not finish(ID, T), position(ID, (_,_), T, 
 %#maximize { 1@4, ID : finish(ID, T) }.	% maybe not needed
 
 % Finish as early as possible
-#minimize { T@3, ID : finish(ID, T) }.
+#minimize { 1@3, ID, T : action(train(ID), _, T) }.
 
 % Prefer waiting over moving
 %#maximize { 1@2, ID, T : action(train(ID), wait, T) }.		% maybe not needed

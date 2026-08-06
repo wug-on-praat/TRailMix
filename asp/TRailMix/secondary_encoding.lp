@@ -99,10 +99,12 @@ action(train(ID), wait, T) :- position(ID, (X,Y), T, _),  position(ID, (X,Y), T+
 %#maximize { 1@5, ID : finish(ID, T) }.	% maybe not needed
 
 % we want as many OG train plans as possible
-#maximize { 1@4, train : planned(train)}.
+#maximize { 1@4, ID : planned(ID)}.
 
 % Finish as early as possible
-#minimize { T@3, ID : finish(ID, T) }.
+% #minimize { T@3, ID : finish(ID, T) }.
+% Using action decreased running time from 180 seconds to 2.2 seconds.
+#minimize { 1@3, ID, T : action(train(ID), _, T) }.
 
 % Prefer waiting over moving
 %#maximize { 1@2, ID, T : action(train(ID), wait, T) }.		% maybe not needed

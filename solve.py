@@ -122,6 +122,7 @@ class SimulationManager():
             self.secondary = primary 
         else:
             self.secondary = secondary
+            self.secondary.insert(-1, "--heuristic=Domain")
 
     def build_actions(self) -> list:
         """ create initial list of actions """

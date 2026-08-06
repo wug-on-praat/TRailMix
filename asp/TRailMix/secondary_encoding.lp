@@ -14,6 +14,8 @@ possible_action(move_right).
 
 % planned is a train that is not affected by the malfunction and we don't want to reroute it
 {planned(ID)}:- train(ID), not consequence(train(ID), _, _).
+% Prioritize planned trains when solving
+#heuristic planned(ID): train(ID). [100, true]
 
 % For actions until the malfunction happened
 {action(train(ID), ACT, T)} :- train(ID), possible_action(ACT), past_time(T).

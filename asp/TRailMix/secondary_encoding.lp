@@ -71,7 +71,7 @@ action(train(ID), wait, T) :- position(ID, P, T, _),  position(ID, P, T+1, _), c
 
 % we can't have multiple finishes for one train
 % train must stop after finish
-:- finish(ID,T), position(ID, _, T', D), time(T), time(T'), T' > T, calculate(ID).
+:- finish(ID, T), position(ID, _, T', _), time(T), time(T'), T' > T, calculate(ID).
 
 % all trains must finish
 :- train(ID), not finish(ID, _), calculate(ID).

@@ -57,7 +57,7 @@ action(train(ID), move_forward, T) :- not finish(ID, T), position(ID, (_,_), T, 
 % we can't have multiple finishes for one train
 % train must stop after finish
 % Changing (X,Y) to _ decreased grounding time from 80 seconds to 8 seconds
-:- finish(ID,T), position(ID, _, T', D), time(T), time(T'), T' > T.
+:- finish(ID, T), position(ID, _, T', _), time(T), time(T'), T' > T.
 
 % all trains must finish
 :- train(ID), not finish(ID, _).

@@ -65,7 +65,7 @@ class TrackMalManager():
         # malfunction_duration = 20 # good interesting
         malfunction_ind = random.random()   # decider for malfunction: create value btw 0-1
         #if timestep == 13:
-        if malfunction_ind > 0.95:
+        if malfunction_ind > 0.99:
             malfunction_cell = tuple(random.choice(self.grid))
             malfunction_duration = random.randint(2,20)    # maybe define with function (make 5 more likely than 20)
         

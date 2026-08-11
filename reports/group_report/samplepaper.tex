@@ -163,6 +163,70 @@ Please note that short captions are centered, while long ones are
 justified by the macro package automatically.} \label{fig1}
 \end{figure}
 
+\begin{theorem}
+	This is a sample theorem. The run-in heading is set in bold, while
+	the following text appears in italics. Definitions, lemmas,
+	propositions, and corollaries are styled the same way.
+\end{theorem}
+%
+% the environments 'definition', 'lemma', 'proposition', 'corollary',
+% 'remark', and 'example' are defined in the LLNCS documentclass as well.
+%
+\begin{proof}
+	Proofs, examples, and remarks have the initial word in italics,
+	while the following text appears in normal font.
+\end{proof}
+For citations of references, we prefer the use of square brackets
+and consecutive numbers. Citations using labels or the author/year
+convention are also acceptable. The following bibliography provides
+a sample reference list with entries for journal
+articles~\cite{ref_article1}, an LNCS chapter~\cite{ref_lncs1}, a
+book~\cite{ref_book1}, proceedings without editors~\cite{ref_proc1},
+and a homepage~\cite{ref_url1}. Multiple citations are grouped
+\cite{ref_article1,ref_lncs1,ref_book1},
+\cite{ref_article1,ref_book1,ref_proc1,ref_url1}.
+
+\begin{credits}
+	\subsubsection{\ackname} A bold run-in heading in small font size at the end of the paper is
+	used for general acknowledgments, for example: This study was funded
+	by X (grant number Y).
+	
+	\subsubsection{\discintname}
+	It is now necessary to declare any competing interests or to specifically
+	state that the authors have no competing interests. Please place the
+	statement with a bold run-in heading in small font size beneath the
+	(optional) acknowledgments\footnote{If EquinOCS, our proceedings submission
+		system, is used, then the disclaimer can be provided directly in the system.},
+	for example: The authors have no competing interests to declare that are
+	relevant to the content of this article. Or: Author A has received research
+	grants from Company W. Author B has received a speaker honorarium from
+	Company X and owns stock in Company Y. Author C is a member of committee Z.
+\end{credits}
+
+\section{Introduction to Flatland and its malfunction handling}
+\begin{itemize}
+	\item flatland built for reinforcement learning
+	\item murphy 2025a adjusted for use with ASP/clingo
+	\item create environments and trains with malfunctions
+	\item gilkra2025a dealt with train malfunctions (secondary encoding)
+\end{itemize}
+
+\subsection{Track Malfunctions}
+There are multiple types of malfunctions that can occur in railway systems such as train and track malfunctions. Building on existing work about malfunctioning trains, we have concentrated on simulating track malfunctions in this project. 
+
+Track malfunctions are a common real world issue in railway systems. It negatively affects punctuality and interferes with scheduling of trains. Deutsche Bahn reports old facilities in need of repairs just as well as an intense, high-frequent use of existing infrastructure as reasons for malfunctions around the track. (source: https://zbir.deutschebahn.com/2025/de/konzern-zwischenlagebericht-ungeprueft/qualitaet-und-sicherheit/puenktlichkeit/, 10:00 10.08.2026)
+
+\section{Our Code}
+
+\subsection{No consequence}
+\subsection{Simple Consequence (no collision)}
+\subsection{Complex Consequence (collision/ multi-agent rescheduling)}
+
+\section{Experiments}
+\subsection{with and without heuristic}
+\subsection{create accidents}
+\subsection{compare grounding for two versions of trains can't be in same cell at same time rule}
+
 \section{Log / Timeline}
 
 \begin{itemize}
@@ -179,56 +243,23 @@ justified by the macro package automatically.} \label{fig1}
 	\item expand secondary encoding: handle rescheduling of directly affected train (August 2)
 	\item finish secondary encoding: handle collisions due to rescheduling (August 3)
 	\item improve encodings: minimize grounding, remove unnecessary rules (August 7)
+	\item add heuristic, code cleaning and remove can\_dir (August 10)
 \end{itemize}
 
 \section{Future Work}
 \begin{itemize}
 	\item explore options instead of random malfunctions (frequented tracks, crosses, etc.)
-	\item explore option of tertiary encoding (recalculate from scratch if malfunction hits early on)
+	\item explore option of tertiary encoding (recalculate from scratch if malfunction hits early on: first > secondary > first)
+	\item heuristic assumes loose rail network BUT not realistic (maybe discussion part)
 \end{itemize}
 
 \section{Examples}
 
 
-\begin{theorem}
-This is a sample theorem. The run-in heading is set in bold, while
-the following text appears in italics. Definitions, lemmas,
-propositions, and corollaries are styled the same way.
-\end{theorem}
-%
-% the environments 'definition', 'lemma', 'proposition', 'corollary',
-% 'remark', and 'example' are defined in the LLNCS documentclass as well.
-%
-\begin{proof}
-Proofs, examples, and remarks have the initial word in italics,
-while the following text appears in normal font.
-\end{proof}
-For citations of references, we prefer the use of square brackets
-and consecutive numbers. Citations using labels or the author/year
-convention are also acceptable. The following bibliography provides
-a sample reference list with entries for journal
-articles~\cite{ref_article1}, an LNCS chapter~\cite{ref_lncs1}, a
-book~\cite{ref_book1}, proceedings without editors~\cite{ref_proc1},
-and a homepage~\cite{ref_url1}. Multiple citations are grouped
-\cite{ref_article1,ref_lncs1,ref_book1},
-\cite{ref_article1,ref_book1,ref_proc1,ref_url1}.
 
-\begin{credits}
-\subsubsection{\ackname} A bold run-in heading in small font size at the end of the paper is
-used for general acknowledgments, for example: This study was funded
-by X (grant number Y).
 
-\subsubsection{\discintname}
-It is now necessary to declare any competing interests or to specifically
-state that the authors have no competing interests. Please place the
-statement with a bold run-in heading in small font size beneath the
-(optional) acknowledgments\footnote{If EquinOCS, our proceedings submission
-system, is used, then the disclaimer can be provided directly in the system.},
-for example: The authors have no competing interests to declare that are
-relevant to the content of this article. Or: Author A has received research
-grants from Company W. Author B has received a speaker honorarium from
-Company X and owns stock in Company Y. Author C is a member of committee Z.
-\end{credits}
+
+
 %
 % ---- Bibliography ----
 %

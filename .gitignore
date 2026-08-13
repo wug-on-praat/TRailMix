@@ -1,4 +1,6 @@
-envs/
+envs/lp
+envs/pkl
+envs/png
 tmp/
 output/
 __pycache__/

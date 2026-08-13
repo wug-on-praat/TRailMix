@@ -53,29 +53,40 @@ class TrackMalManager():
         for i in sorted(malfunctions_to_remove, reverse=True):
             del self.track_malfunctions[i]
 
-    def check(self, timestep) -> set:       # malfunction generator???
-        # 2badjusted
-        """ check current state of the env for new malfunctions """
-        #for test env: malfunction_cell = (13, 16)
-        #for test env: malfunction_duration = 20
-        # malfunction_cell = (24, 22)
-        # malfunction_cell = (17, 19) # interesting
-        # malfunction_duration = 21 # very interesting collision (17,19),35
+    def create_trkmalf(self, timestep, predefined_mals) -> set:       # malfunction generator
 
-        # malfunction_duration = 20 # good interesting
-        malfunction_ind = random.random()   # decider for malfunction: create value btw 0-1
-        #if timestep == 13:
-        if malfunction_ind > 0.99:
-            malfunction_cell = tuple(random.choice(self.grid))
-            malfunction_duration = random.randint(2,20)    # maybe define with function (make 5 more likely than 20)
+        """ create track malfunction or implement predefined track malfunctions if provided """
+
+        if not predefined_mals:
+            malfunction_ind = random.random()   # decider for malfunction: create value btw 0-1
+
+            if malfunction_ind > 0.99:
+                malfunction_cell = tuple(random.choice(self.grid))
+                malfunction_duration = random.randint(2,20)    # maybe define with function (make 5 more likely than 20)
+                mal_timestep = timestep
+
+            else: 
+                return([])
         
-            # add new track malfunctions to current list
-            self.track_malfunctions.append((malfunction_cell, malfunction_duration))
-            self.track_record.append((malfunction_cell, timestep, malfunction_duration))
+        else:
+            current_predefined_mal = [t for t in predefined_mals if t[1] == timestep]
+            if current_predefined_mal:
+                print(current_predefined_mal)
+                malfunction_cell = current_predefined_mal[0][0]
+                malfunction_duration = current_predefined_mal[0][2] 
 
-            return([(malfunction_cell, malfunction_duration)])
-        else: 
-            return([])
+                mal_timestep = current_predefined_mal[0][1]
+
+            else: 
+                return([])
+        # add new track malfunctions to current list
+        self.track_malfunctions.append((malfunction_cell, malfunction_duration))
+        self.track_record.append((malfunction_cell, mal_timestep, malfunction_duration))
+
+        return([(malfunction_cell, malfunction_duration)])
+        
+
+    
     
 
 
@@ -261,7 +272,9 @@ def main():
 
     actions, positions = sim.build_actions()
 
+    predefined_malfunction = []
     new_trkmalfs = []
+
     timestep = 0
     while len(actions) > timestep:
         # add to the log
@@ -281,9 +294,9 @@ def main():
         #for test env: if timestep == 2:
         #for env_003--2_2-wait if timestep == 15:
         # if indicator (value 0-1) over 0.9 malfunction triggers
-        new_trkmalfs = trk.check(timestep)  # generates the malfunction
         
-        
+        new_trkmalfs = trk.create_trkmalf(timestep, predefined_malfunction)  # generates the malfunction
+            
 
         if len(new_malfs) > 0:
             context = sim.provide_context(actions, timestep, mal.get())

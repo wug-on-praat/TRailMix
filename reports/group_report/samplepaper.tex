@@ -244,6 +244,7 @@ Track malfunctions are a common real world issue in railway systems. It negative
 	\item finish secondary encoding: handle collisions due to rescheduling (August 3)
 	\item improve encodings: minimize grounding, remove unnecessary rules (August 7)
 	\item add heuristic, code cleaning and remove can\_dir (August 10)
+	\item separate predefined and random track malfunctions, code clean-up (August 13)
 \end{itemize}
 
 \section{Future Work}
@@ -251,12 +252,40 @@ Track malfunctions are a common real world issue in railway systems. It negative
 	\item explore options instead of random malfunctions (frequented tracks, crosses, etc.)
 	\item explore option of tertiary encoding (recalculate from scratch if malfunction hits early on: first > secondary > first)
 	\item heuristic assumes loose rail network BUT not realistic (maybe discussion part)
-	\item handle unsatisfiable as a result of calculating after malfunction
+	\item handle unsatisfiable as a result of calculating after malfunction (?)
 \end{itemize}
 
 \section{Examples}
 
-
+\begin{table}[h!]
+	\centering
+	\begin{tabular}{|l|l|l|r|r|r|r|}
+		\hline
+		Env name & Mal type & Mode & 1st & 2nd & Abs diff & Rel diff \\ \hline
+		\textbf{env\_028} & simple & 1-only & 0.058 & 0.043 & -0.015 & -0.26 \\
+		\hline
+		{} & simple & 1/2 & 0.073 & 0.032 & -0.041 & -0.56 \\
+		\hline
+		{} & complex & 1-only & 0.069 & 0.071 & 0.002 & +0.02 \\
+		\hline
+		{} & complex & 1/2 & 0.069 & 0.059 & -0.01 & -0.14  \\
+		\hline
+		{} & no cons & 1-only & 0.057 & 0.052 & -0.006 & -0.11 \\
+		\hline
+		{} & no cons & 1/2 & 0.057 & 0.042 & -0.015 &  -0.26 \\
+		\hline
+		\textbf{env\_033} & simple & 1-only & 20.183 & 217.961 & 197.778 & +9.80 \\
+		\hline
+		{} & simple & 1/2 & 19.618 & 4.968 & -14.65 & -0.75 \\ \hline
+		{} & complex & 1-only & 19.466 & 34.705 & 15.239 & +0.78 \\ \hline
+		{} & complex & 1/2 & 18.355 & 1.474 & -16.881 & -0.92 \\ \hline
+		{} & no cons & 1-only & 18.788 & 19.647 & 0.859 & +0.05 \\ \hline
+		{} & no cons & 1/2 & 18.453 & 4.517 & -13.936 & -0.76 \\ \hline
+	\end{tabular}
+\vspace{0.2cm}
+\caption{Comparison of performance between first and secondary encoding.}
+\label{encodings}
+\end{table}
 
 
 

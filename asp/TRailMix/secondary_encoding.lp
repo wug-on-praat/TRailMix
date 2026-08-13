@@ -12,6 +12,15 @@ possible_action(wait).
 possible_action(move_left).
 possible_action(move_right).
 
+% Initialize trains that didn't started before the malfunction occured
+position(ID, P, T, D) :- train(ID), start(ID, P, T, D), time(T), not current_position(ID, _, _, _).
+position(ID, P, T+1, D) :- train(ID), start(ID, P, T, D), time(T), not current_position(ID, _, _, _).
+action(train(ID), move_forward, T) :- start(ID, (_,_), T, _), not current_position(ID, _, _, _).
+action(train(ID), wait, T) :- start(ID, (_,_), T1, _), time(T), T_mal < T < T1, track_malfunction((_, _), _, T_mal), not current_position(ID, _, _, _).
+
+position(ID, P, T, D) :- current_position(ID, P, T, D).
+
+
 % planned is a train that is not affected by the malfunction and we don't want to reroute it
 {planned(ID)}:- train(ID), not consequence(train(ID), _, _).
 % Prioritize planned trains when solving
@@ -61,7 +70,7 @@ action(train(ID), move_right, T) :- position(ID, (X,Y), T, Dir),  position(ID, (
 
 action(train(ID), move_forward, T) :- not finish(ID, T), position(ID, (_,_), T, _), not action(train(ID), wait, T), not action(train(ID), move_left, T), not action(train(ID), move_right, T), calculate(ID).
 
-action(train(ID), wait, T) :- position(ID, P, T, _),  position(ID, P, T+1, _), calculate(ID).
+action(train(ID), wait, T) :- position(ID, P, T, _),  position(ID, P, T+1, _), not start(ID, _, T, _), calculate(ID).
 
 
 %% SINGLE TRAIN CONSTRAINTS

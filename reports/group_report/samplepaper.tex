@@ -13,6 +13,8 @@
 % Used for displaying a sample figure. If possible, figure files should
 % be included in EPS format.
 
+\usepackage{hyperref}
+
 \usepackage{xcolor}
 \definecolor{codegreen}{rgb}{0,0.6,0}
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
@@ -222,7 +224,7 @@ Track malfunctions are a common real world issue in railway systems. It negative
 \subsubsection{generators}
 \subsubsection{constraints}
 \subsection{Additions to solve.py}
-\subsection{Secondary Encoding}
+\subsection{Secondary Encoding} \label{encoding_2}
 \subsubsection{No consequence}
 \subsubsection{Simple Consequence (no collision)}
 \subsubsection{Complex Consequence (collision/ multi-agent rescheduling)}
@@ -260,35 +262,40 @@ Track malfunctions are a common real world issue in railway systems. It negative
 	\item handle unsatisfiable as a result of calculating after malfunction (?)
 \end{itemize}
 
-\section{Examples}
+\section{Experiment 1}
+We compared the use of the secondary encoding with rescheduling the entire environment anew with the base encoding. For this, we have created four testing environments of varying sizes (2 small and 2 medium environments). In each environment we have identified tracks for all three types of track malfunctions (simple, complex, no consequence - see Section \ref{encoding_2}). We ran each environment and malfunction in two modes. Mode 1-1 scheduled and rescheduled with the base encoding. 1-2 used the base encoding only for scheduling and the secondary encoding for rescheduling. 
+
+
 
 \begin{table}[h!]
 	\centering
-	\begin{tabular}{|l|l|l|r|r|r|r|}
+	\begin{tabular}{|l|l|l|r|r|}
 		\hline
-		Env name & Mal type & Mode & 1st & 2nd & Abs diff & Rel diff \\ \hline
-		\textbf{env\_028} & simple & 1-only & 0.058 & 0.043 & -0.015 & -0.26 \\
-		\hline
-		{} & simple & 1/2 & 0.073 & 0.032 & -0.041 & -0.56 \\
-		\hline
-		{} & complex & 1-only & 0.069 & 0.071 & 0.002 & +0.02 \\
-		\hline
-		{} & complex & 1/2 & 0.069 & 0.059 & -0.01 & -0.14  \\
-		\hline
-		{} & no cons & 1-only & 0.057 & 0.052 & -0.006 & -0.11 \\
-		\hline
-		{} & no cons & 1/2 & 0.057 & 0.042 & -0.015 &  -0.26 \\
-		\hline
-		\textbf{env\_033} & simple & 1-only & 20.183 & 217.961 & 197.778 & +9.80 \\
-		\hline
-		{} & simple & 1/2 & 19.618 & 4.968 & -14.65 & -0.75 \\ \hline
-		{} & complex & 1-only & 19.466 & 34.705 & 15.239 & +0.78 \\ \hline
-		{} & complex & 1/2 & 18.355 & 1.474 & -16.881 & -0.92 \\ \hline
-		{} & no cons & 1-only & 18.788 & 19.647 & 0.859 & +0.05 \\ \hline
-		{} & no cons & 1/2 & 18.453 & 4.517 & -13.936 & -0.76 \\ \hline
+		Env name & Mal type & Mode & 1st & 2nd  \\ \hline
+		\textbf{env\_028} & simple & 1-2 & 0.114 & 0.038 \\ \hline
+		{} & simple & 1-1 & 0.057 & 0.047  \\ \hline
+		{} & complex & 1-2 & 0.057 & 0.056 \\ \hline
+		{} & complex & 1-1 & 0.057 & 0.055 \\ \hline
+		{} & no cons & 1-2 & 0.065 & 0.050 \\ \hline
+		{} & no cons & 1-1 & 0.065 & 0.061 \\ \hline
+		\textbf{env\_035} & simple & 1-2 & 26.135 & 2.116 \\ \hline
+		{} & simple & 1-1 & 26.240 & 11.449 \\ \hline
+		{} & complex & 1-2 & 26.299 & 2.053 \\ \hline
+		{} & complex & 1-1 & 26.251 & 35.805 \\ \hline
+		{} & no cons & 1-2 & 26.471 & 6.579  \\ \hline
+		{} & no cons & 1-1 & 26.219 & 22.771 \\ \hline
 	\end{tabular}
 \vspace{0.2cm}
-\caption{Comparison of performance between first and secondary encoding.}
+
+	\begin{tabular}{|l l|}
+		\hline
+		1-1: & base encoding for scheduling and rescheduling \\
+		1-2: & base encoding for scheduling, secondary encoding for rescheduling\\ \hline
+	\end{tabular}
+
+\vspace{0.2cm}
+
+\caption{Results for testing environments with different malfunction types.}
 \label{encodings}
 \end{table}
 

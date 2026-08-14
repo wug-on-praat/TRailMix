@@ -12,7 +12,7 @@ possible_action(wait).
 possible_action(move_left).
 possible_action(move_right).
 
-% Initialize trains that didn't started before the malfunction occured
+% Initialize trains that didn't start before the malfunction occured
 position(ID, P, T, D) :- train(ID), start(ID, P, T, D), time(T), not current_position(ID, _, _, _).
 position(ID, P, T+1, D) :- train(ID), start(ID, P, T, D), time(T), not current_position(ID, _, _, _).
 action(train(ID), move_forward, T) :- start(ID, (_,_), T, _), not current_position(ID, _, _, _).

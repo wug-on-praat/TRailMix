@@ -62,7 +62,7 @@ class TrackMalManager():
             if malfunction_ind > 0.99:
                 malfunction_cell = tuple(random.choice(self.grid))
                 malfunction_duration = random.randint(2,20)    # maybe define with function (make 5 more likely than 20)
-                mal_timestep = timestep
+                malfunction_timestep = timestep
 
             else: 
                 return([])
@@ -75,13 +75,13 @@ class TrackMalManager():
                 malfunction_cell = current_predefined_mal[0][0]
                 malfunction_duration = current_predefined_mal[0][2] 
 
-                mal_timestep = current_predefined_mal[0][1]
+                malfunction_timestep = current_predefined_mal[0][1]
 
             else: 
                 return([])
         # add new track malfunctions to current list
         self.track_malfunctions.append((malfunction_cell, malfunction_duration))
-        self.track_record.append((malfunction_cell, mal_timestep, malfunction_duration))
+        self.track_record.append((malfunction_cell, malfunction_timestep, malfunction_duration))
 
         return([(malfunction_cell, malfunction_duration)])
         
@@ -267,7 +267,7 @@ def main():
     actions, positions = sim.build_actions()
 
     predefined_malfunction = []
-    new_trkmalfs = []
+    new_trkmals = []
 
     timestep = 0
     while len(actions) > timestep:
@@ -283,25 +283,24 @@ def main():
             break
 
         # check for new malfunctions
-        new_malfs = mal.check(info)
+        new_mals = mal.check(info)
         
-        # handle predefined track malfunctions or maybe create random track malfunction 
-        new_trkmalfs = trk.create_trkmal(timestep, predefined_malfunction)  
+        # handle predefined track malfunctions or maybe create random track malfunction for this timestep
+        new_trkmals = trk.create_trkmal(timestep, predefined_malfunction)  
 
-        if len(new_malfs) > 0:
+        if len(new_mals) > 0:
             context = sim.provide_context(actions, timestep, mal.get())
             actions, positions = sim.update_actions(context)
 
         mal.deduct() 
 
-        if len(new_trkmalfs) > 0:
+        if len(new_trkmals) > 0:
             context = sim.provide_context_trk(actions, timestep, trk.get(), positions)
             actions, positions = sim.update_actions(context)
             
-            for (coords, duration) in new_trkmalfs:
+            for (coords, duration) in new_trkmals:
                 log.add_track_mal(f'{timestep}; {coords}; {duration}\n')  
                  
-                
         trk.deduct()
         
         

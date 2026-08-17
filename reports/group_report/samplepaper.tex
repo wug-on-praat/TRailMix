@@ -14,6 +14,8 @@
 % be included in EPS format.
 
 \usepackage{hyperref}
+\usepackage{subcaption}
+%\usepackage{natbib}
 
 \usepackage{xcolor}
 \definecolor{codegreen}{rgb}{0,0.6,0}
@@ -86,7 +88,7 @@ Universität Potsdam,
 The abstract should briefly summarize the contents of the paper in
 150--250 words.
 
-\keywords{clingo  \and flatland \and MAPF \and Rescheduling.}
+\keywords{ASP  \and Flatland \and MAPF \and Rescheduling \and VRSP.}
 \end{abstract}
 %
 %
@@ -206,6 +208,15 @@ and a homepage~\cite{ref_url1}. Multiple citations are grouped
 \end{credits}
 
 \section{Introduction to Flatland and its malfunction handling}
+
+Flatland is a framework developed by AICrowd and SBB for multi-agent path finding problems and more specifically railway scheduling and rescheduling issues \cite{mohanty2020}. The initial simulation environment was designed for Python-based reinforcement learning approaches. It offers a contained experimentation sandbox around the vehicle rescheduling problem (VRSP) and simple two-dimensional visualisation of environments and agent movement.
+
+
+
+\subsection{Flatland and Answer Set Programming}
+Murphy built a toolkit to integrate answer set programming solutions in the Flatland framework \cite{Murphy2026a}. 
+
+\subsection{Malfunctions in Flatland}
 \begin{itemize}
 	\item flatland built for reinforcement learning
 	\item murphy 2025a adjusted for use with ASP/clingo
@@ -263,9 +274,38 @@ Track malfunctions are a common real world issue in railway systems. It negative
 \end{itemize}
 
 \section{Experiment 1}
-We compared the use of the secondary encoding with rescheduling the entire environment anew with the base encoding. For this, we have created four testing environments of varying sizes (2 small and 2 medium environments). In each environment we have identified tracks for all three types of track malfunctions (simple, complex, no consequence - see Section \ref{encoding_2}). We ran each environment and malfunction in two modes. Mode 1-1 scheduled and rescheduled with the base encoding. 1-2 used the base encoding only for scheduling and the secondary encoding for rescheduling. 
+We compared the use of the secondary encoding with rescheduling the entire environment anew with the base encoding. For this, we have created four testing environments of varying sizes (2 small and 2 medium environments - see Figure \ref{test_envs}). In each environment we have identified tracks for all three types of track malfunctions (simple, complex, no consequence - see Section \ref{encoding_2}). We ran each environment and malfunction in two modes. Mode 1-1 scheduled and rescheduled with the base encoding. 1-2 used the base encoding only for scheduling and the secondary encoding for rescheduling. 
 
-
+\begin{figure}[hbt!]
+	
+	\begin{subfigure}{.475\linewidth}
+		\includegraphics[width=\linewidth]{environment.png}
+		\caption{}
+		\label{MLEDdet}
+	\end{subfigure}\hfill % <-- "\hfill"
+	~ % optional tilde b/t figures for readability.
+	% this solution will not work w/ empty lines b/t subfigures
+	\begin{subfigure}{.475\linewidth}
+		\includegraphics[width=\linewidth]{environment.png}
+		\caption{}
+		\label{energydetPSK}
+	\end{subfigure}
+	
+	\medskip % create some *vertical* separation between the graphs
+	\begin{subfigure}{.475\linewidth}
+		\includegraphics[width=\linewidth]{environment.png}
+		\caption{}
+		\label{velcomp}
+	\end{subfigure}\hfill % <-- "\hfill"
+	% or just a comment and no tilde
+	\begin{subfigure}{.475\linewidth}
+		\includegraphics[width=\linewidth]{environment.png}
+		\caption{}
+		\label{velqual}
+	\end{subfigure}
+\caption{These are the testing environments.}
+\label{test_envs}
+\end{figure}
 
 \begin{table}[h!]
 	\centering
@@ -308,27 +348,32 @@ We compared the use of the secondary encoding with rescheduling the entire envir
 % BibTeX users should specify bibliography style 'splncs04'.
 % References will then be sorted and formatted in the correct style.
 %
-% \bibliographystyle{splncs04}
-% \bibliography{mybibliography}
+\bibliographystyle{splncs04}
+\bibliography{refs}
+%%
+%\begin{thebibliography}{8}
+%\bibitem{ref_article1}
+%Author, F.: Article title. Journal \textbf{2}(5), 99--110 (2016)
 %
-\begin{thebibliography}{8}
-\bibitem{ref_article1}
-Author, F.: Article title. Journal \textbf{2}(5), 99--110 (2016)
+%\bibitem{ref_lncs1}
+%Author, F., Author, S.: Title of a proceedings paper. In: Editor,
+%F., Editor, S. (eds.) CONFERENCE 2016, LNCS, vol. 9999, pp. 1--13.
+%Springer, Heidelberg (2016). \doi{10.10007/1234567890}
+%
+%\bibitem{ref_book1}
+%Author, F., Author, S., Author, T.: Book title. 2nd edn. Publisher,
+%Location (1999)
+%
+%\bibitem{ref_proc1}
+%Author, A.-B.: Contribution title. In: 9th International Proceedings
+%on Proceedings, pp. 1--2. Publisher, Location (2010)
 
-\bibitem{ref_lncs1}
-Author, F., Author, S.: Title of a proceedings paper. In: Editor,
-F., Editor, S. (eds.) CONFERENCE 2016, LNCS, vol. 9999, pp. 1--13.
-Springer, Heidelberg (2016). \doi{10.10007/1234567890}
-
-\bibitem{ref_book1}
-Author, F., Author, S., Author, T.: Book title. 2nd edn. Publisher,
-Location (1999)
-
-\bibitem{ref_proc1}
-Author, A.-B.: Contribution title. In: 9th International Proceedings
-on Proceedings, pp. 1--2. Publisher, Location (2010)
-
-\bibitem{ref_url1}
-LNCS Homepage, \url{http://www.springer.com/lncs}, last accessed 2023/10/25
-\end{thebibliography}
+%\bibitem{ref_url1}
+%LNCS Homepage, \url{http://www.springer.com/lncs}, last accessed 2023/10/25
+%
+%\bibitem{flatlandpaper}
+%Mohanty et. al: Flatland-RL: Multi-Agent Reinforcement Learning on Trains. \url{https://arxiv.org/abs/2012.05893}, 2020.
+%
+%
+%\end{thebibliography}
 \end{document}

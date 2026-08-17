@@ -1,0 +1,17 @@
+\begin{thebibliography}{1}
+\providecommand{\url}[1]{\texttt{#1}}
+\providecommand{\urlprefix}{URL }
+\providecommand{\doi}[1]{https://doi.org/#1}
+
+\bibitem{mohanty2020}
+Mohanty, S., Nygren, E., Laurent, F., Schneider, M., Scheller, C.,
+  Bhattacharya, N., Watson, J., Egli, A., Eichenberger, C., Baumberger, C.,
+  Vienken, G., Sturm, I., Sartoretti, G., Spigler, G.: Flatland-rl: Multi-agent
+  reinforcement learning on trains (2020),
+  \url{https://arxiv.org/abs/2012.05893}
+
+\bibitem{Murphy2026a}
+Murphy, K.R.: Flatland (2026), \url{https://github.com/krr-up/flatland},
+  accessed: 17.08.2026
+
+\end{thebibliography}

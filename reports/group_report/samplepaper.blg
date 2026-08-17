@@ -1,47 +1,52 @@
 This is BibTeX, Version 0.99d (TeX Live 2023/Debian)
 Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
 The top-level auxiliary file: samplepaper.aux
-I found no \bibdata command---while reading file samplepaper.aux
-I found no \bibstyle command---while reading file samplepaper.aux
-You've used 5 entries,
-            0 wiz_defined-function locations,
-            88 strings with 543 characters,
-and the built_in function-call counts, 0 in all, are:
-= -- 0
-> -- 0
+The style file: splncs04.bst
+Database file #1: refs.bib
+Warning--I didn't find a database entry for "ref_article1"
+Warning--I didn't find a database entry for "ref_lncs1"
+Warning--I didn't find a database entry for "ref_book1"
+Warning--I didn't find a database entry for "ref_proc1"
+Warning--I didn't find a database entry for "ref_url1"
+You've used 2 entries,
+            2850 wiz_defined-function locations,
+            611 strings with 5030 characters,
+and the built_in function-call counts, 1204 in all, are:
+= -- 75
+> -- 79
 < -- 0
-+ -- 0
-- -- 0
-* -- 0
-:= -- 0
++ -- 32
+- -- 30
+* -- 91
+:= -- 170
 add.period$ -- 0
-call.type$ -- 0
-change.case$ -- 0
+call.type$ -- 2
+change.case$ -- 22
 chr.to.int$ -- 0
-cite$ -- 0
-duplicate$ -- 0
-empty$ -- 0
-format.name$ -- 0
-if$ -- 0
+cite$ -- 2
+duplicate$ -- 86
+empty$ -- 91
+format.name$ -- 31
+if$ -- 237
 int.to.chr$ -- 0
-int.to.str$ -- 0
-missing$ -- 0
-newline$ -- 0
-num.names$ -- 0
-pop$ -- 0
-preamble$ -- 0
-purify$ -- 0
+int.to.str$ -- 2
+missing$ -- 24
+newline$ -- 12
+num.names$ -- 4
+pop$ -- 60
+preamble$ -- 1
+purify$ -- 19
 quote$ -- 0
-skip$ -- 0
+skip$ -- 17
 stack$ -- 0
-substring$ -- 0
-swap$ -- 0
+substring$ -- 28
+swap$ -- 50
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 0
+type$ -- 8
 warning$ -- 0
-while$ -- 0
-width$ -- 0
-write$ -- 0
-(There were 2 error messages)
+while$ -- 6
+width$ -- 3
+write$ -- 22
+(There were 5 warnings)

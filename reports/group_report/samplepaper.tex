@@ -214,27 +214,31 @@ Flatland is a framework developed by AICrowd and SBB for multi-agent path findin
 
 
 \subsection{Flatland and Answer Set Programming}
-Murphy built a toolkit to integrate answer set programming solutions in the Flatland framework \cite{Murphy2026a}. 
+Murphy has built a toolkit to integrate answer set programming solutions in the Flatland framework \cite{Murphy2026a}. The approach solves instances with clingo \cite{gebser2018clingo} and then translates the solution to execute and visualize in Flatland. Environments are generated beforehand to adhere to Flatland prerequisites but also encodes the instance for clingo. The ASP encoding has to generate action predicates which communicate agent's steps to Flatland.  
+
 
 \subsection{Malfunctions in Flatland}
+\label{flatland_mals}
 \begin{itemize}
-	\item flatland built for reinforcement learning
-	\item murphy 2025a adjusted for use with ASP/clingo
 	\item create environments and trains with malfunctions
 	\item gilkra2025a dealt with train malfunctions (secondary encoding)
+	\item waldow2025
 \end{itemize}
 
 \subsection{Track Malfunctions}
-There are multiple types of malfunctions that can occur in railway systems such as train and track malfunctions. Building on existing work about malfunctioning trains, we have concentrated on simulating track malfunctions in this project. 
+\label{trkmals}
+Track malfunctions are a common real world issue in railway systems. It negatively affects punctuality and interferes with scheduling of trains. Deutsche Bahn reports old facilities in need of repairs just as well as an intense, high-frequent use of existing infrastructure as reasons for malfunctions around the track \cite{DB2025}. Other factors can be weather incidents, such as flooding \cite{AusPunctuality2025} or fires \cite{DB2025}, or trespassing individuals that make railway sections temporarily unusable \cite{SZdelayarticle2023}.
 
-Track malfunctions are a common real world issue in railway systems. It negatively affects punctuality and interferes with scheduling of trains. Deutsche Bahn reports old facilities in need of repairs just as well as an intense, high-frequent use of existing infrastructure as reasons for malfunctions around the track. (source: https://zbir.deutschebahn.com/2025/de/konzern-zwischenlagebericht-ungeprueft/qualitaet-und-sicherheit/puenktlichkeit/, 10:00 10.08.2026)
+
 
 \section{Our Code}
+Building on existing work about malfunctioning trains, we implement track malfunctions to simulate realistic scheduling challenges (see Sections \ref{flatland_mals} and \ref{trkmals}). We base our approach on previous work by gilkra and want to build a similar structure for dealing with interruptions in the original schedule. Flatland doesn't natively include track malfunctions. Alternatively, we have included the generation of malfunctions in the main solving pipeline (see Section \ref{solve}). By reusing plans for trains from the original schedule,  we aimed to improve computation time during rescheduling through a secondary encoding (see Section \ref{encoding_2}).
+
 \subsection{base encoding}
 \subsubsection{connections-nswe}
 \subsubsection{generators}
 \subsubsection{constraints}
-\subsection{Additions to solve.py}
+\subsection{Additions to solve.py} \label{solve}
 \subsection{Secondary Encoding} \label{encoding_2}
 \subsubsection{No consequence}
 \subsubsection{Simple Consequence (no collision)}
@@ -311,19 +315,32 @@ We compared the use of the secondary encoding with rescheduling the entire envir
 	\centering
 	\begin{tabular}{|l|l|l|r|r|}
 		\hline
-		Env name & Mal type & Mode & 1st & 2nd  \\ \hline
+		Env name & Mal type & Mode & Schedule & Reschedule  \\ \hline
+		\textbf{env\_016} & simple & 1-2 & 0.092 & 0.084 \\ \hline
+		{} & simple  & 1-1 & 0.095 & 0.082  \\ \hline
+		{} & complex & 1-2 & 0.097 & 0.070 \\ \hline
+		{} & complex & 1-1 & 0.092 & 0.089 \\ \hline
+		{} & no cons & 1-2 & 0.185 & 0.116 \\ \hline
+		{} & no cons & 1-1 & 0.100 & 0.107 \\ \hline
 		\textbf{env\_028} & simple & 1-2 & 0.114 & 0.038 \\ \hline
 		{} & simple & 1-1 & 0.057 & 0.047  \\ \hline
 		{} & complex & 1-2 & 0.057 & 0.056 \\ \hline
 		{} & complex & 1-1 & 0.057 & 0.055 \\ \hline
 		{} & no cons & 1-2 & 0.065 & 0.050 \\ \hline
 		{} & no cons & 1-1 & 0.065 & 0.061 \\ \hline
+		\textbf{env\_033} & simple & 1-2 & 0.651 & 0.389 \\ \hline
+		{} & simple & 1-1 & 0.583 & 0.607 \\ \hline
+		{} & complex & 1-2 & 0.589 & 0.867 \\ \hline
+		{} & complex & 1-1 & 0.598 & 3.747 \\ \hline
+		{} & no cons & 1-2 & {} & {}  \\ \hline
+		{} & no cons & 1-1 & {} & {} \\ \hline
 		\textbf{env\_035} & simple & 1-2 & 26.135 & 2.116 \\ \hline
 		{} & simple & 1-1 & 26.240 & 11.449 \\ \hline
 		{} & complex & 1-2 & 26.299 & 2.053 \\ \hline
 		{} & complex & 1-1 & 26.251 & 35.805 \\ \hline
 		{} & no cons & 1-2 & 26.471 & 6.579  \\ \hline
 		{} & no cons & 1-1 & 26.219 & 22.771 \\ \hline
+		
 	\end{tabular}
 \vspace{0.2cm}
 

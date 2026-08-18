@@ -233,6 +233,66 @@ Track malfunctions are a common real world issue in railway systems. It negative
 
 \section{Our Code}
 Building on existing work about malfunctioning trains, we implement track malfunctions to simulate realistic scheduling challenges (see Sections \ref{flatland_mals} and \ref{trkmals}). We base our approach on previous work by gilkra and want to build a similar structure for dealing with interruptions in the original schedule. Flatland doesn't natively include track malfunctions. Alternatively, we have included the generation of malfunctions in the main solving pipeline (see Section \ref{solve}). By reusing plans for trains from the original schedule,  we aimed to improve computation time during rescheduling through a secondary encoding (see Section \ref{encoding_2}).
+\subsection{Python Part}
+\subsubsection{Track Malfunction Implementation}
+
+Since we could not implement track malfunctions directly in Flatland, we implemented them in Python code that runs Clingo with Flatland input.
+
+The added code consists of multiple parts:
+
+\begin{itemize}
+    \item Creating track malfunctions either randomly or deterministically
+    \item Translating the track malfunction Python object into Clingo
+    \item Forwarding the atoms to Clingo
+    \item Logging the malfunction in a file
+    \item Depicting the malfunction in the Flatland output
+\end{itemize}
+
+\subsubsection{How is a track malfunction created?}
+
+A track malfunction Python object is a tuple consisting of three components:
+
+\begin{verbatim}
+(cell, timestep, duration)
+\end{verbatim}
+
+The \texttt{cell} is an \texttt{(X, Y)} tuple that defines where the track malfunction occurred.
+
+The \texttt{timestep} represents the timestep at which the track malfunction was triggered. During this timestep, the malfunction has not yet occurred; it starts in the following timestep. This was an architectural decision to ensure that trains cannot be on a malfunctioning track when the malfunction starts.
+
+The \texttt{duration} specifies the number of timesteps for which the track malfunction occurred.
+
+Track malfunctions can either be created randomly or predefined by the user. The variable \texttt{predefined\_malfunction} is used to store malfunctions that the user wants to enforce on the environment. If the variable is empty, there is a 1\% chance of a malfunction occurring at every timestep (this probability can be adjusted). In the current setup, only one malfunction can occur per timestep. \textbf{(Improvement idea)}
+
+\subsubsection{How is a malfunction implemented in Clingo?}
+
+When a malfunction is triggered in Python, multiple atoms and rules are generated and forwarded to the program that calculates the rescheduling.
+
+\begin{itemize}
+    \item \textbf{\texttt{action} constraint rules} -- To preserve the actions taken up to this point, a constraint rule is generated for each action, ensuring that all past actions must be present in the output of the rescheduling.
+
+    \item \textbf{\texttt{track\_malfunction} atoms} -- Used to provide the timestep and duration of the malfunction.
+
+    \item \textbf{\texttt{position} constraint rules} -- Since the track malfunction starts one timestep after it is triggered, the actions at the time the malfunction is triggered are preserved. Consequently, their positions in the next timestep are also preserved. These constraints only include the next position.
+
+    \item \textbf{\texttt{planned\_action} atoms} -- Include all actions that were planned before the malfunction occurred.
+
+    \item \textbf{\texttt{planned\_position} atoms} -- Include all positions that were planned before the malfunction occurred.
+
+    \item \textbf{\texttt{current\_position} atoms} -- Include all positions occupied at the timestep at which the malfunction occurred.
+\end{itemize}
+
+\subsubsection{How is the malfunction logged?}
+
+The malfunction is logged in a CSV file with the following parameters:
+
+\begin{verbatim}
+timestep;cell;duration
+\end{verbatim}
+
+\subsubsection{How is the malfunction depicted?}
+
+Similar to a train malfunction, a track malfunction is depicted as a red \textbf{X} over the malfunctioning track.
 
 \subsection{base encoding}
 \subsubsection{connections-nswe}

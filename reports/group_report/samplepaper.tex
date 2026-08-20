@@ -15,7 +15,7 @@
 
 \usepackage{hyperref}
 \usepackage{subcaption}
-%\usepackage{natbib}
+\usepackage{wrapfig}
 
 \usepackage{xcolor}
 \definecolor{codegreen}{rgb}{0,0.6,0}
@@ -169,12 +169,43 @@ Track malfunctions are a common real world issue in railway systems. It negative
 
 
 \section{Our Code}
+
+
 Building on existing work about malfunctioning trains, we implement track malfunctions to simulate realistic scheduling challenges (see Sections \ref{flatland_mals} and \ref{trkmals}). We base our approach on previous work by gilkra and want to build a similar structure for dealing with interruptions in the original schedule. Flatland doesn't natively include track malfunctions. Alternatively, we have included the generation of malfunctions in the main solving pipeline (see Section \ref{solve}). By reusing plans for trains from the original schedule,  we aimed to improve computation time during rescheduling through a secondary encoding (see Section \ref{encoding_2}).
 
-\subsection{Python Part}
+
+\subsection{Base Encoding}
+
+The base encoding is Clingo code that solves a Flatland environment and schedules agents. It sets up the environment, generates sequential and valid positions for agents and then translates the positions into action atoms for Flatland (see Figure \ref{overview_primary}). 
+
+\subsubsection{Setting-up the environment}
+The environment specifications are defined for Clingo during environment creation with \verb|build.py|. It consists of a global time limit, information about the trains including agent ID, start, end and speed, and the cells with their given track type.
+
+Our Base Encoding includes rules and additional information to represent the environment. First, it imports a fact file (\verb|connections_nswe.lp|) with additional world information applicable to all Flatland environments. It defines how track types translate to the directions north, south, west and east. For instance, the fact \verb|connection(4608, (s,w))| is track type 4608, a curve that connects south and west. Furthermore, it contains definitions for directions and turns, a move in a certain direction in terms of movement on the X- and Y-axis, relations between directions (e.g. west is the inverse of east) and which track types allow a choice in direction. The fact file has been taken from Murphy \cite{Murphy2026a} in big parts and adjusted by us. Then, the Base Encoding creates the grid of adjacent cells and which of them is reachable by an agent.
+
+
+\begin{wrapfigure}{r}{0.2\textwidth}
+	\centering
+	\includegraphics[scale=0.5, width=\linewidth]{base_encoding.jpg}
+	\caption{High-level overview of Base Encoding.}
+	\label{overview_primary}
+\end{wrapfigure}
+
+\subsubsection{Move Agents}
+The \verb|position(ID, CELL, TIME, DIRECTION)| argument handles the position of a train (ID) in the environment and thus generates the sequential moves of that agent. A train is marked as \verb|finish(ID, TIME)| once it has reached its destination and doesn't move further. The position atoms are subsequently translated to action predicates containing necessary information, namely train ID and the required action at a given time step, for Flatland to visualise the solved environment.
+
+Our optimization objectives encourage trains to reach their destination as soon as possible and prefer one consecutive waiting period over repeated stop-and-go behaviour.
+
+\subsubsection{Constraints}
+We implemented two types of constraints on agent movements: single train constraints and train coordination constraints. Single train constraints ensure that a train behaves normally. They forbid u-turns, multiple positions of one agent in the environment and correct finishing upon arrival at the destination.
+
+Train Coordination constraints avoid behaviour that would cause collisions between agents. Any two given trains cannot occupy the same cell and two oncoming agents cannot immediately switch places or pass through each other.
+
+
+\subsection{Python Part}\label{solve}
 \subsubsection{Track Malfunction Implementation}
 
-Since we could not implement track malfunctions directly in Flatland, we implemented them in Python code that runs Clingo with Flatland input.
+Since we could not implement track malfunctions directly in Flatland, we implemented them in Python code that runs Clingo with Flatland input (\verb|solve.py|).
 
 The added code consists of multiple parts:
 
@@ -233,11 +264,7 @@ timestep;cell;duration
 
 Similar to a train malfunction, a track malfunction is depicted as a red \textbf{X} over the malfunctioning track.
 
-\subsection{base encoding}
-\subsubsection{connections-nswe}
-\subsubsection{generators}
-\subsubsection{constraints}
-\subsection{Additions to solve.py} \label{solve}
+
 \subsection{Secondary Encoding} \label{encoding_2}
 \subsubsection{No consequence}
 \subsubsection{Simple Consequence (no collision)}

@@ -54,6 +54,9 @@
 	showtabs=false,                  
 	tabsize=2
 }
+% set the name for code blocks to be displayed
+\renewcommand{\lstlistingname}{Code}
+
 %\lstset{style=mystyle}
 % If you use the hyperref package, please uncomment the following two lines
 % to display URLs in blue roman font according to Springer's eBook style:
@@ -130,98 +133,32 @@ they are formatted as run-in headings.
 	
 \end{lstlisting}
 
-\paragraph{Sample Heading (Fourth Level)}
-The contribution should contain no more than four levels of
-headings. Table~\ref{tab1} gives a summary of all heading levels.
-
-\begin{table}
-\caption{Table captions should be placed above the
-tables.}\label{tab1}
-\begin{tabular}{|l|l|l|}
-\hline
-Heading level &  Example & Font size and style\\
-\hline
-Title (centered) &  {\Large\bfseries Lecture Notes} & 14 point, bold\\
-1st-level heading &  {\large\bfseries 1 Introduction} & 12 point, bold\\
-2nd-level heading & {\bfseries 2.1 Printing Area} & 10 point, bold\\
-3rd-level heading & {\bfseries Run-in Heading in Bold.} Text follows & 10 point, bold\\
-4th-level heading & {\itshape Lowest Level Heading.} Text follows & 10 point, italic\\
-\hline
-\end{tabular}
-\end{table}
-
-
-\noindent Displayed equations are centered and set on a separate
-line.
-\begin{equation}
-x + y = z
-\end{equation}
-Please try to avoid rasterized images for line-art diagrams and
-schemas. Whenever possible, use vector graphics instead (see
-Fig.~\ref{fig1}).
-
-\begin{figure}
-%\includegraphics[width=\textwidth]{fig1.eps}
-\caption{A figure caption is always placed below the illustration.
-Please note that short captions are centered, while long ones are
-justified by the macro package automatically.} \label{fig1}
-\end{figure}
-
-\begin{theorem}
-	This is a sample theorem. The run-in heading is set in bold, while
-	the following text appears in italics. Definitions, lemmas,
-	propositions, and corollaries are styled the same way.
-\end{theorem}
-%
-% the environments 'definition', 'lemma', 'proposition', 'corollary',
-% 'remark', and 'example' are defined in the LLNCS documentclass as well.
-%
-\begin{proof}
-	Proofs, examples, and remarks have the initial word in italics,
-	while the following text appears in normal font.
-\end{proof}
-For citations of references, we prefer the use of square brackets
-and consecutive numbers. Citations using labels or the author/year
-convention are also acceptable. The following bibliography provides
-a sample reference list with entries for journal
-articles~\cite{ref_article1}, an LNCS chapter~\cite{ref_lncs1}, a
-book~\cite{ref_book1}, proceedings without editors~\cite{ref_proc1},
-and a homepage~\cite{ref_url1}. Multiple citations are grouped
-\cite{ref_article1,ref_lncs1,ref_book1},
-\cite{ref_article1,ref_book1,ref_proc1,ref_url1}.
-
-\begin{credits}
-	\subsubsection{\ackname} A bold run-in heading in small font size at the end of the paper is
-	used for general acknowledgments, for example: This study was funded
-	by X (grant number Y).
-	
-	\subsubsection{\discintname}
-	It is now necessary to declare any competing interests or to specifically
-	state that the authors have no competing interests. Please place the
-	statement with a bold run-in heading in small font size beneath the
-	(optional) acknowledgments\footnote{If EquinOCS, our proceedings submission
-		system, is used, then the disclaimer can be provided directly in the system.},
-	for example: The authors have no competing interests to declare that are
-	relevant to the content of this article. Or: Author A has received research
-	grants from Company W. Author B has received a speaker honorarium from
-	Company X and owns stock in Company Y. Author C is a member of committee Z.
-\end{credits}
 
 \section{Introduction to Flatland and its malfunction handling}
-
 Flatland is a framework developed by AICrowd and SBB for multi-agent path finding problems and more specifically railway scheduling and rescheduling issues \cite{mohanty2020}. The initial simulation environment was designed for Python-based reinforcement learning approaches. It offers a contained experimentation sandbox around the vehicle rescheduling problem (VRSP) and simple two-dimensional visualisation of environments and agent movement.
 
 
 
 \subsection{Flatland and Answer Set Programming}
-Murphy has built a toolkit to integrate answer set programming solutions in the Flatland framework \cite{Murphy2026a}. The approach solves instances with clingo \cite{gebser2018clingo} and then translates the solution to execute and visualize in Flatland. Environments are generated beforehand to adhere to Flatland prerequisites but also encodes the instance for clingo. The ASP encoding has to generate action predicates which communicate agent's steps to Flatland.  
+Murphy has built a toolkit to integrate answer set programming solutions in the Flatland framework \cite{Murphy2026a}. The approach solves instances with clingo \cite{gebser2018clingo} and then translates the solution to execute and visualize in Flatland. Environments are generated beforehand to adhere to Flatland prerequisites but also encodes the instance for clingo. The ASP encoding has to generate action predicates which communicate all agents' steps to Flatland.  
 
 
 \subsection{Malfunctions in Flatland}
 \label{flatland_mals}
+Flatland environments can natively include agent malfunctions. The aspect is called Stochasticity and defines how often and for how long trains will be disrupted \cite{Flatland2023}. Murphy included this aspect in the script for building new environments \cite{Murphy2026a}. The parameters in Code \ref{build_mals} define train malfunctions occurring in a new environment. The given \verb|malfunction_rate| sets the Poisson rate so that we can expect 10 malfunctions over 30 time steps.
+
+\begin{lstlisting}[style=mystyle, language=Python, caption={Generate train malfunctions in build.py.}, label={build_mals}]
+	
+	malfunction_rate=10/30
+	min_duration=2
+	max_duration=6
+	
+\end{lstlisting}
+
+Murphy's interface between Clingo and Flatland allows to define separate encodings \cite{Murphy2026a}. The first encoding derives the original schedule for all agents. The secondary encoding then solves the rescheduling after every train malfunction.
+Gilkra2025 have introduced a feature for forwarding information from the scheduling encoding to be reused in the secondary encoding \cite{gilkra2025}. They have been able reuse calculated plans from the scheduling step and thus reduce computing power and time during rescheduling.
+
 \begin{itemize}
-	\item create environments and trains with malfunctions
-	\item gilkra2025a dealt with train malfunctions (secondary encoding)
 	\item waldow2025
 \end{itemize}
 
@@ -233,6 +170,7 @@ Track malfunctions are a common real world issue in railway systems. It negative
 
 \section{Our Code}
 Building on existing work about malfunctioning trains, we implement track malfunctions to simulate realistic scheduling challenges (see Sections \ref{flatland_mals} and \ref{trkmals}). We base our approach on previous work by gilkra and want to build a similar structure for dealing with interruptions in the original schedule. Flatland doesn't natively include track malfunctions. Alternatively, we have included the generation of malfunctions in the main solving pipeline (see Section \ref{solve}). By reusing plans for trains from the original schedule,  we aimed to improve computation time during rescheduling through a secondary encoding (see Section \ref{encoding_2}).
+
 \subsection{Python Part}
 \subsubsection{Track Malfunction Implementation}
 
@@ -289,6 +227,7 @@ The malfunction is logged in a CSV file with the following parameters:
 \begin{verbatim}
 timestep;cell;duration
 \end{verbatim}
+
 
 \subsubsection{How is the malfunction depicted?}
 

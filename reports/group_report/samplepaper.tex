@@ -178,7 +178,7 @@ Building on existing work about malfunctioning trains, we implement track malfun
 
 The base encoding is Clingo code that solves a Flatland environment and schedules agents. It sets up the environment, generates sequential and valid positions for agents and then translates the positions into action atoms for Flatland (see Figure \ref{overview_primary}). 
 
-\subsubsection{Setting-up the environment}
+\subsubsection{Setting-up the environment} \label{setup_base}
 The environment specifications are defined for Clingo during environment creation with \verb|build.py|. It consists of a global time limit, information about the trains including agent ID, start, end and speed, and the cells with their given track type.
 
 Our Base Encoding includes rules and additional information to represent the environment. First, it imports a fact file (\verb|connections_nswe.lp|) with additional world information applicable to all Flatland environments. It defines how track types translate to the directions north, south, west and east. For instance, the fact \verb|connection(4608, (s,w))| is track type 4608, a curve that connects south and west. Furthermore, it contains definitions for directions and turns, a move in a certain direction in terms of movement on the X- and Y-axis, relations between directions (e.g. west is the inverse of east) and which track types allow a choice in direction. The fact file has been taken from Murphy \cite{Murphy2026a} in big parts and adjusted by us. Then, the Base Encoding creates the grid of adjacent cells and which of them is reachable by an agent.
@@ -233,7 +233,7 @@ The \texttt{duration} specifies the number of timesteps for which the track malf
 
 Track malfunctions can either be created randomly or predefined by the user. The variable \texttt{predefined\_malfunction} is used to store malfunctions that the user wants to enforce on the environment. If the variable is empty, there is a 1\% chance of a malfunction occurring at every timestep (this probability can be adjusted). In the current setup, only one malfunction can occur per timestep. \textbf{(Improvement idea)}
 
-\subsubsection{How is a malfunction implemented in Clingo?}
+\subsubsection{How is a malfunction implemented in Clingo?}\label{fwd_info_2_clingo}
 
 When a malfunction is triggered in Python, multiple atoms and rules are generated and forwarded to the program that calculates the rescheduling.
 
@@ -266,6 +266,19 @@ Similar to a train malfunction, a track malfunction is depicted as a red \textbf
 
 
 \subsection{Secondary Encoding} \label{encoding_2}
+The secondary encoding reschedules the environment after a track malfunction. Our goal was to reduce computational cost by avoiding recalculation of the environment and agents. Our approach, similar to Gilkra2025 \cite{gilkra2025}, reuses information and train schedules from the original plan unless the track malfunction interferes with an agent. 
+
+\verb|secondary_encoding.lp| has key similarities to the base encoding, such as the use of the general environment facts and set-up defined in \verb|connections_nswe.lp| and \verb|trainjacent| atoms (see Section \ref{setup_base}), handling train movement via \verb|position| and \verb|action|, single train and train coordination constraints. Additional information that is passed from the initial solution model to the secondary encoding are listed in Section \ref{fwd_info_2_clingo}. Thus, the rescheduling has access to basic Flatland information (\verb|connections_nswe.lp|), details of the track malfunction (\verb|track_malfunction|), the history of agents in the current environment up until and including the time of the track malfunction (\verb|action| and \verb|position| constraints, \verb|current_position|) and how the initial plan intended to route the trains (\verb|planned_action| and \verb|planned_position|).
+
+To be added here:
+\begin{itemize}
+	\item how 2ndary enc handles past
+	\item heuristic
+\end{itemize}
+
+
+There are three scenarios our secondary encoding handles: a) the track malfunction doesn't interfere with the planned routes of agents, b) one train is affected by the track malfunction and c) multiple trains are affected by the track malfunction.
+
 \subsubsection{No consequence}
 \subsubsection{Simple Consequence (no collision)}
 \subsubsection{Complex Consequence (collision/ multi-agent rescheduling)}

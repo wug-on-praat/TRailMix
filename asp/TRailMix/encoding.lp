@@ -71,14 +71,9 @@ action(train(ID), move_forward, T) :- not finish(ID, T), position(ID, (_,_), T, 
 :- cell(P, _), time(T), 2 { position(ID, P, T, _) : train(ID) }.
 
 %% OBJECTIVES
-% Finish as many trains as possible 
-%#maximize { 1@4, ID : finish(ID, T) }.	% maybe not needed
 
 % Finish as early as possible
-#minimize { 1@3, ID, T : action(train(ID), _, T) }.
-
-% Prefer waiting over moving
-%#maximize { 1@2, ID, T : action(train(ID), wait, T) }.		% maybe not needed
+#minimize { 1@2, ID, T : action(train(ID), _, T) }.
 
 % Prefer fewer distinct waiting episodes
 % prefer wait, wait, go over go, wait, go wait
@@ -86,7 +81,4 @@ wait_start(ID, T) :- action(train(ID), wait, T), action(train(ID), A, T-1), A !=
 #minimize { 1@1, ID, T : wait_start(ID, T) }.
 
 #show finish/2.
-%#show position/4.
-%#show action/3.
-%#show trainjacent/4.
-%#show adjacent/3.
+

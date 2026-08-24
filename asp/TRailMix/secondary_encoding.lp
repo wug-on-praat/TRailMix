@@ -1,54 +1,63 @@
 % secondary encoding: make use of previously calculated plan to adjust to malfunction
 #include "connections_nswe.lp". % includes track types and transition definitions
 
+%% Environment Set-up
+% future time steps
+time(T_mal+1..T):- track_malfunction((_,_), _, T_mal), global(T).
+
+%% Past Time Steps
+
 % Create actions before malfunction
 % Rely on past constraint rules we get from the malfunction
 past_time(0..T):- track_malfunction((_,_), _, T).
 
-time(T_mal+1..T):- track_malfunction((_,_), _, T_mal), global(T).
+% translates current_position into position 
+position(ID, P, T, D) :- current_position(ID, P, T, D).
 
-possible_action(move_forward).
-possible_action(wait).
-possible_action(move_left).
-possible_action(move_right).
+% translate action constraints (from base encoding) into action atoms
+{action(train(ID), Act, T)} :- train(ID), possible_action(Act), past_time(T).
 
-% Initialize trains that didn't start before the malfunction occured
+% only one action per train an time step allowed
+:- past_time(T), train(ID), {action(train(ID), ACT, T)} > 1.
+
+
+%% Unstarted Trains
+% Initialize trains that didn't start before the malfunction occurred
 position(ID, P, T, D) :- train(ID), start(ID, P, T, D), time(T), not current_position(ID, _, _, _).
 position(ID, P, T+1, D) :- train(ID), start(ID, P, T, D), time(T), not current_position(ID, _, _, _).
 action(train(ID), move_forward, T) :- start(ID, (_,_), T, _), not current_position(ID, _, _, _).
 action(train(ID), wait, T) :- start(ID, (_,_), T1, _), time(T), T_mal < T < T1, track_malfunction((_, _), _, T_mal), not current_position(ID, _, _, _).
 
-position(ID, P, T, D) :- current_position(ID, P, T, D).
 
+%% Train Replanning Behaviour
+% Decide if a train needs replanning or keeps its original schedule
+
+% Consequence: train is affected by a track malfunction and has to be recalculated
+consequence(train(ID), P, T) :- planned_position(ID, P, T, _), track_malfunction(P, Dur_mal, T_mal), Dur_mal + T_mal >= T.
 
 % planned is a train that is not affected by the malfunction and we don't want to reroute it
 {planned(ID)}:- train(ID), not consequence(train(ID), _, _).
 % Prioritize planned trains when solving
 #heuristic planned(ID): train(ID). [100, true]
 
-% For actions until the malfunction happened
-{action(train(ID), Act, T)} :- train(ID), possible_action(Act), past_time(T).
 
-:- past_time(T), train(ID), {action(train(ID), ACT, T)} > 1.
-
-% Create actions after malfunction
-% Consequence denotes if trains ride over a track malfunction
-consequence(train(ID), P, T) :- planned_position(ID, P, T, _), track_malfunction(P, Dur_mal, T_mal), Dur_mal + T_mal >= T.
-
+%% No Consequences
 % For trains which do not have a consequence (if train is planned, copy to action)
 action(train(ID), Act, T+T_mal+1) :- planned(ID), planned_action(train(ID), Act, T), track_malfunction((_, _), _, T_mal), not consequence(train(ID), (_, _), _).
 
 % Create positions from planned_position (if train is planned, copy to position)
 position(ID, P, T, D) :- planned(ID), planned_position(ID, P, T, D), not consequence(train(ID), (_, _), _).
 
+
+%% Consquence (not all trains are planned)
+
 % signifiers whether train has to be recalculated
-% if we have a unplanned train, we have to reroute
-calculate(ID) :- train(ID), not planned(ID).
 % if we a consequence in a train, we have to reroute
 calculate(ID) :- consequence(train(ID), _, _).
+% if calculated train collides with planned train, we have to reroute planned train
+calculate(ID) :- train(ID), not planned(ID).
 
-% Next step: if there is a consequence, reschedule only these trains
-% There is at least one consequence
+%% Base Encoding (only for rescheduled agents)
 % TODO: optional add adjacent, trainjacent as facts from initial encoding.
 adjacent((X,Y), D, (X',Y')) :-  cell((X,Y), _), cell((X', Y'), _), move(D, DX, DY), X'=X+DX, Y'=Y+DY, calculate(_).
 
@@ -95,18 +104,12 @@ action(train(ID), wait, T) :- position(ID, P, T, _),  position(ID, P, T+1, _), n
 
 %% OBJECTIVES
 
-% Finish as many trains as possible 
-%#maximize { 1@5, ID : finish(ID, T) }.	% maybe not needed
-
 % we want as many OG train plans as possible
-#maximize { 1@4, ID : planned(ID)}.
+#maximize { 1@3, ID : planned(ID)}.
 
 % Finish as early as possible
 % Using action instead of finish(ID, T) decreased running time from 180 seconds to 2.2 seconds.
-#minimize { 1@3, ID, T : action(train(ID), _, T) }.
-
-% Prefer waiting over moving
-%#maximize { 1@2, ID, T : action(train(ID), wait, T) }.		% maybe not needed
+#minimize { 1@2, ID, T : action(train(ID), _, T) }.
 
 % Prefer fewer distinct waiting episodes
 % prefer wait, wait, go over go, wait, go wait
@@ -114,9 +117,7 @@ wait_start(ID, T) :- action(train(ID), wait, T), action(train(ID), A, T-1), A !=
 #minimize { 1@1, ID, T : wait_start(ID, T) }.
 
 
-%#show action/3.
-%#show planned_position/4.
-%#show position/4.
 #show consequence/3.
 #show planned/1.
 #show calculate/1.
+

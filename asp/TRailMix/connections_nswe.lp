@@ -90,4 +90,9 @@ move_left(e,n).		move_right(e,s).
 move_left(s,e).		move_right(s,w).
 move_left(w,s).		move_right(w,n).
 
+% possible actions for past actions in secondary encoding
+possible_action(move_forward).
+possible_action(wait).
+possible_action(move_left).
+possible_action(move_right).
 

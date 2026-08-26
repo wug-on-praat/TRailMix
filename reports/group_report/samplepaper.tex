@@ -155,12 +155,12 @@ Flatland environments can natively include agent malfunctions. The aspect is cal
 	
 \end{lstlisting}
 
-Murphy's interface between Clingo and Flatland allows to define separate encodings \cite{Murphy2026a}. The first encoding derives the original schedule for all agents. The secondary encoding then solves the rescheduling after every train malfunction.
-Gilkra2025 have introduced a feature for forwarding information from the scheduling encoding to be reused in the secondary encoding \cite{gilkra2025}. They have been able reuse calculated plans from the scheduling step and thus reduce computing power and time during rescheduling.
+Murphy's interface between Clingo and Flatland allows to define separate encodings \cite{Murphy2026a}. The first encoding derives the original schedule for all agents. The secondary encoding then solves the rescheduling after every train malfunction. It includes a feature for forwarding information from the scheduling encoding to be reused in the secondary encoding \cite{Murphy2026a} \cite{gilkra2025a}. 
 
-\begin{itemize}
-	\item waldow2025
-\end{itemize}
+Gilkra2025a have used these features to benchmark different attempts for secondary encodings after train malfunctions \cite{gilkra2025a}. They have been able reuse calculated plans from the scheduling step and thus reduce computing time during rescheduling.
+
+Waldow2025 approaches train malfunctions by identifying conflict points, cells where two agents can collide due to a train malfunction \cite{waldow2025}. Deltas then define the distance of an agent to such a conflict point and help deduce whether a given train malfunction can be "waited out" (triviality) or if multiple agents have to wait. He calls replanning by solving the environment anew with the same base encoding "Redo Planning".
+
 
 \subsection{Track Malfunctions}
 \label{trkmals}

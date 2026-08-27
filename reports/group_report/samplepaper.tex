@@ -235,7 +235,7 @@ Track malfunctions can either be created randomly or predefined by the user. The
 
 \subsubsection{How is a malfunction implemented in Clingo?}\label{fwd_info_2_clingo}
 
-When a malfunction is triggered in Python, multiple atoms and rules are generated and forwarded to the program that calculates the rescheduling.
+When a malfunction is triggered in Python, multiple atoms and rules are generated and forwarded to the program that calculates the rescheduling (secondary encoding - see Section \ref{encoding_2}).
 
 \begin{itemize}
     \item \textbf{\texttt{action} constraint rules} -- To preserve the actions taken up to this point, a constraint rule is generated for each action, ensuring that all past actions must be present in the output of the rescheduling.
@@ -266,20 +266,23 @@ Similar to a train malfunction, a track malfunction is depicted as a red \textbf
 
 
 \subsection{Secondary Encoding} \label{encoding_2}
-The secondary encoding reschedules the environment after a track malfunction. Our goal was to reduce computational cost by avoiding recalculation of the environment and agents. Our approach, similar to Gilkra2025 \cite{gilkra2025}, reuses information and train schedules from the original plan unless the track malfunction interferes with an agent. 
+The secondary encoding reschedules the environment after a track malfunction. It has Our goal was to reduce computational cost by avoiding recalculation of the environment and agents. Our approach, similar to Gilkra2025 \cite{gilkra2025}, reuses information and train schedules from the original plan unless the track malfunction interferes with an agent. 
 
-\verb|secondary_encoding.lp| has key similarities to the base encoding, such as the use of the general environment facts and set-up defined in \verb|connections_nswe.lp| and \verb|trainjacent| atoms (see Section \ref{setup_base}), handling train movement via \verb|position| and \verb|action|, single train and train coordination constraints. Additional information that is passed from the initial solution model to the secondary encoding are listed in Section \ref{fwd_info_2_clingo}. Thus, the rescheduling has access to basic Flatland information (\verb|connections_nswe.lp|), details of the track malfunction (\verb|track_malfunction|), the history of agents in the current environment up until and including the time of the track malfunction (\verb|action| and \verb|position| constraints, \verb|current_position|) and how the initial plan intended to route the trains (\verb|planned_action| and \verb|planned_position|).
-
-To be added here:
+\verb|secondary_encoding.lp| reuses ideas for solving from the base encoding, such as the general environment facts \verb|connections_nswe.lp| and \verb|trainjacent| atoms for finding valid movements (see Section \ref{setup_base}). Additionally, information is passed from the original schedule (see Section \ref{fwd_info_2_clingo}). Thus, the secondary encoding has access to 
 \begin{itemize}
-	\item how 2ndary enc handles past
-	\item heuristic
+	\item basic Flatland information (\verb|connections_nswe.lp|)
+	\item details of the track malfunction (\verb|track_malfunction\3|)
+	\item agent history (\verb|action| and \verb|position| constraints, \verb|current_position\4|)
+	\item initial plan for agents (\verb|planned_action\3|, \verb|planned_position\4|)
 \end{itemize}
 
 
-There are three scenarios our secondary encoding handles: a) the track malfunction doesn't interfere with the planned routes of agents, b) one train is affected by the track malfunction and c) multiple trains are affected by the track malfunction.
+First, the program sets up the required environment with \verb|connections_nswe.lp| and creates two time counters. \verb|time(T)| counts time from one step after the track malfunction. \verb|past_time(T)| counts time up until and including the step of the track malfunction. This distinction is required to restore actions up until the malfunction time. These action atoms are necessary for Flatland to depict the solution correctly.
 
-\subsubsection{No consequence}
+If a track malfunction triggers before all trains of the environment have been initialized in their starting position, they have to be positioned during rescheduling. Then the replanning of trains starts. There are three scenarios our secondary encoding handles: a) the track malfunction doesn't interfere with the planned routes of agents (no consequence), b) one train is affected by the track malfunction (simple consequence) and c) multiple trains are affected by the track malfunction (complex consequence).
+
+\subsubsection{No Consequence}
+
 \subsubsection{Simple Consequence (no collision)}
 \subsubsection{Complex Consequence (collision/ multi-agent rescheduling)}
 \subsubsection{create accidents}
@@ -395,7 +398,7 @@ We compared the use of the secondary encoding with rescheduling the entire envir
 \label{encodings}
 \end{table}
 
-
+\section{Discussion}
 
 
 %

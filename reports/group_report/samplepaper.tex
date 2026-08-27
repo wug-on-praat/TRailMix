@@ -13,6 +13,9 @@
 % Used for displaying a sample figure. If possible, figure files should
 % be included in EPS format.
 
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric}
+
 \usepackage{hyperref}
 \usepackage{subcaption}
 \usepackage{wrapfig}
@@ -288,7 +291,216 @@ If a track malfunction triggers before all trains of the environment have been i
 \subsubsection{create accidents}
 
 \section{Experiments}
-\subsection{with and without heuristic}
+\subsection{Rescheduling Methods}
+
+We assume that most of the non-solving time is used to ground the rules.
+The objective of each method is described below.
+
+\subsection{Difference in Output of Reschedule Malfunction}
+
+The output for each method when rescheduling after a malfunction will not
+necessarily be the same. The base encoding and the secondary encoding with
+time prioritization will output the optimal solution, meaning that the trains
+will spend the least possible amount of time on the network overall.
+
+However, the secondary encoding with and without heuristics prioritizes the
+preservation of the planned schedule. This means that even if delaying a
+non-consequent train would improve the overall travel time, only the base
+encoding and the secondary encoding with time prioritization will derive this
+solution. The other two methods will not be able to choose this solution.
+
+\subsection{Grounding Time}
+
+The grounding time is similar for all methods and, even for larger
+environments, usually does not account for more than 10\% of the total
+running time.
+
+When the malfunction occurred at the beginning of the schedule, the base
+encoding was 30\% faster than the secondary encoding. However, when the
+malfunction occurred in the middle of the schedule, the secondary encoding
+was 30\% faster.
+
+This can be explained by the fact that, in the base encoding, the positions
+and actions for all time steps must be grounded using complex logic. In the
+secondary encoding, however, the past and current positions and actions are
+already set and do not need to be grounded using the complex rules. Only
+future positions and actions need to go through the complex logic.
+
+Therefore, while the logic in the secondary encoding is more complex for
+future time steps, some malfunctions can still be grounded faster if the
+malfunction occurs late enough in the schedule.
+
+\subsection{Solving Time}
+
+Looking at the solving times, for smaller environments, the running time is
+low for all methods. For larger environments, the secondary encoding with
+heuristics is always preferable. When the malfunction has no consequences,
+solving with the secondary encoding almost always takes less than one
+second, even when there is a consequence but no future collision.
+
+For malfunctions that cause a collision, the running times were closer
+between the methods, but the secondary encoding still ran 75\% faster than
+the base encoding.
+
+Surprisingly, using the base encoding is almost always preferable to using
+the secondary encoding without the heuristic flag. We assume that since the
+secondary encoding has more rules and options, it is harder to solve.
+
+Comparing the base encoding and the secondary encoding with time
+prioritization, the base encoding is faster when there is no consequence,
+whereas the secondary encoding with time prioritization is faster when there
+is a consequence.
+
+\subsection{Why is Adding the Heuristic Flag Important?}
+
+In the beginning, we implemented the secondary encoding without the heuristic
+addition. We were perplexed by the fact that running the environment with
+the secondary encoding took more time than with the base encoding.
+
+For us, it was obvious that since most malfunctions either do not affect the
+trains or affect only one or two trains, most trains should be able to simply
+use the output from the base encoding. However, Clingo still needed to
+re-prove that the solution was optimal.
+
+Clingo started with an initial solution that recalculated all the trains and,
+after many iterations, eventually reached the original planned solution.
+
+After adding the heuristic flag, Clingo found that most trains should use the
+original planned solution already in the first iteration.
+
+\subsection{When to Use Each Method?}
+
+There are two possible goals that a user might want when rescheduling after
+a malfunction:
+
+\begin{itemize}
+    \item Change the least amount of trains possible, i.e., preserve the
+    previous schedule as much as possible.
+    \item Obtain the most optimized solution.
+\end{itemize}
+
+Both goals should be achieved as quickly as possible.
+
+For the purpose of comparing the methods, we assume that the output of the
+initial schedule using the base encoding is already saved. This assumption
+reflects the real-world scenario in which the schedule is set in advance and
+the malfunction occurs later.
+
+For obtaining the most optimized solution, the base encoding and the
+secondary encoding with time prioritization are the preferred methods. Conversely, 
+the secondary encoding with and without heuristics are used to produce 
+an answer with the least amount of changed trains.
+
+For smaller environments, defined as a height below 20, a
+width below 20, and fewer than 3 trains, all methods are very fast, and no
+malfunction requires more than 5 seconds to find a solution.
+
+For larger environments, however, the differences between the methods become
+significant. If the user wants to obtain the least amount of changed trains
+possible, they should choose the secondary encoding with heuristics, as it is
+consistently the fastest method, often by a large margin.
+
+If the user wants the most optimized solution, the preferred method depends
+on whether there is a consequence. If there is a consequence, the secondary
+encoding with time prioritization is the better choice in most cases.
+Otherwise, the base encoding is faster.
+
+Combining all the conclusions derived above, we can create a flow that
+describes how to handle a malfunction. First, the secondary encoding is run
+to derive Solution A. If there is no consequence, Solution A is both the most
+optimized solution and the solution with the least amount of changed trains.
+If there is a consequence, the appropriate solution depends on the user's
+goal. If the goal is to minimize the number of changed trains, Solution A can
+be used directly. If the goal is to obtain the most optimized solution, the
+secondary encoding with time optimization is run to derive Solution B.
+Most malfunctions will not have a consequence, so it is better to run the
+secondary encoding first and determine whether rescheduling is necessary.
+The secondary encoding is also very fast in all cases, so an answer will be
+available before the other methods.
+
+Using the secondary encoding with time optimization only when a consequence
+is detected was faster than the base encoding in all tested cases.
+
+The following graph depicts which method should be used based on the desired
+output:
+\begin{figure}[ht]
+    \centering
+    \begin{tikzpicture}[
+        node distance=1.2cm,
+        every node/.style={font=\small},
+        process/.style={
+            rectangle,
+            rounded corners,
+            draw,
+            align=center,
+            minimum width=4.2cm,
+            minimum height=0.9cm
+        },
+        decision/.style={
+            diamond,
+            draw,
+            align=center,
+            aspect=2,
+            inner sep=2pt
+        },
+        arrow/.style={
+            -{Stealth},
+            thick
+        }
+    ]
+
+    % Start
+    \node[process] (start)
+        {Run secondary encoding\\
+         and derive solution A};
+
+    % First decision
+    \node[decision, below=of start] (consequence)
+        {Consequence?};
+
+    % No consequence branch
+    \node[process, below=of consequence, xshift=-3.5cm] (no)
+        {Solution A is the most\\
+         optimized and has the least\\
+		 amount of changed trains};
+
+    % Consequence branch
+    \node[decision, below=of consequence, xshift=3.5cm] (goal)
+        {User's goal?};
+
+    % Least changed trains
+    \node[process, below=of goal, xshift=-3.2cm] (least)
+        {Solution A already\\
+         minimizes changed trains};
+
+    % Most optimized
+    \node[process, below=of goal, xshift=3.2cm] (optimized)
+        {Run secondary encoding with\\
+         time optimization and\\
+		 derive solution B};
+
+    % Arrows from start
+    \draw[arrow] (start) -- (consequence);
+
+    % Consequence branches
+    \draw[arrow] (consequence)
+        -- node[above left] {No} (no);
+
+    \draw[arrow] (consequence)
+        -- node[above right] {Yes} (goal);
+
+    % User goal branches
+    \draw[arrow] (goal)
+        -- node[above left] {Least changes} (least);
+
+    \draw[arrow] (goal)
+        -- node[above right] {Most optimized} (optimized);
+
+    \end{tikzpicture}
+    \caption{Decision process for selecting a rescheduling method.}
+    \label{fig:rescheduling-method-selection}
+\end{figure}
+
 \subsection{compare grounding for two versions of trains can't be in same cell at same time rule}
 
 \section{Log / Timeline}

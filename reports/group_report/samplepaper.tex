@@ -28,7 +28,7 @@
 
 \usepackage{listings}
 \lstdefinelanguage{Clingo}{
-	morekeywords=[1]{position, time, end, calculate, finish},
+	morekeywords=[1]{position, time, end, calculate, finish, consequence, planned_position, track_malfunction, planned, train},
 	%morekeywords=[2]{ID,POS,T,T',D,X,Y},
 	sensitive=true,
 	morecomment=[l]{\%},
@@ -46,7 +46,7 @@
 	numberstyle=\tiny\color{codegray},
 	stringstyle=\color{codepurple},
 	basicstyle=\footnotesize,
-	breakatwhitespace=false,         
+	breakatwhitespace=true,         
 	breaklines=true,                 
 	captionpos=b,                    
 	keepspaces=true,                 
@@ -59,6 +59,7 @@
 }
 % set the name for code blocks to be displayed
 \renewcommand{\lstlistingname}{Code}
+
 
 %\lstset{style=mystyle}
 % If you use the hyperref package, please uncomment the following two lines
@@ -177,7 +178,7 @@ Track malfunctions are a common real world issue in railway systems. It negative
 Building on existing work about malfunctioning trains, we implement track malfunctions to simulate realistic scheduling challenges (see Sections \ref{flatland_mals} and \ref{trkmals}). We base our approach on previous work by gilkra and want to build a similar structure for dealing with interruptions in the original schedule. Flatland doesn't natively include track malfunctions. Alternatively, we have included the generation of malfunctions in the main solving pipeline (see Section \ref{solve}). By reusing plans for trains from the original schedule,  we aimed to improve computation time during rescheduling through a secondary encoding (see Section \ref{encoding_2}).
 
 
-\subsection{Base Encoding}
+\subsection{Base Encoding} \label{encoding_1}
 
 The base encoding is Clingo code that solves a Flatland environment and schedules agents. It sets up the environment, generates sequential and valid positions for agents and then translates the positions into action atoms for Flatland (see Figure \ref{overview_primary}). 
 
@@ -269,7 +270,7 @@ Similar to a train malfunction, a track malfunction is depicted as a red \textbf
 
 
 \subsection{Secondary Encoding} \label{encoding_2}
-The secondary encoding reschedules the environment after a track malfunction. It has Our goal was to reduce computational cost by avoiding recalculation of the environment and agents. Our approach, similar to Gilkra2025 \cite{gilkra2025}, reuses information and train schedules from the original plan unless the track malfunction interferes with an agent. 
+The secondary encoding reschedules the environment after a track malfunction. Our goal was to reduce computational cost by avoiding recalculation of the environment and agents. Our approach, similar to Gilkra2025 \cite{gilkra2025}, reuses information and train schedules from the original plan unless the track malfunction interferes with an agent. 
 
 \verb|secondary_encoding.lp| reuses ideas for solving from the base encoding, such as the general environment facts \verb|connections_nswe.lp| and \verb|trainjacent| atoms for finding valid movements (see Section \ref{setup_base}). Additionally, information is passed from the original schedule (see Section \ref{fwd_info_2_clingo}). Thus, the secondary encoding has access to 
 \begin{itemize}
@@ -282,22 +283,87 @@ The secondary encoding reschedules the environment after a track malfunction. It
 
 First, the program sets up the required environment with \verb|connections_nswe.lp| and creates two time counters. \verb|time(T)| counts time from one step after the track malfunction. \verb|past_time(T)| counts time up until and including the step of the track malfunction. This distinction is required to restore actions up until the malfunction time. These action atoms are necessary for Flatland to depict the solution correctly.
 
-If a track malfunction triggers before all trains of the environment have been initialized in their starting position, they have to be positioned during rescheduling. Then the replanning of trains starts. There are three scenarios our secondary encoding handles: a) the track malfunction doesn't interfere with the planned routes of agents (no consequence), b) one train is affected by the track malfunction (simple consequence) and c) multiple trains are affected by the track malfunction (complex consequence).
+If a track malfunction triggers before all trains of the environment have been initialized in their starting position, they have to be positioned during rescheduling. Then the replanning of trains starts. To identify whether an agent is affected by a track malfunction, it raises a \verb|consequence\3| (see Code \ref{consequence}). That means the train is planned to be on the malfunctioning track, it cannot continue on its original path and must adjust its behaviour. There are three scenarios our secondary encoding handles: a) the track malfunction doesn't interfere with the planned routes of agents (no consequence), b) one train is affected by the track malfunction (simple consequence) and c) multiple trains are affected by the track malfunction (complex consequence).
+
+
+\begin{lstlisting}[style=mystyle, language=Clingo, caption={Definition of consequence: if a train is attempting to go into a malfunctioning cell it raises a consequence.}, label={consequence}]
+	
+	% Consequence: train is affected by a track malfunction and has to be recalculated
+	consequence(train(ID), P, T) :- planned_position(ID, P, T, _), track_malfunction(P, Dur_mal, T_mal), Dur_mal + T_mal >= T.
+
+	% planned is a train that is not affected by the malfunction and we don't want to reroute it
+	{planned(ID)}:- train(ID), not consequence(train(ID), _, _).
+	
+\end{lstlisting}
+
 
 \subsubsection{No Consequence}
+If no agent is planned to visit the actively malfunctioning cell the trains can continue their paths as calculated in the base encoding. All agents are marked as \verb|planned\1|. Their planned actions and positions are translated into \verb|action\3| and \verb|position\4| atoms. 
 
-\subsubsection{Simple Consequence (no collision)}
-\subsubsection{Complex Consequence (collision/ multi-agent rescheduling)}
+\subsubsection{Simple Consequence}\label{simple_consequence}
+In a simple consequence, only one train is scheduled to pass the track malfunction (only one \verb|consequence/3| atom). The train gets marked as \verb|calculate/1|. From its current position this agents gets rescheduled. The rescheduling is done similarly to the scheduling logic in the base encoding by checking reachable cells, creating \verb|position| and \verb|action| atoms, narrowing down the solution with constraints and selecting the best model via optimization statements (see Section \ref{encoding_1}). A rescheduled train can "wait out" the malfunction or be rerouted via other available tracks.
+
+\subsubsection{Complex Consequence}
+A complex consequence includes multiple agents that require rescheduling (multiple \verb|conequence/3| atoms). However, it also covers the case where the adjustment of one agent's path influences another train, e.g. the rerouted or waiting train would cause a collision with an unaffected train. The trains that were planned as passing through the track malfunction are marked with \verb|consequence/3|. Those agents and the ones indirectly affected are marked as \verb|calculate/1|. The rescheduling then is done as described in Section \ref{simple_consequence}.
+
 \subsubsection{create accidents}
 
 \section{Experiments}
-\subsection{Rescheduling Methods}
+We have conducted three experiments to test the capabilities of our encodings in multiple environments. We tested the following scenarios:
+\begin{itemize}
+	\item Rescheduling: base encoding vs. secondary encoding
+	\item Secondary encoding: heuristic vs. no heuristic
+	\item Secondary encoding: Time vs. first plan prioritization
+\end{itemize}
 
-We assume that most of the non-solving time is used to ground the rules.
-The objective of each method is described below.
+Clingo reports total elapsed time and time spent on solving. For each experiment, we assume that most of the non-solving time is used to ground the rules. We base our comparisons on time differences in computing since rescheduling is a  time-sensitive interruption with only a limited window for decision making.
 
-\subsection{Difference in Output of Reschedule Malfunction}
+Experiment 1 investigates if rescheduling with the secondary encoding is indeed preferable over replanning with the base encoding. Experiment 2 compares performance of the secondary encoding with and without the heuristic prioritizing planned trains. Experiment 3 evaluates the weighting of optimization statements in the secondary encoding. 
 
+\subsection{Testing environments}
+Five testing environments of varying sizes and numbers of agents were used in each experiment (see Figure \ref{test_envs}). In each environment, we have identified tracks for the three types of track malfunctions (simple, complex, no consequence - see Section \ref{encoding_2}).
+
+% add crosses to show malfunction cells
+\begin{figure}[hbt!]
+	
+	\begin{subfigure}{.475\linewidth}
+		\includegraphics[width=\linewidth]{env_016--3_2.png}
+		\caption{20x20, 3 agents}
+		\label{MLEDdet}
+	\end{subfigure}\hfill % <-- "\hfill"
+	~ % optional tilde b/t figures for readability.
+	% this solution will not work w/ empty lines b/t subfigures
+	\begin{subfigure}{.475\linewidth}
+		\includegraphics[width=\linewidth]{env_007--6_6.png}
+		\caption{50x50, 6 agents}
+		\label{energydetPSK}
+	\end{subfigure}
+	
+	\medskip
+	\centering
+	\begin{subfigure}{.475\linewidth}
+		\includegraphics[width=\linewidth]{env_028--2_2.png}
+		\caption{20x15, 2 agents}
+		\label{dense}
+	\end{subfigure}
+	
+	\par \medskip % create some *vertical* separation between the graphs
+	\begin{subfigure}{.475\linewidth}
+		\includegraphics[width=\linewidth]{env_033--5_4.png}
+		\caption{25x40, 5 agents}
+		\label{velcomp}
+	\end{subfigure}\hfill % <-- "\hfill"
+	% or just a comment and no tilde
+	\begin{subfigure}{.475\linewidth}
+		\includegraphics[width=\linewidth]{env_035--10_8.png}
+		\caption{25x40, 10 agents}
+		\label{velqual}
+	\end{subfigure}
+	\caption{These are the testing environments.}
+	\label{test_envs}
+\end{figure}
+
+\subsection{Predictions}
 The output for each method when rescheduling after a malfunction will not
 necessarily be the same. The base encoding and the secondary encoding with
 time prioritization will output the optimal solution, meaning that the trains
@@ -309,6 +375,7 @@ non-consequent train would improve the overall travel time, only the base
 encoding and the secondary encoding with time prioritization will derive this
 solution. The other two methods will not be able to choose this solution.
 
+\section{Results}
 \subsection{Grounding Time}
 
 The grounding time is similar for all methods and, even for larger
@@ -368,15 +435,40 @@ after many iterations, eventually reached the original planned solution.
 After adding the heuristic flag, Clingo found that most trains should use the
 original planned solution already in the first iteration.
 
+
+\subsection{compare grounding for two versions of trains can't be in same cell at same time rule}
+
+\section{Log / Timeline}
+
+\begin{itemize}
+	\item merge encodings (May 29)
+	\item literature review zank2026, gilkra2025a, waldow2025a (June 6)
+	\item fix visualization issue aka add wait before start time (June 9)
+	\item "crack the egg" pkl-file (June 17)
+	\item understand solve.py (June 18)
+	\item create pipeline for track malfunction in parallel to train malfunction TrackMalManager etc. (June 22)
+	\item pick relevant track for malfunction randomly (July 2)
+	\item create visualization for track malfunction ()
+	\item create track malfunction log (July 13)
+	\item start secondary encoding (no consequence or rescheduling necessary) (July 14)
+	\item expand secondary encoding: handle rescheduling of directly affected train (August 2)
+	\item finish secondary encoding: handle collisions due to rescheduling (August 3)
+	\item improve encodings: minimize grounding, remove unnecessary rules (August 7)
+	\item add heuristic, code cleaning and remove can\_dir (August 10)
+	\item separate predefined and random track malfunctions, code clean-up (August 13)
+\end{itemize}
+
+\section{Discussion}
+
 \subsection{When to Use Each Method?}
 
 There are two possible goals that a user might want when rescheduling after
 a malfunction:
 
 \begin{itemize}
-    \item Change the least amount of trains possible, i.e., preserve the
-    previous schedule as much as possible.
-    \item Obtain the most optimized solution.
+	\item Change the least amount of trains possible, i.e., preserve the
+	previous schedule as much as possible.
+	\item Obtain the most optimized solution.
 \end{itemize}
 
 Both goals should be achieved as quickly as possible.
@@ -423,105 +515,83 @@ is detected was faster than the base encoding in all tested cases.
 
 The following graph depicts which method should be used based on the desired
 output:
-\begin{figure}[ht]
-    \centering
-    \begin{tikzpicture}[
-        node distance=1.2cm,
-        every node/.style={font=\small},
-        process/.style={
-            rectangle,
-            rounded corners,
-            draw,
-            align=center,
-            minimum width=4.2cm,
-            minimum height=0.9cm
-        },
-        decision/.style={
-            diamond,
-            draw,
-            align=center,
-            aspect=2,
-            inner sep=2pt
-        },
-        arrow/.style={
-            -{Stealth},
-            thick
-        }
-    ]
-
-    % Start
-    \node[process] (start)
-        {Run secondary encoding\\
-         and derive solution A};
-
-    % First decision
-    \node[decision, below=of start] (consequence)
-        {Consequence?};
-
-    % No consequence branch
-    \node[process, below=of consequence, xshift=-3.5cm] (no)
-        {Solution A is the most\\
-         optimized and has the least\\
-		 amount of changed trains};
-
-    % Consequence branch
-    \node[decision, below=of consequence, xshift=3.5cm] (goal)
-        {User's goal?};
-
-    % Least changed trains
-    \node[process, below=of goal, xshift=-3.2cm] (least)
-        {Solution A already\\
-         minimizes changed trains};
-
-    % Most optimized
-    \node[process, below=of goal, xshift=3.2cm] (optimized)
-        {Run secondary encoding with\\
-         time optimization and\\
-		 derive solution B};
-
-    % Arrows from start
-    \draw[arrow] (start) -- (consequence);
-
-    % Consequence branches
-    \draw[arrow] (consequence)
-        -- node[above left] {No} (no);
-
-    \draw[arrow] (consequence)
-        -- node[above right] {Yes} (goal);
-
-    % User goal branches
-    \draw[arrow] (goal)
-        -- node[above left] {Least changes} (least);
-
-    \draw[arrow] (goal)
-        -- node[above right] {Most optimized} (optimized);
-
-    \end{tikzpicture}
-    \caption{Decision process for selecting a rescheduling method.}
-    \label{fig:rescheduling-method-selection}
+\begin{figure}[htb!]
+	\centering
+	\begin{tikzpicture}[
+		node distance=1.2cm,
+		every node/.style={font=\small},
+		process/.style={
+			rectangle,
+			rounded corners,
+			draw,
+			align=center,
+			minimum width=4.2cm,
+			minimum height=0.9cm
+		},
+		decision/.style={
+			diamond,
+			draw,
+			align=center,
+			aspect=2,
+			inner sep=2pt
+		},
+		arrow/.style={
+			-{Stealth},
+			thick
+		}
+		]
+		
+		% Start
+		\node[process] (start)
+		{Run secondary encoding\\
+			and derive solution A};
+		
+		% First decision
+		\node[decision, below=of start] (consequence)
+		{Consequence?};
+		
+		% No consequence branch
+		\node[process, below=of consequence, xshift=-3.5cm] (no)
+		{Solution A is the most\\
+			optimized and has the least\\
+			amount of changed trains};
+		
+		% Consequence branch
+		\node[decision, below=of consequence, xshift=3.5cm] (goal)
+		{User's goal?};
+		
+		% Least changed trains
+		\node[process, below=of goal, xshift=-3.2cm] (least)
+		{Solution A already\\
+			minimizes changed trains};
+		
+		% Most optimized
+		\node[process, below=of goal, xshift=3.2cm] (optimized)
+		{Run secondary encoding with\\
+			time optimization and\\
+			derive solution B};
+		
+		% Arrows from start
+		\draw[arrow] (start) -- (consequence);
+		
+		% Consequence branches
+		\draw[arrow] (consequence)
+		-- node[above left] {No} (no);
+		
+		\draw[arrow] (consequence)
+		-- node[above right] {Yes} (goal);
+		
+		% User goal branches
+		\draw[arrow] (goal)
+		-- node[above left] {Least changes} (least);
+		
+		\draw[arrow] (goal)
+		-- node[above right] {Most optimized} (optimized);
+		
+	\end{tikzpicture}
+	\caption{Decision process for selecting a rescheduling method.}
+	\label{fig:rescheduling-method-selection}
 \end{figure}
-
-\subsection{compare grounding for two versions of trains can't be in same cell at same time rule}
-
-\section{Log / Timeline}
-
-\begin{itemize}
-	\item merge encodings (May 29)
-	\item literature review zank2026, gilkra2025a, waldow2025a (June 6)
-	\item fix visualization issue aka add wait before start time (June 9)
-	\item "crack the egg" pkl-file (June 17)
-	\item understand solve.py (June 18)
-	\item create pipeline for track malfunction in parallel to train malfunction TrackMalManager etc. (June 22)
-	\item pick relevant track for malfunction randomly (July 2)
-	\item create visualization for track malfunction ()
-	\item create track malfunction log (July 13)
-	\item start secondary encoding (no consequence or rescheduling necessary) (July 14)
-	\item expand secondary encoding: handle rescheduling of directly affected train (August 2)
-	\item finish secondary encoding: handle collisions due to rescheduling (August 3)
-	\item improve encodings: minimize grounding, remove unnecessary rules (August 7)
-	\item add heuristic, code cleaning and remove can\_dir (August 10)
-	\item separate predefined and random track malfunctions, code clean-up (August 13)
-\end{itemize}
 
 \section{Future Work}
 \begin{itemize}
@@ -532,38 +602,9 @@ output:
 \end{itemize}
 
 \section{Experiment 1}
-We compared the use of the secondary encoding with rescheduling the entire environment anew with the base encoding. For this, we have created four testing environments of varying sizes (2 small and 2 medium environments - see Figure \ref{test_envs}). In each environment we have identified tracks for all three types of track malfunctions (simple, complex, no consequence - see Section \ref{encoding_2}). We ran each environment and malfunction in two modes. Mode 1-1 scheduled and rescheduled with the base encoding. 1-2 used the base encoding only for scheduling and the secondary encoding for rescheduling. 
+We compared the use of the secondary encoding with rescheduling the entire environment anew with the base encoding.  We ran each environment and malfunction in two modes. Mode 1-1 scheduled and rescheduled with the base encoding. 1-2 used the base encoding only for scheduling and the secondary encoding for rescheduling. 
 
-\begin{figure}[hbt!]
-	
-	\begin{subfigure}{.475\linewidth}
-		\includegraphics[width=\linewidth]{environment.png}
-		\caption{}
-		\label{MLEDdet}
-	\end{subfigure}\hfill % <-- "\hfill"
-	~ % optional tilde b/t figures for readability.
-	% this solution will not work w/ empty lines b/t subfigures
-	\begin{subfigure}{.475\linewidth}
-		\includegraphics[width=\linewidth]{environment.png}
-		\caption{}
-		\label{energydetPSK}
-	\end{subfigure}
-	
-	\medskip % create some *vertical* separation between the graphs
-	\begin{subfigure}{.475\linewidth}
-		\includegraphics[width=\linewidth]{environment.png}
-		\caption{}
-		\label{velcomp}
-	\end{subfigure}\hfill % <-- "\hfill"
-	% or just a comment and no tilde
-	\begin{subfigure}{.475\linewidth}
-		\includegraphics[width=\linewidth]{environment.png}
-		\caption{}
-		\label{velqual}
-	\end{subfigure}
-\caption{These are the testing environments.}
-\label{test_envs}
-\end{figure}
+
 
 \begin{table}[h!]
 	\centering

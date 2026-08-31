@@ -16,6 +16,10 @@
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta, positioning, shapes.geometric, decorations.pathreplacing, fit}
 
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{makecell}
+
 \usepackage{hyperref}
 \usepackage{subcaption}
 \usepackage{wrapfig}
@@ -794,6 +798,482 @@ We compared the use of the secondary encoding with rescheduling the entire envir
 \end{table}
 
 \section{Discussion}
+\section{Appendix}
+\label{sec:appendix}
+
+\setlength{\LTleft}{0pt}
+\setlength{\LTright}{0pt}
+\setlength{\tabcolsep}{4pt}
+
+\begin{longtable}{@{}
+    l
+    l
+    l
+    r
+    r
+    r
+@{}}
+
+
+\caption{Running times for different malfunction and rescheduling configurations.}
+\label{tab:rescheduling_times} \\
+
+\toprule
+\textbf{Environment} &
+\textbf{Malfunction type} &
+\textbf{Rescheduling type} &
+\makecell[r]{\textbf{$T_{\mathrm{ground}}$}} &
+\makecell[r]{\textbf{$T_{\mathrm{solve}}$}} &
+\makecell[r]{\textbf{$T_{\mathrm{res}}$}} \\
+\midrule
+\endfirsthead
+
+\multicolumn{6}{c}{%
+    \tablename\ \thetable{} -- continued from previous page%
+} \\
+\toprule
+\textbf{Environment} &
+\textbf{Malfunction type} &
+\textbf{Rescheduling type} &
+\makecell[r]{\textbf{$T_{\mathrm{ground}}$}} &
+\makecell[r]{\textbf{$T_{\mathrm{solve}}$}} &
+\makecell[r]{\textbf{$T_{\mathrm{res}}$}} \\
+\midrule
+\endhead
+
+\midrule
+\multicolumn{6}{r@{}}{\textit{Continued on next page}} \\
+\endfoot
+
+\bottomrule
+\endlastfoot
+
+% =========================================================
+% Environment 1
+% =========================================================
+
+\multicolumn{6}{@{}l@{}}{\textbf{env\_016--3\_2}} \\[1pt]
+
+& \makecell[l]{Non-consequent}
+& Base
+& 0.077 & 0.03 & 0.107 \\
+
+& &
+Secondary + heuristic
+& 0.116 & 0 & 0.116 \\
+
+& &
+Secondary + time priority
+& 0.079 & 0.02 & 0.099 \\
+
+& &
+Secondary, no heuristic
+& 0.077 & 0.02 & 0.097 \\
+
+\cmidrule(lr){2-6}
+
+& \makecell[l]{Consequent 1}
+& Base
+& 0.074 & 0.03 & 0.104 \\
+
+& &
+Secondary + heuristic
+& 0.071 & 0 & 0.071 \\
+
+& &
+Secondary + time priority
+& 0.083 & 0.01 & 0.093 \\
+
+& &
+Secondary, no heuristic
+& 0.081 & 0.01 & 0.091 \\
+
+& \makecell[l]{Consequent 2}
+& Base
+& 0.072 & 0.01 & 0.082 \\
+
+& &
+Secondary + heuristic
+& 0.084 & 0 & 0.084 \\
+
+& &
+Secondary + time priority
+& 0.058 & 0 & 0.058 \\
+
+& &
+Secondary, no heuristic
+& 0.054 & 0 & 0.054 \\
+
+\cmidrule(lr){2-6}
+
+& \makecell[l]{Consequent + collisions}
+& Base
+& 0.079 & 0.01 & 0.089 \\
+
+& &
+Secondary + heuristic
+& 0.060 & 0.01 & 0.070 \\
+
+& &
+Secondary + time priority
+& 0.056 & 0.02 & 0.076 \\
+
+& &
+Secondary, no heuristic
+& 0.065 & 0.01 & 0.075 \\
+
+\midrule
+
+% =========================================================
+% Environment 2
+% =========================================================
+
+\multicolumn{6}{@{}l@{}}{\textbf{env\_033--5\_4}} \\[1pt]
+
+& \makecell[l]{Non-consequent}
+& Base
+& 0.545 & 0.11 & 0.655 \\
+
+& &
+Secondary + heuristic
+& 0.566 & 0.01 & 0.576 \\
+
+& &
+Secondary + time priority
+& 0.653 & 0.33 & 0.983 \\
+
+& &
+Secondary, no heuristic
+& 0.692 & 4.45 & 5.142 \\
+
+\cmidrule(lr){2-6}
+
+& \makecell[l]{Consequent 1}
+& Base
+& 0.455 & 0.18 & 0.635 \\
+
+& &
+Secondary + heuristic
+& 0.541 & 0.02 & 0.561 \\
+
+& &
+Secondary + time priority
+& 0.597 & 0.21 & 0.807 \\
+
+& &
+Secondary, no heuristic
+& 0.587 & 7.31 & 7.897 \\
+
+& \makecell[l]{Consequent 2}
+& Base
+& 0.507 & 0.10 & 0.607 \\
+
+& &
+Secondary + heuristic
+& 0.359 & 0.03 & 0.389 \\
+
+& &
+Secondary + time priority
+& 0.395 & 0.19 & 0.585 \\
+
+& &
+Secondary, no heuristic
+& 0.371 & 0.05 & 0.421 \\
+
+\cmidrule(lr){2-6}
+
+& \makecell[l]{Consequent + collisions}
+& Base
+& 0.607 & 3.14 & 3.747 \\
+
+& &
+Secondary + heuristic
+& 0.467 & 0.40 & 0.867 \\
+
+& &
+Secondary + time priority
+& 0.512 & 0.62 & 1.132 \\
+
+& &
+Secondary, no heuristic
+& 0.472 & 2.25 & 2.722 \\
+
+\midrule
+
+% =========================================================
+% Environment 3
+% =========================================================
+
+\multicolumn{6}{@{}l@{}}{\textbf{env\_007--6\_6}} \\[1pt]
+
+& \makecell[l]{Non-consequent}
+& Base
+& 7.597 & 131.10 & 138.697 \\
+
+& &
+Secondary + heuristic
+& 10.564 & 0.23 & 10.794 \\
+
+& &
+Secondary + time priority
+& 10.706 & 168.56 & 179.266 \\
+
+& &
+Secondary, no heuristic
+& 11.150 & 245.22 & 256.370 \\
+
+\cmidrule(lr){2-6}
+
+& \makecell[l]{Consequent 1}
+& Base
+& 7.927 & 119.60 & 127.527 \\
+
+& &
+Secondary + heuristic
+& 9.211 & 0.73 & 9.941 \\
+
+& &
+Secondary + time priority
+& 9.466 & 78.21 & 87.676 \\
+
+& &
+Secondary, no heuristic
+& 10.102 & 195.93 & 206.032 \\
+
+& \makecell[l]{Consequent 2}
+& Base
+& 8.254 & 89.68 & 97.934 \\
+
+& &
+Secondary + heuristic
+& 9.505 & 0.74 & 10.245 \\
+
+& &
+Secondary + time priority
+& 8.516 & 58.83 & 67.346 \\
+
+& &
+Secondary, no heuristic
+& 10.437 & 80.04 & 90.477 \\
+
+\cmidrule(lr){2-6}
+
+& \makecell[l]{Consequent + collisions}
+& Base
+& 7.346 & 92.87 & 100.216 \\
+
+& &
+Secondary + heuristic
+& 5.342 & 20.51 & 25.852 \\
+
+& &
+Secondary + time priority
+& 5.776 & 65.85 & 71.626 \\
+
+& &
+Secondary, no heuristic
+& 5.322 & 51.70 & 57.022 \\
+
+\midrule
+
+% =========================================================
+% Environment 4
+% =========================================================
+
+\multicolumn{6}{@{}l@{}}{\textbf{env\_009--10\_10}} \\[1pt]
+
+& \makecell[l]{Non-consequent}
+& Base
+& 1.441 & 43.14 & 44.581 \\
+
+& &
+Secondary + heuristic
+& 1.273 & 0.03 & 1.303 \\
+
+& &
+Secondary + time priority
+& 1.357 & 8.46 & 9.817 \\
+
+& &
+Secondary, no heuristic
+& 1.312 & 82.30 & 83.612 \\
+
+\cmidrule(lr){2-6}
+
+& \makecell[l]{Consequent 1}
+& Base
+& 1.513 & 95.72 & 97.233 \\
+
+& &
+Secondary + heuristic
+& 1.550 & 0.06 & 1.610 \\
+
+& &
+Secondary + time priority
+& 1.564 & 64.74 & 66.304 \\
+
+& &
+Secondary, no heuristic
+& 1.662 & 94.84 & 96.502 \\
+
+& \makecell[l]{Consequent 2}
+& Base
+& 1.472 & 0.40 & 1.872 \\
+
+& &
+Secondary + heuristic
+& 0.479 & 0.03 & 0.509 \\
+
+& &
+Secondary + time priority
+& 0.470 & 0.27 & 0.740 \\
+
+& &
+Secondary, no heuristic
+& 0.478 & 0.41 & 0.888 \\
+
+\cmidrule(lr){2-6}
+
+& \makecell[l]{Consequent + collisions}
+& Base
+& 1.380 & 70.34 & 71.720 \\
+
+& &
+Secondary + heuristic
+& 2.077 & 0.51 & 2.587 \\
+
+& &
+Secondary + time priority
+& 1.552 & 22.53 & 24.082 \\
+
+& &
+Secondary, no heuristic
+& 1.594 & 69.77 & 71.364 \\
+
+\midrule
+
+% =========================================================
+% Environment 5
+% =========================================================
+
+\multicolumn{6}{@{}l@{}}{\textbf{env\_028--2\_2}} \\[1pt]
+
+& \makecell[l]{Non-consequent}
+& Base
+& 0.034 & 0.02 & 0.054 \\
+
+& &
+Secondary + heuristic
+& 0.071 & 0 & 0.071 \\
+
+& &
+Secondary + time priority
+& 0.040 & 0.01 & 0.050 \\
+
+& &
+Secondary, no heuristic
+& 0.042 & 0 & 0.042 \\
+
+\cmidrule(lr){2-6}
+
+& \makecell[l]{Consequent 1}
+& Base
+& 0.040 & 0 & 0.040 \\
+
+& &
+Secondary + heuristic
+& 0.032 & 0 & 0.032 \\
+
+& &
+Secondary + time priority
+& 0.031 & 0 & 0.031 \\
+
+& &
+Secondary, no heuristic
+& 0.032 & 0 & 0.032 \\
+
+\cmidrule(lr){2-6}
+
+& \makecell[l]{Consequent + collisions}
+& Base
+& 0.043 & 0.01 & 0.053 \\
+
+& &
+Secondary + heuristic
+& 0.038 & 0.01 & 0.048 \\
+
+& &
+Secondary + time priority
+& 0.035 & 0.01 & 0.045 \\
+
+& &
+Secondary, no heuristic
+& 0.037 & 0.01 & 0.047 \\
+
+\midrule
+
+% =========================================================
+% Environment 6
+% =========================================================
+
+\multicolumn{6}{@{}l@{}}{\textbf{env\_35--10\_8}} \\[1pt]
+
+& \makecell[l]{Non-consequent}
+& Base
+& 3.874 & 20.83 & 24.704 \\
+
+& &
+Secondary + heuristic
+& 4.408 & 0.10 & 4.508 \\
+
+& &
+Secondary + time priority
+& 3.997 & 35.23 & 39.227 \\
+
+& &
+Secondary, no heuristic
+& 4.116 & 106.08 & 110.196 \\
+
+\cmidrule(lr){2-6}
+
+& \makecell[l]{Consequent 1}
+& Base
+& 3.472 & 4.48 & 7.952 \\
+
+& &
+Secondary + heuristic
+& 1.181 & 0.05 & 1.231 \\
+
+& &
+Secondary + time priority
+& 0.475 & 1.26 & 1.735 \\
+
+& &
+Secondary, no heuristic
+& 1.356 & 16.62 & 17.976 \\
+
+& \makecell[l]{Consequent 2}
+& Base
+& 3.582 & 21.64 & 25.222 \\
+
+& &
+Secondary + heuristic
+& 1.194 & 0.15 & 1.344 \\
+
+& &
+Secondary + time priority
+& 1.450 & 3.96 & 5.410 \\
+
+& &
+Secondary, no heuristic
+& 1.210 & 29.80 & 31.010 \\
+
+\end{longtable}
+
+\noindent
+Here, $T_{\mathrm{ground}}$, $T_{\mathrm{solve}}$, and $T_{\mathrm{res}}$
+denote the grounding time, solving time, and total rescheduling time,
+respectively. All times are reported in seconds.
 
 
 %

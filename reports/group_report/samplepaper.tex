@@ -14,7 +14,7 @@
 % be included in EPS format.
 
 \usepackage{tikz}
-\usetikzlibrary{arrows.meta, positioning, shapes.geometric}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric, decorations.pathreplacing, fit}
 
 \usepackage{hyperref}
 \usepackage{subcaption}
@@ -172,7 +172,7 @@ Track malfunctions are a common real world issue in railway systems. It negative
 
 
 
-\section{Our Code}
+\section{Track Malfunctions in Flatland}
 
 
 Building on existing work about malfunctioning trains, we implement track malfunctions to simulate realistic scheduling challenges (see Sections \ref{flatland_mals} and \ref{trkmals}). We base our approach on previous work by gilkra and want to build a similar structure for dealing with interruptions in the original schedule. Flatland doesn't natively include track malfunctions. Alternatively, we have included the generation of malfunctions in the main solving pipeline (see Section \ref{solve}). By reusing plans for trains from the original schedule,  we aimed to improve computation time during rescheduling through a secondary encoding (see Section \ref{encoding_2}).
@@ -188,11 +188,77 @@ The environment specifications are defined for Clingo during environment creatio
 Our Base Encoding includes rules and additional information to represent the environment. First, it imports a fact file (\verb|connections_nswe.lp|) with additional world information applicable to all Flatland environments. It defines how track types translate to the directions north, south, west and east. For instance, the fact \verb|connection(4608, (s,w))| is track type 4608, a curve that connects south and west. Furthermore, it contains definitions for directions and turns, a move in a certain direction in terms of movement on the X- and Y-axis, relations between directions (e.g. west is the inverse of east) and which track types allow a choice in direction. The fact file has been taken from Murphy \cite{Murphy2026a} in big parts and adjusted by us. Then, the Base Encoding creates the grid of adjacent cells and which of them is reachable by an agent.
 
 
+%\begin{wrapfigure}{r}{0.2\textwidth}
+%	\centering
+%	\includegraphics[scale=0.5, width=\linewidth]{base_encoding.jpg}
+%	\caption{High-level overview of Base Encoding.}
+%	\label{overview_primary}
+%\end{wrapfigure}
+
 \begin{wrapfigure}{r}{0.2\textwidth}
 	\centering
-	\includegraphics[scale=0.5, width=\linewidth]{base_encoding.jpg}
+	
+	\begin{tikzpicture}[
+		box/.style={
+			draw=gray!75,
+			fill=gray!8,
+			rounded corners=7pt,
+			minimum width=3.1cm,
+			minimum height=1.15cm,
+			text width=2.75cm,
+			align=center,
+			font=\sffamily\footnotesize
+		},
+		arrow/.style={
+			-{Latex[length=2mm]},
+			draw=teal!60!black,
+			line width=0.8pt
+		},
+		node distance=0.4cm
+		]
+		
+		\node[box] (setup) {
+			\textbf{\\ Environment \\ Set-Up}\\%[-1pt]
+			{\scriptsize - time, truck types\\
+				connected cells and \\ 
+				tracks\\}
+		};
+		
+		\node[box, below=of setup] (move) {
+			\textbf{Move Agents}\\[-1pt]
+			{\scriptsize - position and finish}
+		};
+		
+		\node[box, below=of move] (train) {
+			\textbf{Single Train}\\[-1pt]
+			\textbf{Constraints}
+		};
+		
+		\node[box, below=of train] (coordination) {
+			\textbf{Train Coordination}\\[-1pt]
+			\textbf{Constraints}
+		};
+		
+		\node[box, below=of coordination] (translation) {
+			\textbf{Action Translation}\\%[-1pt]
+			{\scriptsize - action atoms for \\[-.5pt]
+				Flatland}
+		};
+		
+		\node[box, below=of translation] (optimization) {
+			\textbf{Optimization}
+		};
+		
+		\draw[arrow] (setup) -- (move);
+		\draw[arrow] (move) -- (train);
+		\draw[arrow] (train) -- (coordination);
+		\draw[arrow] (coordination) -- (translation);
+		\draw[arrow] (translation) -- (optimization);
+		
+	\end{tikzpicture}
+	
 	\caption{High-level overview of Base Encoding.}
-	\label{overview_primary}
+	\label{fig:overview_primary}
 \end{wrapfigure}
 
 \subsubsection{Move Agents}
@@ -270,6 +336,7 @@ Similar to a train malfunction, a track malfunction is depicted as a red \textbf
 
 
 \subsection{Secondary Encoding} \label{encoding_2}
+
 The secondary encoding reschedules the environment after a track malfunction. Our goal was to reduce computational cost by avoiding recalculation of the environment and agents. Our approach, similar to Gilkra2025 \cite{gilkra2025}, reuses information and train schedules from the original plan unless the track malfunction interferes with an agent. 
 
 \verb|secondary_encoding.lp| reuses ideas for solving from the base encoding, such as the general environment facts \verb|connections_nswe.lp| and \verb|trainjacent| atoms for finding valid movements (see Section \ref{setup_base}). Additionally, information is passed from the original schedule (see Section \ref{fwd_info_2_clingo}). Thus, the secondary encoding has access to 
@@ -277,14 +344,89 @@ The secondary encoding reschedules the environment after a track malfunction. Ou
 	\item basic Flatland information (\verb|connections_nswe.lp|)
 	\item details of the track malfunction (\verb|track_malfunction\3|)
 	\item agent history (\verb|action| and \verb|position| constraints, \verb|current_position\4|)
-	\item initial plan for agents (\verb|planned_action\3|, \verb|planned_position\4|)
+	\item {initial plan for agents (\verb|planned_action\3| and \verb|planned_position\4|)}
 \end{itemize}
 
+\begin{wrapfigure}{r}{0.3\textwidth}
+	\centering
+	\vspace{-1.5em}
+	\begin{tikzpicture}[
+		font=\sffamily,
+		>=Latex,
+		node distance=4mm, %and 8mm,
+		box/.style={
+			draw=black!70,
+			rounded corners=2pt,
+			minimum width=3.1cm,
+			minimum height=0.65cm,
+			align=center,
+			fill=white,
+			font=\sffamily\footnotesize
+		},
+		container/.style={
+			draw=black!60,
+			rounded corners=10pt,
+			inner sep=8pt,
+			fill=black!3,
+			font=\sffamily,
+		},
+		arrow/.style={
+			-{Latex[length=2mm]},
+			draw=black!75,
+			line width=0.7pt
+		}
+		]
+		
+		% Environment set-up container
+		\node[container,
+		minimum width=4.25cm,
+		minimum height=4.4cm] (setup) {};
+		
+		\node[anchor=north west] at ([xshift=7pt,yshift=-6pt]setup.north west)
+		{\textbf{Environment Set-Up}};
+		
+		% Main nodes
+		\node[box, minimum width=2.8cm] (future)
+		at ([yshift=-32pt]setup.north) {Future Time};
+		
+		\node[box, minimum width=2.8cm, below=4mm of future] (past)
+		{Past Time Steps\\[-1pt]
+			\scriptsize - past time, past\\[-1pt]
+			\scriptsize actions};
+		
+		\node[box, minimum width=2.8cm, below=4mm of past] (trains)
+		{Unstarted Trains};
+		
+		% Arrows inside the container
+		\draw[arrow] (future) -- (past);
+		\draw[arrow] (past) -- (trains);
+		
+		% Replan agents label
+		\node[container, minimum width=4.25cm, minimum height=8mm, below=4mm of setup.south] (replan)
+		{};
+		
+		\node[anchor=north west] at ([xshift=-36pt,yshift=-4pt]replan.north)
+		{\textbf{Replan Agents}};
+		
+		\draw[arrow] (setup) -- (replan);
+		
+		% Optimization
+		\node[container, minimum width=4.25cm, below=4mm of replan.south] (optimize)
+		{\textbf{Optimization}};
+		
+		\draw[arrow] (replan) -- (optimize);	
+		
+	\end{tikzpicture}
+	
+	\caption{High-level overview of Secondary Encoding.}
+	\label{fig:overview_secondary}
+\end{wrapfigure}
 
 First, the program sets up the required environment with \verb|connections_nswe.lp| and creates two time counters. \verb|time(T)| counts time from one step after the track malfunction. \verb|past_time(T)| counts time up until and including the step of the track malfunction. This distinction is required to restore actions up until the malfunction time. These action atoms are necessary for Flatland to depict the solution correctly.
 
 If a track malfunction triggers before all trains of the environment have been initialized in their starting position, they have to be positioned during rescheduling. Then the replanning of trains starts. To identify whether an agent is affected by a track malfunction, it raises a \verb|consequence\3| (see Code \ref{consequence}). That means the train is planned to be on the malfunctioning track, it cannot continue on its original path and must adjust its behaviour. There are three scenarios our secondary encoding handles: a) the track malfunction doesn't interfere with the planned routes of agents (no consequence), b) one train is affected by the track malfunction (simple consequence) and c) multiple trains are affected by the track malfunction (complex consequence).
 
+\pagebreak
 
 \begin{lstlisting}[style=mystyle, language=Clingo, caption={Definition of consequence: if a train is attempting to go into a malfunctioning cell it raises a consequence.}, label={consequence}]
 	

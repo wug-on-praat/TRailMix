@@ -3,50 +3,48 @@ Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
 The top-level auxiliary file: samplepaper.aux
 The style file: splncs04.bst
 Database file #1: refs.bib
-Warning--I didn't find a database entry for "gilkra2025a"
 Warning--I didn't find a database entry for "waldow2025"
-Warning--I didn't find a database entry for "gilkra2025"
 Warning--to sort, need author or key in DB2025
 Warning--to sort, need author or key in SZdelayarticle2023
-You've used 7 entries,
+You've used 8 entries,
             2850 wiz_defined-function locations,
-            639 strings with 6023 characters,
-and the built_in function-call counts, 3449 in all, are:
-= -- 231
-> -- 182
+            641 strings with 6195 characters,
+and the built_in function-call counts, 3811 in all, are:
+= -- 257
+> -- 194
 < -- 0
-+ -- 75
-- -- 68
-* -- 246
-:= -- 448
++ -- 80
+- -- 72
+* -- 268
+:= -- 495
 add.period$ -- 3
-call.type$ -- 7
-change.case$ -- 55
+call.type$ -- 8
+change.case$ -- 60
 chr.to.int$ -- 0
-cite$ -- 9
-duplicate$ -- 271
-empty$ -- 304
-format.name$ -- 71
-if$ -- 713
+cite$ -- 10
+duplicate$ -- 302
+empty$ -- 343
+format.name$ -- 76
+if$ -- 791
 int.to.chr$ -- 0
-int.to.str$ -- 7
-missing$ -- 67
-newline$ -- 27
-num.names$ -- 10
-pop$ -- 172
+int.to.str$ -- 8
+missing$ -- 73
+newline$ -- 30
+num.names$ -- 12
+pop$ -- 191
 preamble$ -- 1
-purify$ -- 48
+purify$ -- 52
 quote$ -- 0
-skip$ -- 64
+skip$ -- 73
 stack$ -- 0
-substring$ -- 101
-swap$ -- 144
+substring$ -- 114
+swap$ -- 157
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 28
+type$ -- 32
 warning$ -- 2
-while$ -- 17
-width$ -- 8
-write$ -- 70
-(There were 5 warnings)
+while$ -- 20
+width$ -- 9
+write$ -- 78
+(There were 3 warnings)

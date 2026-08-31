@@ -163,9 +163,9 @@ Flatland environments can natively include agent malfunctions. The aspect is cal
 	
 \end{lstlisting}
 
-Murphy's interface between Clingo and Flatland allows to define separate encodings \cite{Murphy2026a}. The first encoding derives the original schedule for all agents. The secondary encoding then solves the rescheduling after every train malfunction. It includes a feature for forwarding information from the scheduling encoding to be reused in the secondary encoding \cite{Murphy2026a} \cite{gilkra2025a}. 
+Murphy's interface between Clingo and Flatland allows to define separate encodings \cite{Murphy2026a}. The first encoding derives the original schedule for all agents. The secondary encoding then solves the rescheduling after every train malfunction. It includes a feature for forwarding information from the scheduling encoding to be reused in the secondary encoding \cite{Murphy2026a} \cite{gilkra2025}. 
 
-Gilkra2025a have used these features to benchmark different attempts for secondary encodings after train malfunctions \cite{gilkra2025a}. They have been able reuse calculated plans from the scheduling step and thus reduce computing time during rescheduling.
+Gilkra2025a have used these features to benchmark different attempts for secondary encodings after train malfunctions \cite{gilkra2025}. They have been able reuse calculated plans from the scheduling step and thus reduce computing time during rescheduling.
 
 Waldow2025 approaches train malfunctions by identifying conflict points, cells where two agents can collide due to a train malfunction \cite{waldow2025}. Deltas then define the distance of an agent to such a conflict point and help deduce whether a given train malfunction can be "waited out" (triviality) or if multiple agents have to wait. He calls replanning by solving the environment anew with the same base encoding "Redo Planning".
 
@@ -179,7 +179,7 @@ Track malfunctions are a common real world issue in railway systems. It negative
 \section{Track Malfunctions in Flatland}
 
 
-Building on existing work about malfunctioning trains, we implement track malfunctions to simulate realistic scheduling challenges (see Sections \ref{flatland_mals} and \ref{trkmals}). We base our approach on previous work by gilkra and want to build a similar structure for dealing with interruptions in the original schedule. Flatland doesn't natively include track malfunctions. Alternatively, we have included the generation of malfunctions in the main solving pipeline (see Section \ref{solve}). By reusing plans for trains from the original schedule,  we aimed to improve computation time during rescheduling through a secondary encoding (see Section \ref{encoding_2}).
+Building on existing work about malfunctioning trains, we implement track malfunctions to simulate realistic scheduling challenges (see Sections \ref{flatland_mals} and \ref{trkmals}). We base our approach on previous work by Gilkra \cite{gilkra2025} and want to build a similar structure for dealing with interruptions in the original schedule. Flatland doesn't natively include track malfunctions. Alternatively, we have included the generation of malfunctions in the main solving pipeline (see Section \ref{solve}). By reusing plans for trains from the original schedule,  we aimed to improve computation time during rescheduling through a secondary encoding (see Section \ref{encoding_2}).
 
 
 \subsection{Base Encoding} \label{encoding_1}
@@ -428,7 +428,7 @@ The secondary encoding reschedules the environment after a track malfunction. Ou
 
 First, the program sets up the required environment with \verb|connections_nswe.lp| and creates two time counters. \verb|time(T)| counts time from one step after the track malfunction. \verb|past_time(T)| counts time up until and including the step of the track malfunction. This distinction is required to restore actions up until the malfunction time. These action atoms are necessary for Flatland to depict the solution correctly.
 
-If a track malfunction triggers before all trains of the environment have been initialized in their starting position, they have to be positioned during rescheduling. Then the replanning of trains starts. To identify whether an agent is affected by a track malfunction, it raises a \verb|consequence\3| (see Code \ref{consequence}). That means the train is planned to be on the malfunctioning track, it cannot continue on its original path and must adjust its behaviour. There are three scenarios our secondary encoding handles: a) the track malfunction doesn't interfere with the planned routes of agents (no consequence), b) one train is affected by the track malfunction (simple consequence) and c) multiple trains are affected by the track malfunction (complex consequence).
+If a track malfunction triggers before all trains of the environment have been initialized in their starting position, they have to be positioned during rescheduling. Then the replanning of trains starts. To identify whether an agent is affected by a track malfunction, it raises a \verb|consequence\3| (see Code \ref{consequence}). That means the train is planned to be on the malfunctioning track, it cannot continue on its original path and must adjust its behaviour. Subsequently, a heuristic was added to prioritize planned trains (see Section \ref{heuristic}). There are three scenarios our secondary encoding handles: a) the track malfunction doesn't interfere with the planned routes of agents (no consequence), b) one train is affected by the track malfunction (simple consequence) and c) multiple trains are affected by the track malfunction (complex consequence).
 
 \pagebreak
 
@@ -475,35 +475,39 @@ Five testing environments of varying sizes and numbers of agents were used in ea
 	\begin{subfigure}{.475\linewidth}
 		\includegraphics[width=\linewidth]{env_016--3_2.png}
 		\caption{20x20, 3 agents}
-		\label{MLEDdet}
+		\label{016}
 	\end{subfigure}\hfill % <-- "\hfill"
 	~ % optional tilde b/t figures for readability.
 	% this solution will not work w/ empty lines b/t subfigures
 	\begin{subfigure}{.475\linewidth}
 		\includegraphics[width=\linewidth]{env_007--6_6.png}
 		\caption{50x50, 6 agents}
-		\label{energydetPSK}
+		\label{007}
 	\end{subfigure}
-	
-	\medskip
-	\centering
+
 	\begin{subfigure}{.475\linewidth}
 		\includegraphics[width=\linewidth]{env_028--2_2.png}
-		\caption{20x15, 2 agents}
-		\label{dense}
+		\caption{20x15, 3 agents}
+		\label{028}
+	\end{subfigure}\hfill % <-- "\hfill"
+	~ % optional tilde b/t figures for readability.
+	% this solution will not work w/ empty lines b/t subfigures
+	\begin{subfigure}{.475\linewidth}
+		\includegraphics[width=\linewidth]{env_009--10_10.png}
+		\caption{30x30, 10 agents}
+		\label{009}
 	\end{subfigure}
 	
-	\par \medskip % create some *vertical* separation between the graphs
 	\begin{subfigure}{.475\linewidth}
 		\includegraphics[width=\linewidth]{env_033--5_4.png}
 		\caption{25x40, 5 agents}
-		\label{velcomp}
+		\label{033}
 	\end{subfigure}\hfill % <-- "\hfill"
 	% or just a comment and no tilde
 	\begin{subfigure}{.475\linewidth}
 		\includegraphics[width=\linewidth]{env_035--10_8.png}
 		\caption{25x40, 10 agents}
-		\label{velqual}
+		\label{035}
 	\end{subfigure}
 	\caption{These are the testing environments.}
 	\label{test_envs}
@@ -564,10 +568,10 @@ prioritization, the base encoding is faster when there is no consequence,
 whereas the secondary encoding with time prioritization is faster when there
 is a consequence.
 
-\subsection{Why is Adding the Heuristic Flag Important?}
+\subsection{Why is Adding the Heuristic Flag Important?}\label{heuristic}
 
 In the beginning, we implemented the secondary encoding without the heuristic
-addition. We were perplexed by the fact that running the environment with
+addition (Line 6 in Code \ref{heuristic_code}). We were perplexed by the fact that running the environment with
 the secondary encoding took more time than with the base encoding.
 
 For us, it was obvious that since most malfunctions either do not affect the
@@ -581,28 +585,19 @@ after many iterations, eventually reached the original planned solution.
 After adding the heuristic flag, Clingo found that most trains should use the
 original planned solution already in the first iteration.
 
+% Heuristic Flag in Clingo Code
+\begin{lstlisting}[style=mystyle, language=Clingo, caption={Here is a caption.}, label=heuristic_code]
+	
+	% planned is a train that is not affected by the malfunction and we don't want to reroute it
+	{planned(ID)}:- train(ID), not consequence(train(ID), _, _).
+	
+	% Prioritize planned trains when solving
+	#heuristic planned(ID): train(ID). [100, true]
+	
+\end{lstlisting}
 
 \subsection{compare grounding for two versions of trains can't be in same cell at same time rule}
 
-\section{Log / Timeline}
-
-\begin{itemize}
-	\item merge encodings (May 29)
-	\item literature review zank2026, gilkra2025a, waldow2025a (June 6)
-	\item fix visualization issue aka add wait before start time (June 9)
-	\item "crack the egg" pkl-file (June 17)
-	\item understand solve.py (June 18)
-	\item create pipeline for track malfunction in parallel to train malfunction TrackMalManager etc. (June 22)
-	\item pick relevant track for malfunction randomly (July 2)
-	\item create visualization for track malfunction ()
-	\item create track malfunction log (July 13)
-	\item start secondary encoding (no consequence or rescheduling necessary) (July 14)
-	\item expand secondary encoding: handle rescheduling of directly affected train (August 2)
-	\item finish secondary encoding: handle collisions due to rescheduling (August 3)
-	\item improve encodings: minimize grounding, remove unnecessary rules (August 7)
-	\item add heuristic, code cleaning and remove can\_dir (August 10)
-	\item separate predefined and random track malfunctions, code clean-up (August 13)
-\end{itemize}
 
 \section{Discussion}
 
@@ -751,54 +746,12 @@ output:
 We compared the use of the secondary encoding with rescheduling the entire environment anew with the base encoding.  We ran each environment and malfunction in two modes. Mode 1-1 scheduled and rescheduled with the base encoding. 1-2 used the base encoding only for scheduling and the secondary encoding for rescheduling. 
 
 
+\bibliographystyle{splncs04}
+\bibliography{refs}
 
-\begin{table}[h!]
-	\centering
-	\begin{tabular}{|l|l|l|r|r|}
-		\hline
-		Env name & Mal type & Mode & Schedule & Reschedule  \\ \hline
-		\textbf{env\_016} & simple & 1-2 & 0.092 & 0.084 \\ \hline
-		{} & simple  & 1-1 & 0.095 & 0.082  \\ \hline
-		{} & complex & 1-2 & 0.097 & 0.070 \\ \hline
-		{} & complex & 1-1 & 0.092 & 0.089 \\ \hline
-		{} & no cons & 1-2 & 0.185 & 0.116 \\ \hline
-		{} & no cons & 1-1 & 0.100 & 0.107 \\ \hline
-		\textbf{env\_028} & simple & 1-2 & 0.114 & 0.038 \\ \hline
-		{} & simple & 1-1 & 0.057 & 0.047  \\ \hline
-		{} & complex & 1-2 & 0.057 & 0.056 \\ \hline
-		{} & complex & 1-1 & 0.057 & 0.055 \\ \hline
-		{} & no cons & 1-2 & 0.065 & 0.050 \\ \hline
-		{} & no cons & 1-1 & 0.065 & 0.061 \\ \hline
-		\textbf{env\_033} & simple & 1-2 & 0.651 & 0.389 \\ \hline
-		{} & simple & 1-1 & 0.583 & 0.607 \\ \hline
-		{} & complex & 1-2 & 0.589 & 0.867 \\ \hline
-		{} & complex & 1-1 & 0.598 & 3.747 \\ \hline
-		{} & no cons & 1-2 & {} & {}  \\ \hline
-		{} & no cons & 1-1 & {} & {} \\ \hline
-		\textbf{env\_035} & simple & 1-2 & 26.135 & 2.116 \\ \hline
-		{} & simple & 1-1 & 26.240 & 11.449 \\ \hline
-		{} & complex & 1-2 & 26.299 & 2.053 \\ \hline
-		{} & complex & 1-1 & 26.251 & 35.805 \\ \hline
-		{} & no cons & 1-2 & 26.471 & 6.579  \\ \hline
-		{} & no cons & 1-1 & 26.219 & 22.771 \\ \hline
-		
-	\end{tabular}
-\vspace{0.2cm}
-
-	\begin{tabular}{|l l|}
-		\hline
-		1-1: & base encoding for scheduling and rescheduling \\
-		1-2: & base encoding for scheduling, secondary encoding for rescheduling\\ \hline
-	\end{tabular}
-
-\vspace{0.2cm}
-
-\caption{Results for testing environments with different malfunction types.}
-\label{encodings}
-\end{table}
-
-\section{Discussion}
-\section{Appendix}
+\appendix
+%\pagebreak
+\section{Experiment Results}
 \label{sec:appendix}
 
 \setlength{\LTleft}{0pt}
@@ -813,10 +766,6 @@ We compared the use of the secondary encoding with rescheduling the entire envir
     r
     r
 @{}}
-
-
-\caption{Running times for different malfunction and rescheduling configurations.}
-\label{tab:rescheduling_times} \\
 
 \toprule
 \textbf{Environment} &
@@ -1268,12 +1217,34 @@ Secondary + time priority
 Secondary, no heuristic
 & 1.210 & 29.80 & 31.010 \\
 
+\bottomrule
+
+\caption[Running times for different malfunction and rescheduling configurations.]{Running times for different malfunction and rescheduling configurations. Here, $T_{\mathrm{ground}}$, $T_{\mathrm{solve}}$, and $T_{\mathrm{res}}$
+	denote the grounding time, solving time, and total rescheduling time,
+	respectively. All times are reported in seconds.}
+\label{tab:rescheduling_times} \\
+
 \end{longtable}
 
-\noindent
-Here, $T_{\mathrm{ground}}$, $T_{\mathrm{solve}}$, and $T_{\mathrm{res}}$
-denote the grounding time, solving time, and total rescheduling time,
-respectively. All times are reported in seconds.
+\section{Log / Timeline}
+
+\begin{itemize}
+	\item merge encodings (May 29)
+	\item literature review zank2026, gilkra2025a, waldow2025a (June 6)
+	\item fix visualization issue aka add wait before start time (June 9)
+	\item "crack the egg" pkl-file (June 17)
+	\item understand solve.py (June 18)
+	\item create pipeline for track malfunction in parallel to train malfunction TrackMalManager etc. (June 22)
+	\item pick relevant track for malfunction randomly (July 2)
+	\item create visualization for track malfunction ()
+	\item create track malfunction log (July 13)
+	\item start secondary encoding (no consequence or rescheduling necessary) (July 14)
+	\item expand secondary encoding: handle rescheduling of directly affected train (August 2)
+	\item finish secondary encoding: handle collisions due to rescheduling (August 3)
+	\item improve encodings: minimize grounding, remove unnecessary rules (August 7)
+	\item add heuristic, code cleaning and remove can\_dir (August 10)
+	\item separate predefined and random track malfunctions, code clean-up (August 13)
+\end{itemize}
 
 
 %
@@ -1282,8 +1253,7 @@ respectively. All times are reported in seconds.
 % BibTeX users should specify bibliography style 'splncs04'.
 % References will then be sorted and formatted in the correct style.
 %
-\bibliographystyle{splncs04}
-\bibliography{refs}
+
 %%
 %\begin{thebibliography}{8}
 %\bibitem{ref_article1}

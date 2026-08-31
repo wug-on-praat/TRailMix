@@ -4,24 +4,47 @@
 \providecommand{\doi}[1]{https://doi.org/#1}
 
 \bibitem{SZdelayarticle2023}
-{Bahn-Verspätungen durch Menschen an und auf Gleisen}. Süddeutsche Zeitung (2023), \url{https://www.sueddeutsche.de/wirtschaft/statistik-bahn-verspaetungen-durch-menschen-an-und-auf-gleisen-dpa.urn-newsml-dpa-com-20090101-230610-99-05514}, {Accessed: 18.08.2026}
+{Bahn-Verspätungen durch Menschen an und auf Gleisen}. Süddeutsche Zeitung
+  (2023),
+  \url{https://www.sueddeutsche.de/wirtschaft/statistik-bahn-verspaetungen-durch-menschen-an-und-auf-gleisen-dpa.urn-newsml-dpa-com-20090101-230610-99-05514},
+  {Accessed: 18.08.2026}
 
 \bibitem{DB2025}
-{Integrierter Zwischenbericht 2025}. {Deutsche Bahn AG} (2025), \url{https://zbir.deutschebahn.com/2025/de/konzern-zwischenlagebericht-ungeprueft/qualitaet-und-sicherheit/puenktlichkeit/}, {Accessed: 10.08.2026}
+{Integrierter Zwischenbericht 2025}. {Deutsche Bahn AG} (2025),
+  \url{https://zbir.deutschebahn.com/2025/de/konzern-zwischenlagebericht-ungeprueft/qualitaet-und-sicherheit/puenktlichkeit/},
+  {Accessed: 10.08.2026}
 
 \bibitem{gebser2018clingo}
-Gebser, M., Kaminski, R., Kaufmann, B., Schaub, T.: Multi-shot asp solving with clingo (2018), \url{https://arxiv.org/abs/1705.09811}
+Gebser, M., Kaminski, R., Kaufmann, B., Schaub, T.: Multi-shot asp solving with
+  clingo (2018), \url{https://arxiv.org/abs/1705.09811}
+
+\bibitem{gilkra2025}
+{Gili i Bueno}, G., Kratzsch, F.: Flatland: Malfunctions research on train
+  training (2025),
+  \url{https://github.com/krr-up/railway-research/blob/main/railway-course/2024-wise/gilkra2025a.pdf}
 
 \bibitem{AusPunctuality2025}
-Loderbauer, G.: {Punctuality in rail transport in Autria in 2024}. {Agentur für Passagier- und Fahrgastrechte} (2025), \url{https://en.apf.gv.at/news-detail/P%C3%BCnktlichkeit2024}, {Accessed: 18.08.2026}
+Loderbauer, G.: {Punctuality in rail transport in Autria in 2024}. {Agentur
+  für Passagier- und Fahrgastrechte} (2025),
+  \url{https://en.apf.gv.at/news-detail/P%C3%BCnktlichkeit2024}, {Accessed:
+  18.08.2026}
 
 \bibitem{mohanty2020}
-Mohanty, S., Nygren, E., Laurent, F., Schneider, M., Scheller, C., Bhattacharya, N., Watson, J., Egli, A., Eichenberger, C., Baumberger, C., Vienken, G., Sturm, I., Sartoretti, G., Spigler, G.: Flatland-rl: Multi-agent reinforcement learning on trains (2020), \url{https://arxiv.org/abs/2012.05893}
+Mohanty, S., Nygren, E., Laurent, F., Schneider, M., Scheller, C.,
+  Bhattacharya, N., Watson, J., Egli, A., Eichenberger, C., Baumberger, C.,
+  Vienken, G., Sturm, I., Sartoretti, G., Spigler, G.: Flatland-rl: Multi-agent
+  reinforcement learning on trains (2020),
+  \url{https://arxiv.org/abs/2012.05893}
 
 \bibitem{Flatland2023}
-Mohanty, S., Nygren, E., Laurent, F., Schneider, M., Scheller, C., Bhattacharya, N., Watson, J., Egli, A., Eichenberger, C., Baumberger, C., Vienken, G., Sturm, I., Sartoretti, G., Spigler, G.: Flatland book (2023), \url{https://flatland-association.github.io/flatland-book/environment/environment/stochasticity.html}, {Accessed: 19.08.2026}
+Mohanty, S., Nygren, E., Laurent, F., Schneider, M., Scheller, C.,
+  Bhattacharya, N., Watson, J., Egli, A., Eichenberger, C., Baumberger, C.,
+  Vienken, G., Sturm, I., Sartoretti, G., Spigler, G.: Flatland book (2023),
+  \url{https://flatland-association.github.io/flatland-book/environment/environment/stochasticity.html},
+  {Accessed: 19.08.2026}
 
 \bibitem{Murphy2026a}
-Murphy, K.R.: Flatland (2026), \url{https://github.com/krr-up/flatland}, {Accessed: 17.08.2026}
+Murphy, K.R.: Flatland (2026), \url{https://github.com/krr-up/flatland},
+  {Accessed: 17.08.2026}
 
 \end{thebibliography}

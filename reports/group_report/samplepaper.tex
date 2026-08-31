@@ -102,45 +102,6 @@ The abstract should briefly summarize the contents of the paper in
 \keywords{ASP  \and Flatland \and MAPF \and Rescheduling \and VRSP.}
 \end{abstract}
 %
-%
-%
-\section{Example Section}
-\subsection{A Subsection Sample}
-Please note that the first paragraph of a section or subsection is
-not indented. The first paragraph that follows a table, figure,
-equation etc. does not need an indent, either.
-
-Subsequent paragraphs, however, are indented.
-
-% example code snippet for clingo
-\begin{lstlisting}[style=mystyle, language=Clingo, title={Here is a caption.}]
-	
-	{position(ID, POS, T', D)} :- position(ID, POS, T, D), 
-	time(T), time(T'), T'= T+1, calculate(ID).
-	
-	% end train when it reaches its destination
-	finish(ID, T) :- position(ID,(X,Y),T,D), end(ID,(X,Y),T'), 
-	calculate(ID).
-	
-\end{lstlisting}
-
-\subsubsection{Sample Heading (Third Level)} Only two levels of
-headings should be numbered. Lower level headings remain unnumbered;
-they are formatted as run-in headings.
-
-% example code
-\begin{lstlisting}[style=mystyle, language=Python, title={Here you enter a caption.}]
-
-	import numpy as np
-	
-	def incmatrix(genl1,genl2):
-	m = len(genl1)
-	n = len(genl2)
-	M = None #to become the incidence matrix
-	VT = np.zeros((n*m,1), int)  #dummy variable
-	
-\end{lstlisting}
-
 
 \section{Introduction to Flatland and its malfunction handling}
 Flatland is a framework developed by AICrowd and SBB for multi-agent path finding problems and more specifically railway scheduling and rescheduling issues \cite{mohanty2020}. The initial simulation environment was designed for Python-based reinforcement learning approaches. It offers a contained experimentation sandbox around the vehicle rescheduling problem (VRSP) and simple two-dimensional visualisation of environments and agent movement.
@@ -430,7 +391,6 @@ First, the program sets up the required environment with \verb|connections_nswe.
 
 If a track malfunction triggers before all trains of the environment have been initialized in their starting position, they have to be positioned during rescheduling. Then the replanning of trains starts. To identify whether an agent is affected by a track malfunction, it raises a \verb|consequence\3| (see Code \ref{consequence}). That means the train is planned to be on the malfunctioning track, it cannot continue on its original path and must adjust its behaviour. Subsequently, a heuristic was added to prioritize planned trains (see Section \ref{heuristic}). There are three scenarios our secondary encoding handles: a) the track malfunction doesn't interfere with the planned routes of agents (no consequence), b) one train is affected by the track malfunction (simple consequence) and c) multiple trains are affected by the track malfunction (complex consequence).
 
-\pagebreak
 
 \begin{lstlisting}[style=mystyle, language=Clingo, caption={Definition of consequence: if a train is attempting to go into a malfunctioning cell it raises a consequence.}, label={consequence}]
 	

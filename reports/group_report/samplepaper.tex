@@ -96,8 +96,7 @@ Universität Potsdam,
 \maketitle              % typeset the header of the contribution
 %
 \begin{abstract}
-The abstract should briefly summarize the contents of the paper in
-150--250 words.
+Malfunctions on and around tracks of a railway system is a common real world situation. While train malfunctions render the agent immovable, issues on the track often allows a small window for new decisions and rerouting of agents. We propose an implementation of track malfunctions for the Flatland framework leveraging environment solving with answer set programming. It investigates whether a secondary encoding for rescheduling of agents after a track malfunction is preferable to Redo Planning. 
 
 \keywords{ASP  \and Flatland \and MAPF \and Rescheduling \and VRSP.}
 \end{abstract}
@@ -145,7 +144,7 @@ Building on existing work about malfunctioning trains, we implement track malfun
 
 \subsection{Base Encoding} \label{encoding_1}
 
-The base encoding is Clingo code that solves a Flatland environment and schedules agents. It sets up the environment, generates sequential and valid positions for agents and then translates the positions into action atoms for Flatland (see Figure \ref{overview_primary}). 
+The base encoding is Clingo code that solves a Flatland environment and schedules agents. It sets up the environment, generates sequential and valid positions for agents and then translates the positions into action atoms for Flatland (see Figure \ref{fig:overview_primary}). 
 
 \subsubsection{Setting-up the environment} \label{setup_base}
 The environment specifications are defined for Clingo during environment creation with \verb|build.py|. It consists of a global time limit, information about the trains including agent ID, start, end and speed, and the cells with their given track type.
@@ -162,7 +161,7 @@ Our Base Encoding includes rules and additional information to represent the env
 
 \begin{wrapfigure}{r}{0.2\textwidth}
 	\centering
-	
+	\vspace{-2.5em}
 	\begin{tikzpicture}[
 		box/.style={
 			draw=gray!75,
@@ -389,7 +388,7 @@ The secondary encoding reschedules the environment after a track malfunction. Ou
 
 First, the program sets up the required environment with \verb|connections_nswe.lp| and creates two time counters. \verb|time(T)| counts time from one step after the track malfunction. \verb|past_time(T)| counts time up until and including the step of the track malfunction. This distinction is required to restore actions up until the malfunction time. These action atoms are necessary for Flatland to depict the solution correctly.
 
-If a track malfunction triggers before all trains of the environment have been initialized in their starting position, they have to be positioned during rescheduling. Then the replanning of trains starts. To identify whether an agent is affected by a track malfunction, it raises a \verb|consequence\3| (see Code \ref{consequence}). That means the train is planned to be on the malfunctioning track, it cannot continue on its original path and must adjust its behaviour. Subsequently, a heuristic was added to prioritize planned trains (see Section \ref{heuristic}). There are three scenarios our secondary encoding handles: a) the track malfunction doesn't interfere with the planned routes of agents (no consequence), b) one train is affected by the track malfunction (simple consequence) and c) multiple trains are affected by the track malfunction (complex consequence).
+If a track malfunction triggers before all trains of the environment have been initialized in their starting position, they have to be positioned during rescheduling. Then the replanning of trains starts. To identify whether an agent is affected by a track malfunction, it raises a \verb|consequence\3| (see Code \ref{consequence}). That means the train is planned to be on the malfunctioning track, it cannot continue on its original path and must adjust its behaviour. Subsequently, a heuristic was added to prioritize planned trains (see Section \ref{heuristic}). There are three scenarios our secondary encoding handles\footnote{If a track malfunction hits a cell while there is a train on its track, the simulation break, effectively corresponding to an accident on the track. We discovered this behaviour and decided to keep it instead of handling that exception as it also depicts a realistic scenario and could be inspiration for future work in this course.}: a) the track malfunction doesn't interfere with the planned routes of agents (no consequence), b) one train is affected by the track malfunction (simple consequence) and c) multiple trains are affected by the track malfunction (complex consequence).
 
 
 \begin{lstlisting}[style=mystyle, language=Clingo, caption={Definition of consequence: if a train is attempting to go into a malfunctioning cell it raises a consequence.}, label={consequence}]
@@ -412,7 +411,6 @@ In a simple consequence, only one train is scheduled to pass the track malfuncti
 \subsubsection{Complex Consequence}
 A complex consequence includes multiple agents that require rescheduling (multiple \verb|conequence/3| atoms). However, it also covers the case where the adjustment of one agent's path influences another train, e.g. the rerouted or waiting train would cause a collision with an unaffected train. The trains that were planned as passing through the track malfunction are marked with \verb|consequence/3|. Those agents and the ones indirectly affected are marked as \verb|calculate/1|. The rescheduling then is done as described in Section \ref{simple_consequence}.
 
-\subsubsection{create accidents}
 
 \section{Experiments}
 We have conducted three experiments to test the capabilities of our encodings in multiple environments. We tested the following scenarios:
@@ -424,7 +422,7 @@ We have conducted three experiments to test the capabilities of our encodings in
 
 Clingo reports total elapsed time and time spent on solving. For each experiment, we assume that most of the non-solving time is used to ground the rules. We base our comparisons on time differences in computing since rescheduling is a  time-sensitive interruption with only a limited window for decision making.
 
-Experiment 1 investigates if rescheduling with the secondary encoding is indeed preferable over replanning with the base encoding. Experiment 2 compares performance of the secondary encoding with and without the heuristic prioritizing planned trains. Experiment 3 evaluates the weighting of optimization statements in the secondary encoding. 
+Experiment 1 investigates if rescheduling with the secondary encoding is indeed preferable over replanning with the base encoding (Redo Planning). Experiment 2 compares performance of the secondary encoding with and without the heuristic prioritizing planned trains. Experiment 3 evaluates the weighting of optimization statements in the secondary encoding. 
 
 \subsection{Testing environments}
 Five testing environments of varying sizes and numbers of agents were used in each experiment (see Figure \ref{test_envs}). In each environment, we have identified tracks for the three types of track malfunctions (simple, complex, no consequence - see Section \ref{encoding_2}).
@@ -486,6 +484,299 @@ encoding and the secondary encoding with time prioritization will derive this
 solution. The other two methods will not be able to choose this solution.
 
 \section{Results}
+The raw results are listed in Appendix \ref{sec:appendix}. Tables \ref{tab:rescheduling_times_base}, \ref{tab:rescheduling_times_heuristic} and \ref{tab:rescheduling_time_priority} report the results by experiment.
+
+\begin{table}[htb]
+	\centering
+	\footnotesize
+	\setlength{\tabcolsep}{4pt}
+	\renewcommand{\arraystretch}{0.9}
+	\begin{tabular}{@{}llrrr@{}}
+		\toprule
+		\textbf{Environment} &
+		\textbf{Malfunction type} &
+		\textbf{Base} &
+		\textbf{~~Secondary} &
+		\textbf{$\Delta T_{\mathrm{res}}$} \\
+		& &
+		\makecell[r]{\textbf{$T_{\mathrm{res}}$}} &
+		\makecell[r]{\textbf{$T_{\mathrm{res}}$}} &
+		\makecell[r]{\textbf{}} \\
+		\midrule
+		
+		\textbf{env\_016--3\_2}
+		& Non-consequent
+		& 0.107
+		& 0.116
+		& +0.009 \\
+		
+		& Consequent 1
+		& 0.104
+		& 0.071
+		& -0.033 \\
+		
+		& Consequent 2
+		& 0.082
+		& 0.084
+		& +0.002 \\
+		
+		& Consequent + collisions
+		& 0.089
+		& 0.070
+		& -0.019 \\
+		
+		\midrule
+		
+		\textbf{env\_033--5\_4}
+		& Non-consequent
+		& 0.655
+		& 0.576
+		& -0.079 \\
+		
+		& Consequent 1
+		& 0.635
+		& 0.561
+		& -0.074 \\
+		
+		& Consequent 2
+		& 0.607
+		& 0.389
+		& -0.218 \\
+		
+		& Consequent + collisions
+		& 3.747
+		& 0.867
+		& -2.880 \\
+		
+		\midrule
+		
+		\textbf{env\_007--6\_6}
+		& Non-consequent
+		& 138.697
+		& 10.794
+		& -127.903 \\
+		
+		& Consequent 1
+		& 127.527
+		& 9.941
+		& -117.586 \\
+		
+		& Consequent 2
+		& 97.934
+		& 10.245
+		& -87.689 \\
+		
+		& Consequent + collisions
+		& 100.216
+		& 25.852
+		& -74.364 \\
+		
+		\midrule
+		
+		\textbf{env\_009--10\_10}
+		& Non-consequent
+		& 44.581
+		& 1.303
+		& -43.278 \\
+		
+		& Consequent 1
+		& 97.233
+		& 1.610
+		& -95.623 \\
+		
+		& Consequent 2
+		& 1.872
+		& 0.509
+		& -1.363 \\
+		
+		& Consequent + collisions
+		& 71.720
+		& 2.587
+		& -69.133 \\
+		
+		\midrule
+		
+		\textbf{env\_028--2\_2}
+		& Non-consequent
+		& 0.054
+		& 0.071
+		& +0.017 \\
+		
+		& Consequent 1
+		& 0.040
+		& 0.032
+		& -0.008 \\
+		
+		& Consequent + collisions
+		& 0.053
+		& 0.048
+		& -0.005 \\
+		
+		\midrule
+		
+		\textbf{env\_35--10\_8}
+		& Non-consequent
+		& 24.704
+		& 4.508
+		& -20.196 \\
+		
+		& Consequent 1
+		& 7.952
+		& 1.231
+		& -6.721 \\
+		
+		& Consequent 2
+		& 25.222
+		& 1.344
+		& -23.878 \\
+		
+		\bottomrule
+	\end{tabular}
+	\vspace{4mm}
+	\caption{Comparison of total rescheduling times for Base and Secondary + heuristic. Negative values of $\Delta T_{\mathrm{res}}$ indicate that Secondary + heuristic is faster than Base.}
+	\label{tab:rescheduling_times_base}
+\end{table}
+
+\begin{table}[htbp]
+	\centering
+	\footnotesize
+	\setlength{\tabcolsep}{4pt}
+	\renewcommand{\arraystretch}{0.9}
+	\begin{tabular}{@{}llrrr@{}}
+		\toprule
+		\textbf{Environment} &
+		\textbf{Malfunction type} &
+		\makecell[r]{\textbf{heuristic}} &
+		\makecell[r]{\textbf{~~no heuristic}} &
+		\makecell[r]{\textbf{$\Delta T_{\mathrm{res}}$}} \\
+		\midrule
+		
+		\textbf{env\_016--3\_2}
+		& Non-consequent & 0.116 & 0.097 & -0.019 \\
+		& Consequent 1 & 0.071 & 0.091 & +0.020 \\
+		& Consequent 2 & 0.084 & 0.054 & -0.030 \\
+		& Consequent + collisions & 0.070 & 0.075 & +0.005 \\
+		
+		\midrule
+		
+		\textbf{env\_033--5\_4}
+		& Non-consequent & 0.576 & 5.142 & +4.566 \\
+		& Consequent 1 & 0.561 & 7.897 & +7.336 \\
+		& Consequent 2 & 0.389 & 0.421 & +0.032 \\
+		& Consequent + collisions & 0.867 & 2.722 & +1.855 \\
+		
+		\midrule
+		
+		\textbf{env\_007--6\_6}
+		& Non-consequent & 10.794 & 256.370 & +245.576 \\
+		& Consequent 1 & 9.941 & 206.032 & +196.091 \\
+		& Consequent 2 & 10.245 & 90.477 & +80.232 \\
+		& Consequent + collisions & 25.852 & 57.022 & +31.170 \\
+		
+		\midrule
+		
+		\textbf{env\_009--10\_10}
+		& Non-consequent & 1.303 & 83.612 & +82.309 \\
+		& Consequent 1 & 1.610 & 96.502 & +94.892 \\
+		& Consequent 2 & 0.509 & 0.888 & +0.379 \\
+		& Consequent + collisions & 2.587 & 71.364 & +68.777 \\
+		
+		\midrule
+		
+		\textbf{env\_028--2\_2}
+		& Non-consequent & 0.071 & 0.042 & -0.029 \\
+		& Consequent 1 & 0.032 & 0.032 & 0.000 \\
+		& Consequent + collisions & 0.048 & 0.047 & -0.001 \\
+		
+		\midrule
+		
+		\textbf{env\_35--10\_8}
+		& Non-consequent & 4.508 & 110.196 & +105.688 \\
+		& Consequent 1 & 1.231 & 17.976 & +16.745 \\
+		& Consequent 2 & 1.344 & 31.010 & +29.666 \\
+		
+		\bottomrule
+	\end{tabular}
+	\vspace{4mm}
+	\caption{Comparison of total rescheduling times, $T_{\mathrm{res}}$, for Secondary + heuristic and Secondary without heuristic. The difference is computed as $\Delta T_{\mathrm{res}} = T_{\mathrm{res}}^{\mathrm{Secondary+heuristic}} - T_{\mathrm{res}}^{\mathrm{Secondary,\ no\ heuristic}}$. Positive values indicate that using the heuristic is faster than without the heuristic.}
+	\label{tab:rescheduling_times_heuristic}
+\end{table}
+
+
+\begin{table}[htbp]
+	\centering
+	\footnotesize
+	\setlength{\tabcolsep}{4pt}
+	\renewcommand{\arraystretch}{0.9}
+	
+	\begin{tabular}{@{}llrrr@{}}
+		\toprule
+		\textbf{Environment} &
+		\textbf{Malfunction type} &
+		\makecell[r]{\textbf{heuristic}} &
+		\makecell[r]{\textbf{~~time priority}} &
+		\makecell[r]{\textbf{$\Delta T_{\mathrm{res}}$}} \\
+		\midrule
+		
+		\textbf{env\_016--3\_2}
+		& Non-consequent & 0.116 & 0.099 & -0.017 \\
+		& Consequent 1 & 0.071 & 0.093 & +0.022 \\
+		& Consequent 2 & 0.084 & 0.058 & -0.026 \\
+		& Consequent + collisions & 0.070 & 0.076 & +0.006 \\
+		
+		\midrule
+		
+		\textbf{env\_033--5\_4}
+		& Non-consequent & 0.576 & 0.983 & +0.407 \\
+		& Consequent 1 & 0.561 & 0.807 & +0.246 \\
+		& Consequent 2 & 0.389 & 0.585 & +0.196 \\
+		& Consequent + collisions & 0.867 & 1.132 & +0.265 \\
+		
+		\midrule
+		
+		\textbf{env\_007--6\_6}
+		& Non-consequent & 10.794 & 179.266 & +168.472 \\
+		& Consequent 1 & 9.941 & 87.676 & +77.735 \\
+		& Consequent 2 & 10.245 & 67.346 & +57.101 \\
+		& Consequent + collisions & 25.852 & 71.626 & +45.774 \\
+		
+		\midrule
+		
+		\textbf{env\_009--10\_10}
+		& Non-consequent & 1.303 & 9.817 & +8.514 \\
+		& Consequent 1 & 1.610 & 66.304 & +64.694 \\
+		& Consequent 2 & 0.509 & 0.740 & +0.231 \\
+		& Consequent + collisions & 2.587 & 24.082 & +21.495 \\
+		
+		\midrule
+		
+		\textbf{env\_028--2\_2}
+		& Non-consequent & 0.071 & 0.050 & -0.021 \\
+		& Consequent 1 & 0.032 & 0.031 & -0.001 \\
+		& Consequent + collisions & 0.048 & 0.045 & -0.003 \\
+		
+		\midrule
+		
+		\textbf{env\_35--10\_8}
+		& Non-consequent & 4.508 & 39.227 & +34.719 \\
+		& Consequent 1 & 1.231 & 1.735 & +0.504 \\
+		& Consequent 2 & 1.344 & 5.410 & +4.066 \\
+		
+		\bottomrule
+	\end{tabular}
+	\vspace{4mm¸}
+	\caption{Comparison of total rescheduling times, $T_{\mathrm{res}}$, for
+		Secondary + heuristic and Secondary + time priority. The difference is
+		computed as
+		$\Delta T_{\mathrm{res}} =
+		T_{\mathrm{res}}^{\mathrm{Secondary+time\ priority}} -
+		T_{\mathrm{res}}^{\mathrm{Secondary+heuristic}}$.
+		Positive values indicate that Secondary + heuristic is faster.}
+	\label{tab:rescheduling_time_priority}
+\end{table}
+
+
+
 \subsection{Grounding Time}
 
 The grounding time is similar for all methods and, even for larger
@@ -528,6 +819,16 @@ prioritization, the base encoding is faster when there is no consequence,
 whereas the secondary encoding with time prioritization is faster when there
 is a consequence.
 
+\subsection{compare grounding for two versions of trains can't be in same cell at same time rule}
+
+
+\section{Discussion}
+\begin{itemize}
+	\item add summary of results for each experiment
+	\item How do we feel about the results?
+\end{itemize}
+
+
 \subsection{Why is Adding the Heuristic Flag Important?}\label{heuristic}
 
 In the beginning, we implemented the secondary encoding without the heuristic
@@ -555,11 +856,6 @@ original planned solution already in the first iteration.
 	#heuristic planned(ID): train(ID). [100, true]
 	
 \end{lstlisting}
-
-\subsection{compare grounding for two versions of trains can't be in same cell at same time rule}
-
-
-\section{Discussion}
 
 \subsection{When to Use Each Method?}
 
@@ -695,15 +991,15 @@ output:
 \end{figure}
 
 \section{Future Work}
-\begin{itemize}
-	\item explore options instead of random malfunctions (frequented tracks, crosses, etc.)
-	\item explore option of tertiary encoding (recalculate from scratch if malfunction hits early on: first > secondary > first)
-	\item heuristic assumes loose rail network BUT not realistic (maybe discussion part)
-	\item handle unsatisfiable as a result of calculating after malfunction (?)
-\end{itemize}
+Future work could consider other approaches than randomness as a decider for a track malfunction. For instance, making malfunction on highly frequented tracks or crossings more likely than on straight connections. 
 
-\section{Experiment 1}
-We compared the use of the secondary encoding with rescheduling the entire environment anew with the base encoding.  We ran each environment and malfunction in two modes. Mode 1-1 scheduled and rescheduled with the base encoding. 1-2 used the base encoding only for scheduling and the secondary encoding for rescheduling. 
+Another avenue to explore would be the option of a tertiary encoding. The results show that our secondary encoding performs badly when the track malfunction happens early on in an environment with many time steps. The encoding then has to recalculate a very big part and Redo Planning would be more efficient. Introducing a cut-off point for early malfunctions in the secondary encoding that then leads to rescheduling with the base encoding anew could be feasible.
+
+Finally, we noticed that sometimes a malfunction can cause an environment to be unsatisfiable, i.e. when a malfunction hits a particularly crucial track. Then the program crashes without any visual output despite having successfully calculated the original schedule. Future projects could focus on handling this issue and generating the base plan in Flatland or maybe even visualizing when and why the program fails.
+
+\begin{itemize}
+	\item heuristic assumes loose rail network BUT not realistic (maybe discussion part)
+\end{itemize}
 
 
 \bibliographystyle{splncs04}

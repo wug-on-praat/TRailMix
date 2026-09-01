@@ -7,9 +7,6 @@
 \citation{gebser2018clingo}
 \citation{Flatland2023}
 \citation{Murphy2026a}
-\citation{Murphy2026a}
-\citation{Murphy2026a}
-\citation{gilkra2025}
 \@writefile{toc}{\contentsline {title}{Track Malfunctions in Flatland}{1}{chapter.1}\protected@file@percent }
 \@writefile{toc}{\authcount {2}}
 \@writefile{toc}{\contentsline {author}{TRailMix: Baruch Shteken \and Lena Friedek}{1}{chapter.1}\protected@file@percent }
@@ -17,8 +14,9 @@
 \@writefile{toc}{\contentsline {subsection}{\numberline {1.1}Flatland and Answer Set Programming}{1}{subsection.1.1.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {1.2}Malfunctions in Flatland}{1}{subsection.1.1.2}\protected@file@percent }
 \newlabel{flatland_mals}{{1.2}{1}{Malfunctions in Flatland}{subsection.1.1.2}{}}
-\newlabel{build_mals}{{1.1}{1}{Generate train malfunctions in build.py}{lstlisting.1.1}{}}
-\@writefile{lol}{\contentsline {lstlisting}{\numberline {1.1}{\ignorespaces Generate train malfunctions in build.py.}}{1}{lstlisting.1.1}\protected@file@percent }
+\citation{Murphy2026a}
+\citation{Murphy2026a}
+\citation{gilkra2025}
 \citation{gilkra2025}
 \citation{waldow2025}
 \citation{DB2025}
@@ -26,6 +24,8 @@
 \citation{DB2025}
 \citation{SZdelayarticle2023}
 \citation{gilkra2025}
+\newlabel{build_mals}{{1.1}{2}{Generate train malfunctions in build.py}{lstlisting.1.1}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1.1}{\ignorespaces Generate train malfunctions in build.py.}}{2}{lstlisting.1.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {1.3}Track Malfunctions}{2}{subsection.1.1.3}\protected@file@percent }
 \newlabel{trkmals}{{1.3}{2}{Track Malfunctions}{subsection.1.1.3}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {2}Track Malfunctions in Flatland}{2}{section.1.2}\protected@file@percent }
@@ -39,9 +39,9 @@
 \newlabel{fig:overview_primary}{{1}{3}{High-level overview of Base Encoding}{figure.caption.3}{}}
 \@writefile{toc}{\contentsline {subsubsection}{Move Agents}{3}{section*.4}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{Constraints}{3}{section*.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Python Part}{3}{subsection.1.2.2}\protected@file@percent }
-\newlabel{solve}{{2.2}{3}{Python Part}{subsection.1.2.2}{}}
-\@writefile{toc}{\contentsline {subsubsection}{Track Malfunction Implementation}{3}{section*.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Python Part}{4}{subsection.1.2.2}\protected@file@percent }
+\newlabel{solve}{{2.2}{4}{Python Part}{subsection.1.2.2}{}}
+\@writefile{toc}{\contentsline {subsubsection}{Track Malfunction Implementation}{4}{section*.6}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{How is a track malfunction created?}{4}{section*.7}\protected@file@percent }
 \newlabel{fwd_info_2_clingo}{{2.2}{4}{How is a malfunction implemented in Clingo?}{section*.8}{}}
 \@writefile{toc}{\contentsline {subsubsection}{How is a malfunction implemented in Clingo?}{4}{section*.8}\protected@file@percent }
@@ -57,30 +57,34 @@
 \@writefile{toc}{\contentsline {subsubsection}{No Consequence}{6}{section*.12}\protected@file@percent }
 \newlabel{simple_consequence}{{2.3}{6}{Simple Consequence}{section*.13}{}}
 \@writefile{toc}{\contentsline {subsubsection}{Simple Consequence}{6}{section*.13}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{Complex Consequence}{6}{section*.14}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{create accidents}{7}{section*.15}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Complex Consequence}{7}{section*.14}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {3}Experiments}{7}{section.1.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Testing environments}{7}{subsection.1.3.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Predictions}{7}{subsection.1.3.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {4}Results}{7}{section.1.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Grounding Time}{7}{subsection.1.4.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Solving Time}{8}{subsection.1.4.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Why is Adding the Heuristic Flag Important?}{8}{subsection.1.4.3}\protected@file@percent }
-\newlabel{heuristic}{{4.3}{8}{Why is Adding the Heuristic Flag Important?}{subsection.1.4.3}{}}
-\newlabel{heuristic_code}{{1.3}{9}{Here is a caption}{lstlisting.1.3}{}}
-\@writefile{lol}{\contentsline {lstlisting}{\numberline {1.3}{\ignorespaces Here is a caption.}}{9}{lstlisting.1.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}compare grounding for two versions of trains can't be in same cell at same time rule}{9}{subsection.1.4.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {5}Discussion}{9}{section.1.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}When to Use Each Method?}{9}{subsection.1.5.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4}Results}{8}{section.1.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Comparison of total rescheduling times for Base and Secondary + heuristic. Negative values of $\Delta T_{\mathrm  {res}}$ indicate that Secondary + heuristic is faster than Base.}}{8}{table.caption.16}\protected@file@percent }
+\newlabel{tab:rescheduling_times_base}{{1}{8}{Comparison of total rescheduling times for Base and Secondary + heuristic. Negative values of $\Delta T_{\mathrm {res}}$ indicate that Secondary + heuristic is faster than Base}{table.caption.16}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Grounding Time}{8}{subsection.1.4.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Comparison of total rescheduling times, $T_{\mathrm  {res}}$, for Secondary + heuristic and Secondary without heuristic. The difference is computed as $\Delta T_{\mathrm  {res}} = T_{\mathrm  {res}}^{\mathrm  {Secondary+heuristic}} - T_{\mathrm  {res}}^{\mathrm  {Secondary,\ no\ heuristic}}$. Positive values indicate that using the heuristic is faster than without the heuristic.}}{9}{table.caption.17}\protected@file@percent }
+\newlabel{tab:rescheduling_times_heuristic}{{2}{9}{Comparison of total rescheduling times, $T_{\mathrm {res}}$, for Secondary + heuristic and Secondary without heuristic. The difference is computed as $\Delta T_{\mathrm {res}} = T_{\mathrm {res}}^{\mathrm {Secondary+heuristic}} - T_{\mathrm {res}}^{\mathrm {Secondary,\ no\ heuristic}}$. Positive values indicate that using the heuristic is faster than without the heuristic}{table.caption.17}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Comparison of total rescheduling times, $T_{\mathrm  {res}}$, for Secondary + heuristic and Secondary + time priority. The difference is computed as $\Delta T_{\mathrm  {res}} = T_{\mathrm  {res}}^{\mathrm  {Secondary+time\ priority}} - T_{\mathrm  {res}}^{\mathrm  {Secondary+heuristic}}$. Positive values indicate that Secondary + heuristic is faster.}}{10}{table.caption.18}\protected@file@percent }
+\newlabel{tab:rescheduling_time_priority}{{3}{10}{Comparison of total rescheduling times, $T_{\mathrm {res}}$, for Secondary + heuristic and Secondary + time priority. The difference is computed as $\Delta T_{\mathrm {res}} = T_{\mathrm {res}}^{\mathrm {Secondary+time\ priority}} - T_{\mathrm {res}}^{\mathrm {Secondary+heuristic}}$. Positive values indicate that Secondary + heuristic is faster}{table.caption.18}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Solving Time}{11}{subsection.1.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}compare grounding for two versions of trains can't be in same cell at same time rule}{11}{subsection.1.4.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5}Discussion}{11}{section.1.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Why is Adding the Heuristic Flag Important?}{11}{subsection.1.5.1}\protected@file@percent }
+\newlabel{heuristic}{{5.1}{11}{Why is Adding the Heuristic Flag Important?}{subsection.1.5.1}{}}
+\newlabel{heuristic_code}{{1.3}{12}{Here is a caption}{lstlisting.1.3}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1.3}{\ignorespaces Here is a caption.}}{12}{lstlisting.1.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}When to Use Each Method?}{12}{subsection.1.5.2}\protected@file@percent }
 \bibstyle{splncs04}
 \bibdata{refs}
 \bibcite{SZdelayarticle2023}{1}
 \bibcite{DB2025}{2}
 \bibcite{gebser2018clingo}{3}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Future Work}{13}{section.1.6}\protected@file@percent }
 \bibcite{gilkra2025}{4}
 \bibcite{AusPunctuality2025}{5}
-\@writefile{toc}{\contentsline {section}{\numberline {6}Future Work}{10}{section.1.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {7}Experiment 1}{10}{section.1.7}\protected@file@percent }
 \bibcite{mohanty2020}{6}
 \bibcite{Flatland2023}{7}
 \bibcite{Murphy2026a}{8}
@@ -91,25 +95,25 @@
     {1}{38.69112pt}\LT@entry 
     {5}{35.77777pt}\LT@entry 
     {5}{36.77777pt}}
-\@writefile{toc}{\contentsline {section}{\numberline {A}Experiment Results}{11}{section.A.1}\protected@file@percent }
-\newlabel{sec:appendix}{{A}{11}{Experiment Results}{section.A.1}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Running times for different malfunction and rescheduling configurations.}}{13}{table.A.1}\protected@file@percent }
-\newlabel{tab:rescheduling_times}{{1}{13}{Running times for different malfunction and rescheduling configurations}{table.A.1}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {B}Log / Timeline}{13}{section.A.2}\protected@file@percent }
-\newlabel{016}{{3a}{15}{20x20, 3 agents}{figure.caption.16}{}}
-\newlabel{sub@016}{{a}{15}{20x20, 3 agents}{figure.caption.16}{}}
-\newlabel{007}{{3b}{15}{50x50, 6 agents}{figure.caption.16}{}}
-\newlabel{sub@007}{{b}{15}{50x50, 6 agents}{figure.caption.16}{}}
-\newlabel{028}{{3c}{15}{20x15, 3 agents}{figure.caption.16}{}}
-\newlabel{sub@028}{{c}{15}{20x15, 3 agents}{figure.caption.16}{}}
-\newlabel{009}{{3d}{15}{30x30, 10 agents}{figure.caption.16}{}}
-\newlabel{sub@009}{{d}{15}{30x30, 10 agents}{figure.caption.16}{}}
-\newlabel{033}{{3e}{15}{25x40, 5 agents}{figure.caption.16}{}}
-\newlabel{sub@033}{{e}{15}{25x40, 5 agents}{figure.caption.16}{}}
-\newlabel{035}{{3f}{15}{25x40, 10 agents}{figure.caption.16}{}}
-\newlabel{sub@035}{{f}{15}{25x40, 10 agents}{figure.caption.16}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces These are the testing environments.}}{15}{figure.caption.16}\protected@file@percent }
-\newlabel{test_envs}{{3}{15}{These are the testing environments}{figure.caption.16}{}}
-\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Decision process for selecting a rescheduling method.}}{16}{figure.caption.17}\protected@file@percent }
-\newlabel{fig:rescheduling-method-selection}{{4}{16}{Decision process for selecting a rescheduling method}{figure.caption.17}{}}
-\gdef \@abspage@last{16}
+\@writefile{toc}{\contentsline {section}{\numberline {A}Experiment Results}{14}{section.A.1}\protected@file@percent }
+\newlabel{sec:appendix}{{A}{14}{Experiment Results}{section.A.1}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Running times for different malfunction and rescheduling configurations.}}{17}{table.A.4}\protected@file@percent }
+\newlabel{tab:rescheduling_times}{{4}{17}{Running times for different malfunction and rescheduling configurations}{table.A.4}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {B}Log / Timeline}{17}{section.A.2}\protected@file@percent }
+\newlabel{016}{{3a}{18}{20x20, 3 agents}{figure.caption.15}{}}
+\newlabel{sub@016}{{a}{18}{20x20, 3 agents}{figure.caption.15}{}}
+\newlabel{007}{{3b}{18}{50x50, 6 agents}{figure.caption.15}{}}
+\newlabel{sub@007}{{b}{18}{50x50, 6 agents}{figure.caption.15}{}}
+\newlabel{028}{{3c}{18}{20x15, 3 agents}{figure.caption.15}{}}
+\newlabel{sub@028}{{c}{18}{20x15, 3 agents}{figure.caption.15}{}}
+\newlabel{009}{{3d}{18}{30x30, 10 agents}{figure.caption.15}{}}
+\newlabel{sub@009}{{d}{18}{30x30, 10 agents}{figure.caption.15}{}}
+\newlabel{033}{{3e}{18}{25x40, 5 agents}{figure.caption.15}{}}
+\newlabel{sub@033}{{e}{18}{25x40, 5 agents}{figure.caption.15}{}}
+\newlabel{035}{{3f}{18}{25x40, 10 agents}{figure.caption.15}{}}
+\newlabel{sub@035}{{f}{18}{25x40, 10 agents}{figure.caption.15}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces These are the testing environments.}}{18}{figure.caption.15}\protected@file@percent }
+\newlabel{test_envs}{{3}{18}{These are the testing environments}{figure.caption.15}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Decision process for selecting a rescheduling method.}}{19}{figure.caption.19}\protected@file@percent }
+\newlabel{fig:rescheduling-method-selection}{{4}{19}{Decision process for selecting a rescheduling method}{figure.caption.19}{}}
+\gdef \@abspage@last{19}

@@ -828,6 +828,11 @@ is a consequence.
 
 
 \section{Discussion}
+
+Our proposed secondary encoding including a heuristic for prioritizing the least amount of changes improves running time compared to Redo Planning with the base encoding. The heuristic improves total calculation time significantly. However, by prioritizing the least amount of changes qualitative details can be missed.
+
+Figure \ref{label} illustrates this discrepancy. 
+ 
 \begin{itemize}
 	\item add summary of results for each experiment
 	\item How do we feel about the results?
@@ -996,9 +1001,11 @@ output:
 \end{figure}
 
 \section{Future Work}
-Future work could consider other approaches than randomness as a decider for a track malfunction. For instance, making malfunction on highly frequented tracks or crossings more likely than on straight connections. 
+Future work could consider other approaches than uniform randomness as a decider for a track malfunction. For instance, malfunctions on highly frequented tracks or crossings could be more likely than on straight connections. 
 
 In our current pipeline, scheduling and rescheduling are tied together tightly. For benchmarking of different encoding options, it can be useful to separate out these two steps. Such a set-up would have to save the scheduling plan from the base encoding, then create a malfunction and call the plan again for generating the information to forward for rescheduling. This approach could ease comparisons between rescheduling encodings by using the exact same model from the base encoding.
+
+Additionally, our approach currently only handles one emerging track malfunction at a given time step and overlapping malfunctions with different starting times. Future projects could consider adjusting \verb|solve.py| to handle two or more simultaneous track malfunctions.
 
 Finally, we noticed that sometimes a malfunction can cause an environment to be unsatisfiable, i.e. when a malfunction hits a particularly crucial track. Then the program crashes without any visual output despite having successfully calculated the original schedule. Future projects could focus on handling this issue and generating the base plan in Flatland or maybe even visualizing when and why the program fails.
 

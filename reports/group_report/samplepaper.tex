@@ -409,7 +409,7 @@ If no agent is planned to visit the actively malfunctioning cell the trains can 
 In a simple consequence, only one train is scheduled to pass the track malfunction (only one \verb|consequence/3| atom). The train gets marked as \verb|calculate/1|. Other trains remain \verb|planned/1|. From its current position this agents gets rescheduled. The rescheduling is done similarly to the scheduling logic in the base encoding by checking reachable cells, creating \verb|position| and \verb|action| atoms, narrowing down the solution with constraints and selecting the best model via optimization statements (see Section \ref{encoding_1}). A rescheduled train can "wait out" the malfunction or be rerouted via other available tracks.
 
 \subsubsection{Complex Consequence}
-A complex consequence includes multiple agents that require rescheduling (multiple \verb|conequence/3| atoms). However, it also covers the case where the adjustment of one agent's path influences another train, e.g. the rerouted or waiting train would cause a collision with an unaffected train. The trains that were planned as passing through the track malfunction are marked with \verb|consequence/3|. Those agents and the ones indirectly affected are marked as \verb|calculate/1|. The rescheduling then is done as described in Section \ref{simple_consequence}.
+A complex consequence includes multiple agents that require rescheduling (multiple \verb|conequence/3| atoms). However, it also covers the case where the adjustment of one agent's path influences another train, e.g. the rerouted or waiting train would cause a collision with an unaffected train. The trains that were planned as passing through the track malfunction are marked with \verb|consequence/3|. Those agents and the ones indirectly affected are marked as \verb|calculate/1|. Other trains remain \verb|planned/1|. The rescheduling then is done as described in Section \ref{simple_consequence}.
 
 
 \section{Experiments}
@@ -998,9 +998,7 @@ output:
 \section{Future Work}
 Future work could consider other approaches than randomness as a decider for a track malfunction. For instance, making malfunction on highly frequented tracks or crossings more likely than on straight connections. 
 
-Another avenue to explore would be the option of a tertiary encoding. The results show that our secondary encoding performs badly when the track malfunction happens early on in an environment with many time steps. The encoding then has to recalculate a very big part and Redo Planning would be more efficient. Introducing a cut-off point for early malfunctions in the secondary encoding that then leads to rescheduling with the base encoding anew could be feasible.
-
-add idea: run just secondary encoding
+In our current pipeline, scheduling and rescheduling are tied together tightly. For benchmarking of different encoding options, it can be useful to separate out these two steps. Such a set-up would have to save the scheduling plan from the base encoding, then create a malfunction and call the plan again for generating the information to forward for rescheduling. This approach could ease comparisons between rescheduling encodings by using the exact same model from the base encoding.
 
 Finally, we noticed that sometimes a malfunction can cause an environment to be unsatisfiable, i.e. when a malfunction hits a particularly crucial track. Then the program crashes without any visual output despite having successfully calculated the original schedule. Future projects could focus on handling this issue and generating the base plan in Flatland or maybe even visualizing when and why the program fails.
 

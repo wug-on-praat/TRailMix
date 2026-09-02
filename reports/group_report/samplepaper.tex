@@ -15,6 +15,7 @@
 
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta, positioning, shapes.geometric, decorations.pathreplacing, fit}
+\usepackage{float}
 
 \usepackage{booktabs}
 \usepackage{longtable}
@@ -251,23 +252,23 @@ The added code consists of multiple parts:
     \item Depicting the malfunction in the Flatland output
 \end{itemize}
 
-\subsubsection{How is a track malfunction created?}
+\subsubsection{Track Malfunction Atom Definition}
 
 A track malfunction Python object is a tuple consisting of three components:
 
 \begin{verbatim}
-(cell, timestep, duration)
+(CELL, TIMESTEP, DURATION)
 \end{verbatim}
 
-The \texttt{cell} is an \texttt{(X, Y)} tuple that defines where the track malfunction occurred.
+The \texttt{CELL} is an \texttt{(X, Y)} tuple that defines where the track malfunction occurred.
 
-The \texttt{timestep} represents the timestep at which the track malfunction was triggered. During this timestep, the malfunction has not yet occurred; it starts in the following timestep. This was an architectural decision to ensure that trains cannot be on a malfunctioning track when the malfunction starts.
+The \texttt{TIMESTEP} represents the timestep at which the track malfunction was triggered. During this timestep, the malfunction has not yet occurred; it starts in the following timestep. This was an architectural decision to ensure that trains cannot be on a malfunctioning track when the malfunction starts.
 
-The \texttt{duration} specifies the number of timesteps for which the track malfunction occurred.
+The \texttt{DURATION} specifies the number of timesteps for which the track malfunction occurred.
 
-Track malfunctions can either be created randomly or predefined by the user. The variable \texttt{predefined\_malfunction} is used to store malfunctions that the user wants to enforce on the environment. If the variable is empty, there is a 1\% chance of a malfunction occurring at every timestep (this probability can be adjusted). In the current setup, only one malfunction can occur per timestep. \textbf{(Improvement idea)}
+Track malfunctions can either be created randomly or predefined by the user. The variable \texttt{predefined\_malfunction} is used to store malfunctions that the user wants to enforce on the environment. If the variable is empty, there is a 1\% chance of a malfunction occurring at every timestep (this probability can be adjusted). In the current setup, only one malfunction can occur per timestep.
 
-\subsubsection{How is a malfunction implemented in Clingo?}\label{fwd_info_2_clingo}
+\subsubsection{Track malfunction Implementation in Clingo}\label{fwd_info_2_clingo}
 
 When a malfunction is triggered in Python, multiple atoms and rules are generated and forwarded to the program that calculates the rescheduling (secondary encoding - see Section \ref{encoding_2}).
 
@@ -285,7 +286,7 @@ When a malfunction is triggered in Python, multiple atoms and rules are generate
     \item \textbf{\texttt{current\_position} atoms} -- Include all positions occupied at the timestep at which the malfunction occurred.
 \end{itemize}
 
-\subsubsection{How is the malfunction logged?}
+\subsubsection{Track malfunction Log}
 
 The malfunction is logged in a CSV file with the following parameters:
 
@@ -294,7 +295,7 @@ timestep;cell;duration
 \end{verbatim}
 
 
-\subsubsection{How is the malfunction depicted?}
+\subsubsection{Track malfunction Depiction}
 
 Similar to a train malfunction, a track malfunction is depicted as a red \textbf{X} over the malfunctioning track.
 
@@ -413,21 +414,20 @@ A complex consequence includes multiple agents that require rescheduling (multip
 
 
 \section{Experiments}
-We have conducted three experiments to test the capabilities of our encodings in multiple environments. We tested the following scenarios:
+We have conducted four experiments to test the capabilities of our encodings in multiple environments. We tested the following scenarios:
 \begin{itemize}
-	\item Rescheduling: base encoding vs. secondary encoding
+	\item Rescheduling: base encoding vs. secondary encoding with heuristic
 	\item Secondary encoding: heuristic vs. no heuristic
+	\item Base encoding vs. secondary encoding with time prioritization
 	\item Secondary encoding: Time vs. first plan prioritization
 \end{itemize}
 
 Clingo reports total elapsed time and time spent on solving. For each experiment, we assume that most of the non-solving time is used to ground the rules. We base our comparisons on time differences in computing since rescheduling is a  time-sensitive interruption with only a limited window for decision making.
 
-Experiment 1 investigates if rescheduling with the secondary encoding is indeed preferable over replanning with the base encoding (Redo Planning). 
-base prioritzese time, while secondary prioritizes planned trains
-
-Experiment 2 compares performance of the secondary encoding with and without the heuristic prioritizing planned trains. 
-
-Experiment 3 evaluates the weighting of optimization statements in the secondary encoding. optimization weights were switched
+Experiment 1 investigates if rescheduling with the secondary encoding is indeed preferable over replanning with the base encoding (Redo Planning).
+Experiment 2 compares performance of the secondary encoding with and without the heuristic prioritizing planned trains.
+Experiment 3 evaluates if the base or the secondary encoding with time prioritization is better for getting the time optimized solution. 
+Experiment 4 evaluates the weighting of optimization statements in the secondary encoding.
 
 \subsection{Testing environments}
 Six testing environments of varying sizes and numbers of agents were used in each experiment (see Figure \ref{test_envs}). In each environment, we have identified tracks for the three types of track malfunctions (simple, complex, no consequence - see Section \ref{encoding_2}).
@@ -477,7 +477,7 @@ Six testing environments of varying sizes and numbers of agents were used in eac
 \end{figure}
 
 \subsection{Predictions}
-The output for each method when rescheduling after a malfunction will not
+The output for each encoding when rescheduling after a malfunction will not
 necessarily be the same. The base encoding and the secondary encoding with
 time prioritization will output the optimal solution, meaning that the trains
 will spend the least possible amount of time on the network overall.
@@ -486,12 +486,19 @@ However, the secondary encoding with and without heuristics prioritizes the
 preservation of the planned schedule. This means that even if delaying a
 non-consequent train would improve the overall travel time, only the base
 encoding and the secondary encoding with time prioritization will derive this
-solution. The other two methods will not be able to choose this solution.
+solution. The other two encodings will not be able to choose this solution.
 
 \section{Results}
 The raw results are listed in Appendix \ref{sec:appendix}. Tables \ref{tab:rescheduling_times_base}, \ref{tab:rescheduling_times_heuristic} and \ref{tab:rescheduling_time_priority} report the results by experiment.
 
-\begin{table}[htb]
+\subsection{Base Encoding vs. Secondary Encoding with Heuristics}
+For smaller environments, the running time is low for both encodings.
+For larger environments, the secondary encoding with heuristics is always preferable.
+For example, in \texttt{env\_007-6\_6}, the differences in the running time were substantial.
+In the non-consequent malfunction the secondary encoding with heuristics ran two minutes faster than
+the base encoding.
+
+\begin{table}[htbp]
 	\centering
 	\footnotesize
 	\setlength{\tabcolsep}{4pt}
@@ -510,130 +517,48 @@ The raw results are listed in Appendix \ref{sec:appendix}. Tables \ref{tab:resch
 		\midrule
 		
 		\textbf{env\_016--3\_2}
-		& Non-consequent
-		& 0.107
-		& 0.116
-		& +0.009 \\
-		
-		& Consequent 1
-		& 0.104
-		& 0.071
-		& -0.033 \\
-		
-		& Consequent 2
-		& 0.082
-		& 0.084
-		& +0.002 \\
-		
-		& Consequent + collisions
-		& 0.089
-		& 0.070
-		& -0.019 \\
+		& Non-consequent & 0.107 & 0.116 & +0.009 \\
+		& Consequent 1 & 0.104 & 0.071 & -0.033 \\
+		& Consequent 2 & 0.082 & 0.084 & +0.002 \\
+		& Consequent + collisions & 0.089 & 0.070 & -0.019 \\
 		
 		\midrule
 		
 		\textbf{env\_033--5\_4}
-		& Non-consequent
-		& 0.655
-		& 0.576
-		& -0.079 \\
-		
-		& Consequent 1
-		& 0.635
-		& 0.561
-		& -0.074 \\
-		
-		& Consequent 2
-		& 0.607
-		& 0.389
-		& -0.218 \\
-		
-		& Consequent + collisions
-		& 3.747
-		& 0.867
-		& -2.880 \\
+		& Non-consequent & 0.655 & 0.576 & -0.079 \\
+		& Consequent 1 & 0.635 & 0.561 & -0.074 \\
+		& Consequent 2 & 0.607 & 0.389 & -0.218 \\
+		& Consequent + collisions & 3.747 & 0.867 & -2.880 \\
 		
 		\midrule
 		
 		\textbf{env\_007--6\_6}
-		& Non-consequent
-		& 138.697
-		& 10.794
-		& -127.903 \\
-		
-		& Consequent 1
-		& 127.527
-		& 9.941
-		& -117.586 \\
-		
-		& Consequent 2
-		& 97.934
-		& 10.245
-		& -87.689 \\
-		
-		& Consequent + collisions
-		& 100.216
-		& 25.852
-		& -74.364 \\
+		& Non-consequent & 138.697 & 10.794 & -127.903 \\
+		& Consequent 1 & 127.527 & 9.941 & -117.586 \\
+		& Consequent 2 & 97.934 & 10.245 & -87.689 \\
+		& Consequent + collisions & 100.216 & 25.852 & -74.364 \\
 		
 		\midrule
 		
 		\textbf{env\_009--10\_10}
-		& Non-consequent
-		& 44.581
-		& 1.303
-		& -43.278 \\
-		
-		& Consequent 1
-		& 97.233
-		& 1.610
-		& -95.623 \\
-		
-		& Consequent 2
-		& 1.872
-		& 0.509
-		& -1.363 \\
-		
-		& Consequent + collisions
-		& 71.720
-		& 2.587
-		& -69.133 \\
+		& Non-consequent & 44.581 & 1.303 & -43.278 \\
+		& Consequent 1 & 97.233 & 1.610 & -95.623 \\
+		& Consequent 2 & 1.872 & 0.509 & -1.363 \\
+		& Consequent + collisions & 71.720 & 2.587 & -69.133 \\
 		
 		\midrule
 		
 		\textbf{env\_028--2\_2}
-		& Non-consequent
-		& 0.054
-		& 0.071
-		& +0.017 \\
-		
-		& Consequent 1
-		& 0.040
-		& 0.032
-		& -0.008 \\
-		
-		& Consequent + collisions
-		& 0.053
-		& 0.048
-		& -0.005 \\
+		& Non-consequent & 0.054 & 0.071 & +0.017 \\
+		& Consequent 1 & 0.040 & 0.032 & -0.008 \\
+		& Consequent + collisions & 0.053 & 0.048 & -0.005 \\
 		
 		\midrule
 		
 		\textbf{env\_35--10\_8}
-		& Non-consequent
-		& 24.704
-		& 4.508
-		& -20.196 \\
-		
-		& Consequent 1
-		& 7.952
-		& 1.231
-		& -6.721 \\
-		
-		& Consequent 2
-		& 25.222
-		& 1.344
-		& -23.878 \\
+		& Non-consequent & 24.704 & 4.508 & -20.196 \\
+		& Consequent 1 & 7.952 & 1.231 & -6.721 \\
+		& Consequent 2 & 25.222 & 1.344 & -23.878 \\
 		
 		\bottomrule
 	\end{tabular}
@@ -641,6 +566,38 @@ The raw results are listed in Appendix \ref{sec:appendix}. Tables \ref{tab:resch
 	\caption{Comparison of total rescheduling times for Base and Secondary + heuristic. Negative values of $\Delta T_{\mathrm{res}}$ indicate that Secondary + heuristic is faster than Base.}
 	\label{tab:rescheduling_times_base}
 \end{table}
+
+\subsection{Secondary Encoding: Heuristic vs. no Heuristic}
+
+Secondary encoding with heuristic is always faster than secondary encoding without heuristic.
+
+In the beginning, we implemented the secondary encoding without the heuristic
+addition (Line 6 in Code \ref{heuristic_code}). We were perplexed by the fact that running the environment with
+the secondary encoding took more time than with the base encoding.
+
+For us, it was obvious that since most malfunctions either do not affect the
+trains or affect only one or two trains, most trains should be able to simply
+use the output from the base encoding. However, Clingo still needed to
+re-prove that the solution was optimal.
+
+Clingo started with an initial solution that recalculated all the trains and,
+after many iterations, eventually reached the original planned solution.
+
+After adding the heuristic flag, Clingo found that most trains should use the
+original planned solution already in the first iteration.
+
+We assume that since the secondary encoding has more rules and options,
+it is harder to solve without redirecting Clingo toward the planned train solution.
+
+% Heuristic Flag in Clingo Code
+\begin{lstlisting}[style=mystyle, language=Clingo, caption={heuristic code.}, label=heuristic_code]
+	
+	% planned is a train that is not affected by the malfunction and we don't want to reroute it
+	{planned(ID)}:- train(ID), not consequence(train(ID), _, _).
+	
+	% Prioritize planned trains when solving
+	#heuristic planned(ID): train(ID). [100, true]
+\end{lstlisting}
 
 \begin{table}[htbp]
 	\centering
@@ -707,6 +664,90 @@ The raw results are listed in Appendix \ref{sec:appendix}. Tables \ref{tab:resch
 	\label{tab:rescheduling_times_heuristic}
 \end{table}
 
+\subsection{Base Encoding vs. Secondary Encoding with Time Prioritization}
+
+We compared these two encodings because these are the only encoding that can output the most optimized reschedule 
+after a malfunciton.
+The base encoding is sometimes faster when there is no consequence,
+whereas the secondary encoding with time prioritization is always faster when there
+is a consequence.
+
+\begin{table}[htbp]
+	\centering
+	\footnotesize
+	\setlength{\tabcolsep}{4pt}
+	\renewcommand{\arraystretch}{0.9}
+	
+	\begin{tabular}{@{}llrrr@{}}
+		\toprule
+		\textbf{Environment} &
+		\textbf{Malfunction type} &
+		\makecell[r]{\textbf{base}} &
+		\makecell[r]{\textbf{~~time prioritization}} &
+		\makecell[r]{\textbf{$\Delta T_{\mathrm{res}}$}} \\
+		\midrule
+		
+		\textbf{env\_016--3\_2}
+		& Non-consequent & 0.107 & 0.099 & -0.008 \\
+		& Consequent 1 & 0.104 & 0.093 & -0.011 \\
+		& Consequent 2 & 0.082 & 0.058 & -0.024 \\
+		& Consequent + collisions & 0.089 & 0.076 & -0.013 \\
+
+		\midrule
+
+		\textbf{env\_033--5\_4}
+		& Non-consequent & 0.655 & 0.983 & +0.328 \\
+		& Consequent 1 & 0.635 & 0.807 & +0.172 \\
+		& Consequent 2 & 0.607 & 0.585 & -0.022 \\
+		& Consequent + collisions & 3.747 & 1.132 & -2.615 \\
+
+		\midrule
+
+		\textbf{env\_007--6\_6}
+		& Non-consequent & 138.697 & 179.266 & +40.569 \\
+		& Consequent 1 & 127.527 & 87.676 & -39.851 \\
+		& Consequent 2 & 97.934 & 67.346 & -30.588 \\
+		& Consequent + collisions & 100.216 & 71.626 & -28.590 \\
+
+		\midrule
+
+		\textbf{env\_009--10\_10}
+		& Non-consequent & 44.581 & 9.817 & -34.764 \\
+		& Consequent 1 & 97.233 & 66.304 & -30.929 \\
+		& Consequent 2 & 1.872 & 0.740 & -1.132 \\
+		& Consequent + collisions & 71.720 & 24.082 & -47.638 \\
+
+		\midrule
+
+		\textbf{env\_028--2\_2}
+		& Non-consequent & 0.054 & 0.050 & -0.004 \\
+		& Consequent 1 & 0.040 & 0.031 & -0.009 \\
+		& Consequent + collisions & 0.053 & 0.045 & -0.008 \\
+
+		\midrule
+
+		\textbf{env\_35--10\_8}
+		& Non-consequent & 24.704 & 39.227 & +14.523 \\
+		& Consequent 1 & 7.952 & 1.735 & -6.217 \\
+		& Consequent 2 & 25.222 & 5.410 & -19.812 \\
+
+		
+		\bottomrule
+	\end{tabular}
+	\vspace{4mm¸}
+	\caption{Comparison of total rescheduling times, $T_{\mathrm{res}}$, for
+		Base and Secondary + time prioritization. The difference is
+		computed as
+		$\Delta T_{\mathrm{res}} =
+		T_{\mathrm{res}}^{\mathrm{Secondary+time\ priority}} -
+		T_{\mathrm{res}}^{\mathrm{Base}}$.
+		Positive values indicate that Base is faster.}
+	\label{tab:rescheduling_time_prioritization}
+\end{table}
+
+\subsection{Secondary encoding: Time vs. first plan prioritization}
+
+Secondary encoding that prioritizes the first plan is always faster than the secondary encoding that prioritizes time optimization.
 
 \begin{table}[htbp]
 	\centering
@@ -781,93 +822,7 @@ The raw results are listed in Appendix \ref{sec:appendix}. Tables \ref{tab:resch
 \end{table}
 
 
-
-\subsection{Grounding Time}
-
-The grounding time is similar for all methods and, even for larger
-environments, usually does not account for more than 10\% of the total
-running time.
-
-When the malfunction occurred at the beginning of the schedule, the base
-encoding was 30\% faster than the secondary encoding. However, when the
-malfunction occurred in the middle of the schedule, the secondary encoding
-was 30\% faster.
-
-This can be explained by the fact that, in the base encoding, the positions
-and actions for all time steps must be grounded using complex logic. In the
-secondary encoding, however, the past and current positions and actions are
-already set and do not need to be grounded using the complex rules. Only
-future positions and actions need to go through the complex logic.
-
-Therefore, while the logic in the secondary encoding is more complex for
-future time steps, some malfunctions can still be grounded faster if the
-malfunction occurs late enough in the schedule.
-
-\subsection{Solving Time}
-
-Looking at the solving times, for smaller environments, the running time is
-low for all methods. For larger environments, the secondary encoding with
-heuristics is always preferable. When the malfunction has no consequences,
-solving with the secondary encoding almost always takes less than one
-second, even when there is a consequence but no future collision.
-
-For malfunctions that cause a collision, the running times were closer
-between the methods, but the secondary encoding still ran 75\% faster than
-the base encoding.
-
-Surprisingly, using the base encoding is almost always preferable to using
-the secondary encoding without the heuristic flag. We assume that since the
-secondary encoding has more rules and options, it is harder to solve.
-
-Comparing the base encoding and the secondary encoding with time
-prioritization, the base encoding is faster when there is no consequence,
-whereas the secondary encoding with time prioritization is faster when there
-is a consequence.
-
-\subsection{compare grounding for two versions of trains can't be in same cell at same time rule}
-
-
-\section{Discussion}
-
-Our proposed secondary encoding including a heuristic for prioritizing the least amount of changes improves running time compared to Redo Planning with the base encoding. The heuristic improves total calculation time significantly. However, by prioritizing the least amount of changes qualitative details can be missed.
-
-Figure \ref{label} illustrates this discrepancy. 
- 
-\begin{itemize}
-	\item add summary of results for each experiment
-	\item How do we feel about the results?
-\end{itemize}
-
-
-\subsection{Why is Adding the Heuristic Flag Important?}\label{heuristic}
-
-In the beginning, we implemented the secondary encoding without the heuristic
-addition (Line 6 in Code \ref{heuristic_code}). We were perplexed by the fact that running the environment with
-the secondary encoding took more time than with the base encoding.
-
-For us, it was obvious that since most malfunctions either do not affect the
-trains or affect only one or two trains, most trains should be able to simply
-use the output from the base encoding. However, Clingo still needed to
-re-prove that the solution was optimal.
-
-Clingo started with an initial solution that recalculated all the trains and,
-after many iterations, eventually reached the original planned solution.
-
-After adding the heuristic flag, Clingo found that most trains should use the
-original planned solution already in the first iteration.
-
-% Heuristic Flag in Clingo Code
-\begin{lstlisting}[style=mystyle, language=Clingo, caption={Here is a caption.}, label=heuristic_code]
-	
-	% planned is a train that is not affected by the malfunction and we don't want to reroute it
-	{planned(ID)}:- train(ID), not consequence(train(ID), _, _).
-	
-	% Prioritize planned trains when solving
-	#heuristic planned(ID): train(ID). [100, true]
-	
-\end{lstlisting}
-
-\subsection{When to Use Each Method?}
+\subsection{Encoding Selection After a Track Malfunction}
 
 There are two possible goals that a user might want when rescheduling after
 a malfunction:
@@ -880,26 +835,26 @@ a malfunction:
 
 Both goals should be achieved as quickly as possible.
 
-For the purpose of comparing the methods, we assume that the output of the
+For the purpose of comparing the encodings, we assume that the output of the
 initial schedule using the base encoding is already saved. This assumption
 reflects the real-world scenario in which the schedule is set in advance and
 the malfunction occurs later.
 
 For obtaining the most optimized solution, the base encoding and the
-secondary encoding with time prioritization are the preferred methods. Conversely, 
+secondary encoding with time prioritization are the preferred encodings. Conversely, 
 the secondary encoding with and without heuristics are used to produce 
 an answer with the least amount of changed trains.
 
 For smaller environments, defined as a height below 20, a
-width below 20, and fewer than 3 trains, all methods are very fast, and no
+width below 20, and fewer than 3 trains, all encodings are very fast, and no
 malfunction requires more than 5 seconds to find a solution.
 
-For larger environments, however, the differences between the methods become
+For larger environments, however, the differences between the encodings become
 significant. If the user wants to obtain the least amount of changed trains
 possible, they should choose the secondary encoding with heuristics, as it is
-consistently the fastest method, often by a large margin.
+consistently the fastest encoding, often by a large margin.
 
-If the user wants the most optimized solution, the preferred method depends
+If the user wants the most optimized solution, the preferred encoding depends
 on whether there is a consequence. If there is a consequence, the secondary
 encoding with time prioritization is the better choice in most cases.
 Otherwise, the base encoding is faster.
@@ -911,21 +866,21 @@ optimized solution and the solution with the least amount of changed trains.
 If there is a consequence, the appropriate solution depends on the user's
 goal. If the goal is to minimize the number of changed trains, Solution A can
 be used directly. If the goal is to obtain the most optimized solution, the
-secondary encoding with time optimization is run to derive Solution B.
+secondary encoding with time prioritization is run to derive Solution B.
 Most malfunctions will not have a consequence, so it is better to run the
 secondary encoding first and determine whether rescheduling is necessary.
 The secondary encoding is also very fast in all cases, so an answer will be
-available before the other methods.
+available before the other encodings.
 
-Using the secondary encoding with time optimization only when a consequence
+Using the secondary encoding with time prioritization only when a consequence
 is detected was faster than the base encoding in all tested cases.
 
-The following graph depicts which method should be used based on the desired
+The following graph depicts which encoding should be used based on the desired
 output:
-\begin{figure}[htb!]
+\begin{figure}[H]
 	\centering
 	\begin{tikzpicture}[
-		node distance=1.2cm,
+		node distance=0.5cm,
 		every node/.style={font=\small},
 		process/.style={
 			rectangle,
@@ -950,22 +905,24 @@ output:
 		
 		% Start
 		\node[process] (start)
-		{Run secondary encoding\\
+		{Run secondary encoding with heuristic\\
 			and derive solution A};
 		
 		% First decision
 		\node[decision, below=of start] (consequence)
-		{Consequence?};
+		{Consequence in\\
+		solution A?};
 		
 		% No consequence branch
 		\node[process, below=of consequence, xshift=-3.5cm] (no)
-		{Solution A is the most\\
-			optimized and has the least\\
+		{Solution A is optimized for\\
+			both time and\\
 			amount of changed trains};
 		
 		% Consequence branch
 		\node[decision, below=of consequence, xshift=3.5cm] (goal)
-		{User's goal?};
+		{Is time \\
+		prioritization required?};
 		
 		% Least changed trains
 		\node[process, below=of goal, xshift=-3.2cm] (least)
@@ -975,7 +932,7 @@ output:
 		% Most optimized
 		\node[process, below=of goal, xshift=3.2cm] (optimized)
 		{Run secondary encoding with\\
-			time optimization and\\
+			time prioritization and\\
 			derive solution B};
 		
 		% Arrows from start
@@ -990,14 +947,14 @@ output:
 		
 		% User goal branches
 		\draw[arrow] (goal)
-		-- node[above left] {Least changes} (least);
+		-- node[above left] {No} (least);
 		
 		\draw[arrow] (goal)
-		-- node[above right] {Most optimized} (optimized);
+		-- node[above right] {Yes} (optimized);
 		
 	\end{tikzpicture}
-	\caption{Decision process for selecting a rescheduling method.}
-	\label{fig:rescheduling-method-selection}
+	\caption{Decision process for selecting a rescheduling encoding.}
+	\label{fig:rescheduling-encoding-selection}
 \end{figure}
 
 \section{Future Work}

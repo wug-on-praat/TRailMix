@@ -3,8 +3,32 @@
 \usecolortheme{spruce} % choose from: wolverine dove spruce beaver albatross {ASP one ;)} 
 
 \usepackage{xcolor, soul}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
 \usepackage{tcolorbox}
 \usepackage{listings}
+
+\lstdefinestyle{mystyle}{
+	backgroundcolor=\color{backcolour},   
+	%commentstyle=\color{codegreen},
+	keywordstyle=\bfseries,
+	numberstyle=\tiny\color{codegray},
+	stringstyle=\color{codepurple},
+	basicstyle=\footnotesize,
+	breakatwhitespace=true,         
+	breaklines=true,                 
+	captionpos=b,                    
+	keepspaces=true,                 
+	numbers=left,                    
+	numbersep=5pt,                  
+	showspaces=false,                
+	showstringspaces=false,
+	showtabs=false,                  
+	tabsize=2
+}
 
 \tcbuselibrary{breakable}
 \tcbset{%any default parameters
@@ -16,14 +40,13 @@
 }
 
 \usepackage{caption}
-\usepackage{tipa}
-\usepackage{xcolor}
-\usepackage{listings}
-\title{Title}
-\subtitle{Subtitle}
+
+
+\title{Track Malfunctions in Flatland}
+%\subtitle{Subtitle}
 \author{Baruch Shteken \and Lena Friedek}
 \institute[]{Railway Scheduling, Universität Potsdam}
-\date{\today}
+\date{21st Sep 2026}
 
 \begin{document}
 
@@ -34,25 +57,166 @@
 %----------------------------------------------------------------
 
 \begin{frame}
-\frametitle{Slide Title}
+\frametitle{Malfunctions in Flatland}
+
 \begin{itemize}
-    \item A fact
+	\item \textsf{solve.py} handles train malfunctions.
+	
+	\item Base encoding for scheduling and forwarding information;
+	secondary encoding for rescheduling (Gilka and Murphy).
+	
+	\item Information forwarded:
+	\begin{itemize}
+		\item actions as constraints;
+		\item the malfunction atom;
+		\item \textsf{planned\_action}.
+	\end{itemize}
 \end{itemize}
-    
+
+% add picture from output
+
 \end{frame}
 
 %----------------------------------------------------------------
 
 \begin{frame}
-\frametitle{Another Slide}
+\frametitle{Track Malfunctions}
 \begin{itemize}
-    \item Something
+    \item real-world issue
+    \item negatively affects punctuality
+    \item reasons: weather, fires, trespassing, repairs, high-frequent use
 \end{itemize}
-    
+ 
+ % add DB Meme or Fun
+ 
 \end{frame}
 
 %----------------------------------------------------------------
-¸
 
+\begin{frame}
+	\frametitle{Our Contribution}
+	\begin{itemize}
+		\item create malfunction (randomly/deterministically)
+		\item forwarding additional information
+		\item malfunction logging
+		\item visualization in Flatland
+	\end{itemize}
+	
+\end{frame}
+
+%----------------------------------------------------------------
+\begin{frame}
+	\frametitle{Create a Track Malfunction}
+
+%\begin{lstlisting}[style=mystyle, language=Python]
+%	
+%	malfunction_rate=10/30
+%	min_duration=2
+%	max_duration=6
+
+%    def create_trkmalf(self, timestep, predefined_mals) -> set:       # malfunction generator
+%
+%""" create track malfunction or implement predefined track malfunctions if provided """
+%
+%if not predefined_mals:
+%malfunction_ind = random.random()   # decider for malfunction: create value btw 0-1
+%
+%if malfunction_ind > 0.99:
+%malfunction_cell = tuple(random.choice(self.grid))
+%malfunction_duration = random.randint(2,20)    # maybe define with function (make 5 more likely than 20)
+%mal_timestep = timestep
+%
+%else: 
+%return([])
+%	
+%\end{lstlisting}
+	
+\end{frame}
+
+%----------------------------------------------------------------
+
+\begin{frame}
+	\frametitle{Additional Forwarded Information}
+	\begin{itemize}
+		\item track malfunction 
+		\item position constraint rules
+		\item planned position
+		\item current position
+	\end{itemize}
+	
+% add Output
+
+\end{frame}
+
+%----------------------------------------------------------------
+
+\begin{frame}
+	\frametitle{Secondary Encoding}
+	\begin{itemize}
+		\item add figures for base and secondary
+		\item 
+	\end{itemize}
+	
+\end{frame}
+
+%----------------------------------------------------------------
+
+\begin{frame}
+	\frametitle{Rescheduling}
+	\begin{itemize}
+		\item planned, consequence, calculate
+		\item heuristic
+		\item (should be 5 rules in total)
+	\end{itemize}
+% show the clingo code for this OR add diagram
+\end{frame}
+
+%----------------------------------------------------------------
+
+\begin{frame}
+	\frametitle{Experiments}
+	\begin{itemize}
+		\item Base vs. Secondary
+		\item Heuristic vs. no heuristic
+		\item Planned trains (heuristic) vs. Time Optimization
+	\end{itemize}
+	
+\end{frame}
+
+%----------------------------------------------------------------
+
+\begin{frame}
+	\frametitle{Results}
+	\begin{itemize}
+		\item secondary+heuristic is fastest
+		\item heuristic better than no heuristic
+		\item Time Optimization 
+	\end{itemize}
+	
+\end{frame}
+
+%----------------------------------------------------------------
+
+\begin{frame}
+	\frametitle{Discussion}
+	\begin{itemize}
+		\item add fig decision process
+		\item 
+	\end{itemize}
+	
+\end{frame}
+
+%----------------------------------------------------------------
+
+\begin{frame}
+	\frametitle{Future Work}
+	\begin{itemize}
+		\item add figures for base and secondary
+		\item 
+	\end{itemize}
+	
+\end{frame}
+
+%----------------------------------------------------------------
 
 \end{document}

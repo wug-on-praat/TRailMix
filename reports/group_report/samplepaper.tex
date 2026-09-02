@@ -388,7 +388,7 @@ The secondary encoding reschedules the environment after a track malfunction. Ou
 
 First, the program sets up the required environment with \verb|connections_nswe.lp| and creates two time counters. \verb|time(T)| counts time from one step after the track malfunction. \verb|past_time(T)| counts time up until and including the step of the track malfunction. This distinction is required to restore actions up until the malfunction time. These action atoms are necessary for Flatland to depict the solution correctly.
 
-If a track malfunction triggers before all trains of the environment have been initialized in their starting position, they have to be positioned during rescheduling. Then the replanning of trains starts. To identify whether an agent is affected by a track malfunction, it raises a \verb|consequence\3| (see Code \ref{consequence}). That means the train is planned to be on the malfunctioning track, it cannot continue on its original path and must adjust its behaviour. Subsequently, a heuristic was added to prioritize planned trains (see Section \ref{heuristic}). There are three scenarios our secondary encoding handles\footnote{If a track malfunction hits a cell while there is a train on its track, the simulation break, effectively corresponding to an accident on the track. We discovered this behaviour and decided to keep it instead of handling that exception as it also depicts a realistic scenario and could be inspiration for future work in this course.}: a) the track malfunction doesn't interfere with the planned routes of agents (no consequence), b) one train is affected by the track malfunction (simple consequence) and c) multiple trains are affected by the track malfunction (complex consequence).
+If a track malfunction triggers before all trains of the environment have been initialized in their starting position, they have to be positioned during rescheduling. Then the replanning of trains starts. To identify whether an agent is affected by a track malfunction, it raises a \verb|consequence\3| (see Code \ref{consequence}). That means the train is planned to be on the malfunctioning track, it cannot continue on its original path and must adjust its behaviour. There are three scenarios our secondary encoding handles\footnote{If a track malfunction hits a cell while there is a train on its track, the simulation break, effectively corresponding to an accident on the track. We discovered this behaviour and decided to keep it instead of handling that exception as it also depicts a realistic scenario and could be inspiration for future work in this course.}: a) the track malfunction doesn't interfere with the planned routes of agents (no consequence), b) one train is affected by the track malfunction (simple consequence) and c) multiple trains are affected by the track malfunction (complex consequence).
 
 
 \begin{lstlisting}[style=mystyle, language=Clingo, caption={Definition of consequence: if a train is attempting to go into a malfunctioning cell it raises a consequence.}, label={consequence}]
@@ -406,7 +406,7 @@ If a track malfunction triggers before all trains of the environment have been i
 If no agent is planned to visit the actively malfunctioning cell the trains can continue their paths as calculated in the base encoding. All agents are marked as \verb|planned\1|. Their planned actions and positions are translated into \verb|action\3| and \verb|position\4| atoms. 
 
 \subsubsection{Simple Consequence}\label{simple_consequence}
-In a simple consequence, only one train is scheduled to pass the track malfunction (only one \verb|consequence/3| atom). The train gets marked as \verb|calculate/1|. From its current position this agents gets rescheduled. The rescheduling is done similarly to the scheduling logic in the base encoding by checking reachable cells, creating \verb|position| and \verb|action| atoms, narrowing down the solution with constraints and selecting the best model via optimization statements (see Section \ref{encoding_1}). A rescheduled train can "wait out" the malfunction or be rerouted via other available tracks.
+In a simple consequence, only one train is scheduled to pass the track malfunction (only one \verb|consequence/3| atom). The train gets marked as \verb|calculate/1|. Other trains remain \verb|planned/1|. From its current position this agents gets rescheduled. The rescheduling is done similarly to the scheduling logic in the base encoding by checking reachable cells, creating \verb|position| and \verb|action| atoms, narrowing down the solution with constraints and selecting the best model via optimization statements (see Section \ref{encoding_1}). A rescheduled train can "wait out" the malfunction or be rerouted via other available tracks.
 
 \subsubsection{Complex Consequence}
 A complex consequence includes multiple agents that require rescheduling (multiple \verb|conequence/3| atoms). However, it also covers the case where the adjustment of one agent's path influences another train, e.g. the rerouted or waiting train would cause a collision with an unaffected train. The trains that were planned as passing through the track malfunction are marked with \verb|consequence/3|. Those agents and the ones indirectly affected are marked as \verb|calculate/1|. The rescheduling then is done as described in Section \ref{simple_consequence}.
@@ -422,10 +422,15 @@ We have conducted three experiments to test the capabilities of our encodings in
 
 Clingo reports total elapsed time and time spent on solving. For each experiment, we assume that most of the non-solving time is used to ground the rules. We base our comparisons on time differences in computing since rescheduling is a  time-sensitive interruption with only a limited window for decision making.
 
-Experiment 1 investigates if rescheduling with the secondary encoding is indeed preferable over replanning with the base encoding (Redo Planning). Experiment 2 compares performance of the secondary encoding with and without the heuristic prioritizing planned trains. Experiment 3 evaluates the weighting of optimization statements in the secondary encoding. 
+Experiment 1 investigates if rescheduling with the secondary encoding is indeed preferable over replanning with the base encoding (Redo Planning). 
+base prioritzese time, while secondary prioritizes planned trains
+
+Experiment 2 compares performance of the secondary encoding with and without the heuristic prioritizing planned trains. 
+
+Experiment 3 evaluates the weighting of optimization statements in the secondary encoding. optimization weights were switched
 
 \subsection{Testing environments}
-Five testing environments of varying sizes and numbers of agents were used in each experiment (see Figure \ref{test_envs}). In each environment, we have identified tracks for the three types of track malfunctions (simple, complex, no consequence - see Section \ref{encoding_2}).
+Six testing environments of varying sizes and numbers of agents were used in each experiment (see Figure \ref{test_envs}). In each environment, we have identified tracks for the three types of track malfunctions (simple, complex, no consequence - see Section \ref{encoding_2}).
 
 % add crosses to show malfunction cells
 \begin{figure}[hbt!]
@@ -994,6 +999,8 @@ output:
 Future work could consider other approaches than randomness as a decider for a track malfunction. For instance, making malfunction on highly frequented tracks or crossings more likely than on straight connections. 
 
 Another avenue to explore would be the option of a tertiary encoding. The results show that our secondary encoding performs badly when the track malfunction happens early on in an environment with many time steps. The encoding then has to recalculate a very big part and Redo Planning would be more efficient. Introducing a cut-off point for early malfunctions in the secondary encoding that then leads to rescheduling with the base encoding anew could be feasible.
+
+add idea: run just secondary encoding
 
 Finally, we noticed that sometimes a malfunction can cause an environment to be unsatisfiable, i.e. when a malfunction hits a particularly crucial track. Then the program crashes without any visual output despite having successfully calculated the original schedule. Future projects could focus on handling this issue and generating the base plan in Flatland or maybe even visualizing when and why the program fails.
 

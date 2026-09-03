@@ -97,7 +97,7 @@ Universität Potsdam,
 \maketitle              % typeset the header of the contribution
 %
 \begin{abstract}
-Malfunctions on and around tracks of a railway system is a common real world situation. While train malfunctions render the agent immovable, issues on the track often allows a small window for new decisions and rerouting of agents. We propose an implementation of track malfunctions for the Flatland framework leveraging environment solving with answer set programming. It investigates whether a secondary encoding for rescheduling of agents after a track malfunction is preferable to Redo Planning. 
+Malfunctions on and around tracks of a railway system are a common real-world situation. While train malfunctions render the agent immovable, issues on the track often allow a small window for decisions and rerouting of agents. We propose an implementation of track malfunctions for the Flatland framework leveraging environment solving with answer set programming. It investigates whether a secondary encoding for rescheduling of agents after a track malfunction is preferable to Redo Planning. 
 
 \keywords{ASP  \and Flatland \and MAPF \and Rescheduling \and VRSP.}
 \end{abstract}
@@ -109,7 +109,7 @@ Flatland is a framework developed by AICrowd and SBB for multi-agent path findin
 
 
 \subsection{Flatland and Answer Set Programming}
-Murphy has built a toolkit to integrate answer set programming solutions in the Flatland framework \cite{Murphy2026a}. The approach solves instances with clingo \cite{gebser2018clingo} and then translates the solution to execute and visualize in Flatland. Environments are generated beforehand to adhere to Flatland prerequisites but also encodes the instance for clingo. The ASP encoding has to generate action predicates which communicate all agents' steps to Flatland.  
+Murphy has built a toolkit to integrate answer set programming solutions in the Flatland framework \cite{Murphy2026a}. The approach solves instances with Clingo \cite{gebser2018clingo} and then translates the solution to execute and visualize in Flatland. Environments are generated beforehand to adhere to Flatland prerequisites but also encode the instance for Clingo. The ASP encoding for solving has to generate action predicates which communicate all agents' steps to Flatland.  
 
 
 \subsection{Malfunctions in Flatland}
@@ -126,9 +126,9 @@ Flatland environments can natively include agent malfunctions. The aspect is cal
 
 Murphy's interface between Clingo and Flatland allows to define separate encodings \cite{Murphy2026a}. The first encoding derives the original schedule for all agents. The secondary encoding then solves the rescheduling after every train malfunction. It includes a feature for forwarding information from the scheduling encoding to be reused in the secondary encoding \cite{Murphy2026a} \cite{gilkra2025}. 
 
-Gilkra2025a have used these features to benchmark different attempts for secondary encodings after train malfunctions \cite{gilkra2025}. They have been able reuse calculated plans from the scheduling step and thus reduce computing time during rescheduling.
+Gilkra have used these features to benchmark different attempts for secondary encodings after train malfunctions \cite{gilkra2025}. They have been able reuse calculated plans from the scheduling step and thus reduce computing time during rescheduling.
 
-Waldow2025 approaches train malfunctions by identifying conflict points, cells where two agents can collide due to a train malfunction \cite{waldow2025}. Deltas then define the distance of an agent to such a conflict point and help deduce whether a given train malfunction can be "waited out" (triviality) or if multiple agents have to wait. He calls replanning by solving the environment anew with the same base encoding "Redo Planning".
+Waldow approaches train malfunctions by identifying conflict points, cells where two agents can collide due to a train malfunction \cite{waldow2025}. Deltas then define the distance of an agent to such a conflict point and help deduce whether a given train malfunction can be "waited out" (triviality) or if multiple agents have to wait. He calls replanning by solving the environment anew with the same base encoding "Redo Planning" \cite[p.~24]{waldow2025}.
 
 
 \subsection{Track Malfunctions}
@@ -140,7 +140,7 @@ Track malfunctions are a common real world issue in railway systems. It negative
 \section{Track Malfunctions in Flatland}
 
 
-Building on existing work about malfunctioning trains, we implement track malfunctions to simulate realistic scheduling challenges (see Sections \ref{flatland_mals} and \ref{trkmals}). We base our approach on previous work by Gilkra \cite{gilkra2025} and want to build a similar structure for dealing with interruptions in the original schedule. Flatland doesn't natively include track malfunctions. Alternatively, we have included the generation of malfunctions in the main solving pipeline (see Section \ref{solve}). By reusing plans for trains from the original schedule,  we aimed to improve computation time during rescheduling through a secondary encoding (see Section \ref{encoding_2}).
+Building on existing work about malfunctioning trains, we implement track malfunctions to simulate realistic scheduling challenges (see Sections \ref{flatland_mals} and \ref{trkmals}). We base our approach on previous work by Gilkra \cite{gilkra2025} and propose a similar structure for dealing with track-based disruptions in the original schedule. Flatland doesn't natively include track malfunctions. Alternatively, we generate track malfunctions in the main solving pipeline (see Section \ref{solve}). By reusing plans for trains from the original schedule,  we aimed to improve computation time during rescheduling through a secondary encoding (see Section \ref{encoding_2}).
 
 
 \subsection{Base Encoding} \label{encoding_1}
@@ -150,7 +150,7 @@ The base encoding is Clingo code that solves a Flatland environment and schedule
 \subsubsection{Setting-up the environment} \label{setup_base}
 The environment specifications are defined for Clingo during environment creation with \verb|build.py|. It consists of a global time limit, information about the trains including agent ID, start, end and speed, and the cells with their given track type.
 
-Our Base Encoding includes rules and additional information to represent the environment. First, it imports a fact file (\verb|connections_nswe.lp|) with additional world information applicable to all Flatland environments. It defines how track types translate to the directions north, south, west and east. For instance, the fact \verb|connection(4608, (s,w))| is track type 4608, a curve that connects south and west. Furthermore, it contains definitions for directions and turns, a move in a certain direction in terms of movement on the X- and Y-axis, relations between directions (e.g. west is the inverse of east) and which track types allow a choice in direction. The fact file has been taken from Murphy \cite{Murphy2026a} in big parts and adjusted by us. Then, the Base Encoding creates the grid of adjacent cells and which of them is reachable by an agent.
+Our Base Encoding includes rules and additional information to represent the environment. First, it imports a fact file (\verb|connections_nswe.lp|) with additional world information applicable to all Flatland environments. It defines how track types translate to the directions north, south, west and east. For instance, the fact \verb|connection(4608, (s,w))| is track type 4608, a curve that connects south and west. Furthermore, it contains definitions for directions and turns, a move in a certain direction in terms of movement on the X- and Y-axis, relations between directions (e.g. west is the inverse of east) and which track types allow a choice in direction. The fact file has been taken from Murphy \cite{Murphy2026a} in big parts and expanded by us. Then, the Base Encoding creates a grid of adjacent cells and checks which are reachable by an agent.
 
 
 %\begin{wrapfigure}{r}{0.2\textwidth}
@@ -160,9 +160,9 @@ Our Base Encoding includes rules and additional information to represent the env
 %	\label{overview_primary}
 %\end{wrapfigure}
 
-\begin{wrapfigure}{r}{0.2\textwidth}
+\begin{wrapfigure}[23]{r}{0.2\textwidth}
 	\centering
-	\vspace{-2.5em}
+	\vspace{-3em}
 	\begin{tikzpicture}[
 		box/.style={
 			draw=gray!75,
@@ -184,7 +184,7 @@ Our Base Encoding includes rules and additional information to represent the env
 		
 		\node[box] (setup) {
 			\textbf{\\ Environment \\ Set-Up}\\%[-1pt]
-			{\scriptsize - time, truck types\\
+			{\scriptsize - time, track types\\
 				connected cells and \\ 
 				tracks\\}
 		};
@@ -222,19 +222,20 @@ Our Base Encoding includes rules and additional information to represent the env
 		
 	\end{tikzpicture}
 	
-	\caption{High-level overview of Base Encoding.}
+	\caption{Overview of Base Encoding.}
 	\label{fig:overview_primary}
 \end{wrapfigure}
 
 \subsubsection{Move Agents}
-The \verb|position(ID, CELL, TIME, DIRECTION)| argument handles the position of a train (ID) in the environment and thus generates the sequential moves of that agent. A train is marked as \verb|finish(ID, TIME)| once it has reached its destination and doesn't move further. The position atoms are subsequently translated to action predicates containing necessary information, namely train ID and the required action at a given time step, for Flatland to visualise the solved environment.
+The \verb|position(ID, CELL, TIME, DIRECTION)| argument handles the position of a train (ID) in the environment at any given time step and thus generates the sequential moves for that agent. A train is marked as \verb|finish(ID, TIME)| once it has reached its destination and doesn't move further. The position atoms are subsequently translated to action predicates containing necessary information, namely train ID and the required action at a given time step, for Flatland to visualise the solved environment.
 
 Our optimization objectives encourage trains to reach their destination as soon as possible and prefer one consecutive waiting period over repeated stop-and-go behaviour.
 
 \subsubsection{Constraints}
-We implemented two types of constraints on agent movements: single train constraints and train coordination constraints. Single train constraints ensure that a train behaves normally. They forbid u-turns, multiple positions of one agent in the environment and correct finishing upon arrival at the destination.
+We implemented two types of constraints on agent movements: single train constraints and train coordination constraints. Single train constraints ensure that a train behaves normally. They forbid u-turns and multiple positions of one agent in the environment and ensure termination upon arrival at the destination.
 
 Train Coordination constraints avoid behaviour that would cause collisions between agents. Any two given trains cannot occupy the same cell and two oncoming agents cannot immediately switch places or pass through each other.
+
 
 
 \subsection{Python Part}\label{solve}
@@ -261,21 +262,23 @@ A track malfunction Python object is a tuple consisting of three components:
 \end{verbatim}
 
 The \texttt{CELL} is an \texttt{(X, Y)} tuple that defines where the track malfunction occurred.
-
 The \texttt{TIMESTEP} represents the timestep at which the track malfunction was triggered. During this timestep, the malfunction has not yet occurred; it starts in the following timestep. This was an architectural decision to ensure that trains cannot be on a malfunctioning track when the malfunction starts.
-
 The \texttt{DURATION} specifies the number of timesteps for which the track malfunction occurred.
 
-Track malfunctions can either be created randomly or predefined by the user. The variable \texttt{predefined\_malfunction} is used to store malfunctions that the user wants to enforce on the environment. If the variable is empty, there is a 1\% chance of a malfunction occurring at every timestep (this probability can be adjusted). In the current setup, only one malfunction can occur per timestep.
+Track malfunctions can either be created randomly or predefined by the user. The variable \texttt{predefined\_malfunction} is used to store malfunctions that the user wants to enforce on the environment. If the variable is empty, there is a 1\% chance of a malfunction occurring at every timestep (this probability can be adjusted). In the current setup, only one malfunction can occur per timestep (see Section \ref{future-work}). Malfunctions are logged in a CSV file with the following parameters:
+
+\begin{verbatim}
+	timestep;cell;duration
+\end{verbatim}
 
 \subsubsection{Track malfunction Implementation in Clingo}\label{fwd_info_2_clingo}
 
-When a malfunction is triggered in Python, multiple atoms and rules are generated and forwarded to the program that calculates the rescheduling (secondary encoding - see Section \ref{encoding_2}).
+When a malfunction is triggered in Python, multiple atoms and rules are generated and forwarded to the program that calculates the rescheduling (Secondary Encoding - see Section \ref{encoding_2}).
 
 \begin{itemize}
     \item \textbf{\texttt{action} constraint rules} -- To preserve the actions taken up to this point, a constraint rule is generated for each action, ensuring that all past actions must be present in the output of the rescheduling.
 
-    \item \textbf{\texttt{track\_malfunction} atoms} -- Used to provide the timestep and duration of the malfunction.
+    \item \textbf{\texttt{track\_malfunction} atoms} -- to provide the location, timestep and duration of the malfunction.
 
     \item \textbf{\texttt{position} constraint rules} -- Since the track malfunction starts one timestep after it is triggered, the actions at the time the malfunction is triggered are preserved. Consequently, their positions in the next timestep are also preserved. These constraints only include the next position.
 
@@ -286,15 +289,6 @@ When a malfunction is triggered in Python, multiple atoms and rules are generate
     \item \textbf{\texttt{current\_position} atoms} -- Include all positions occupied at the timestep at which the malfunction occurred.
 \end{itemize}
 
-\subsubsection{Track malfunction Log}
-
-The malfunction is logged in a CSV file with the following parameters:
-
-\begin{verbatim}
-timestep;cell;duration
-\end{verbatim}
-
-
 \subsubsection{Track malfunction Depiction}
 
 Similar to a train malfunction, a track malfunction is depicted as a red \textbf{X} over the malfunctioning track.
@@ -302,7 +296,7 @@ Similar to a train malfunction, a track malfunction is depicted as a red \textbf
 
 \subsection{Secondary Encoding} \label{encoding_2}
 
-The secondary encoding reschedules the environment after a track malfunction. Our goal was to reduce computational cost by avoiding recalculation of the environment and agents. Our approach, similar to Gilkra2025 \cite{gilkra2025}, reuses information and train schedules from the original plan unless the track malfunction interferes with an agent. 
+The secondary encoding reschedules the environment after a track malfunction. Our goal was to reduce computational cost by avoiding recalculation of the environment and agents. Our approach, similar to Gilkra \cite{gilkra2025}, reuses information and train schedules from the original plan unless the track malfunction interferes with an agent. 
 
 \verb|secondary_encoding.lp| reuses ideas for solving from the base encoding, such as the general environment facts \verb|connections_nswe.lp| and \verb|trainjacent| atoms for finding valid movements (see Section \ref{setup_base}). Additionally, information is passed from the original schedule (see Section \ref{fwd_info_2_clingo}). Thus, the secondary encoding has access to 
 \begin{itemize}
@@ -312,9 +306,9 @@ The secondary encoding reschedules the environment after a track malfunction. Ou
 	\item {initial plan for agents (\verb|planned_action\3| and \verb|planned_position\4|)}
 \end{itemize}
 
-\begin{wrapfigure}{r}{0.3\textwidth}
+\begin{wrapfigure}[18]{r}{0.3\textwidth}
 	\centering
-	\vspace{-1.5em}
+	\vspace{-2.5em}
 	\begin{tikzpicture}[
 		font=\sffamily,
 		>=Latex,
@@ -387,9 +381,9 @@ The secondary encoding reschedules the environment after a track malfunction. Ou
 	\label{fig:overview_secondary}
 \end{wrapfigure}
 
-First, the program sets up the required environment with \verb|connections_nswe.lp| and creates two time counters. \verb|time(T)| counts time from one step after the track malfunction. \verb|past_time(T)| counts time up until and including the step of the track malfunction. This distinction is required to restore actions up until the malfunction time. These action atoms are necessary for Flatland to depict the solution correctly.
+First, the program sets up the required environment with \verb|connections_nswe.lp| and creates two time counters. \verb|time(T)| counts time from one step after the track malfunction. \verb|past_time(T)| counts time up until and including the step of the track malfunction. This distinction is required to restore actions up until the malfunction time. These past action atoms are necessary for Flatland to depict the solution correctly.
 
-If a track malfunction triggers before all trains of the environment have been initialized in their starting position, they have to be positioned during rescheduling. Then the replanning of trains starts. To identify whether an agent is affected by a track malfunction, it raises a \verb|consequence\3| (see Code \ref{consequence}). That means the train is planned to be on the malfunctioning track, it cannot continue on its original path and must adjust its behaviour. There are three scenarios our secondary encoding handles\footnote{If a track malfunction hits a cell while there is a train on its track, the simulation break, effectively corresponding to an accident on the track. We discovered this behaviour and decided to keep it instead of handling that exception as it also depicts a realistic scenario and could be inspiration for future work in this course.}: a) the track malfunction doesn't interfere with the planned routes of agents (no consequence), b) one train is affected by the track malfunction (simple consequence) and c) multiple trains are affected by the track malfunction (complex consequence).
+If a track malfunction triggers before all trains of the environment have been initialized in their starting position, they have to be positioned during rescheduling by creating their starting \verb|position\4|. Then the replanning of trains starts. To identify whether an agent is affected by a track malfunction, it raises a \verb|consequence\3| (see Code \ref{consequence}). That means the train is planned to be on the malfunctioning track, it cannot continue on its original path and must adjust its behaviour. There are three scenarios our secondary encoding handles\footnote{If a track malfunction hits a cell while there is a train on its track, the simulation breaks, effectively corresponding to an accident on the track. We discovered this behaviour and decided to keep it instead of handling that exception as it also depicts a realistic scenario and could be inspiration for future work in this course.}: a) the track malfunction doesn't interfere with the planned routes of agents (no consequence), b) one train is affected by the track malfunction (simple consequence) and c) multiple trains are affected by the track malfunction (complex consequence).
 
 
 \begin{lstlisting}[style=mystyle, language=Clingo, caption={Definition of consequence: if a train is attempting to go into a malfunctioning cell it raises a consequence.}, label={consequence}]
@@ -410,66 +404,78 @@ If no agent is planned to visit the actively malfunctioning cell the trains can 
 In a simple consequence, only one train is scheduled to pass the track malfunction (only one \verb|consequence/3| atom). The train gets marked as \verb|calculate/1|. Other trains remain \verb|planned/1|. From its current position this agents gets rescheduled. The rescheduling is done similarly to the scheduling logic in the base encoding by checking reachable cells, creating \verb|position| and \verb|action| atoms, narrowing down the solution with constraints and selecting the best model via optimization statements (see Section \ref{encoding_1}). A rescheduled train can "wait out" the malfunction or be rerouted via other available tracks.
 
 \subsubsection{Complex Consequence}
-A complex consequence includes multiple agents that require rescheduling (multiple \verb|conequence/3| atoms). However, it also covers the case where the adjustment of one agent's path influences another train, e.g. the rerouted or waiting train would cause a collision with an unaffected train. The trains that were planned as passing through the track malfunction are marked with \verb|consequence/3|. Those agents and the ones indirectly affected are marked as \verb|calculate/1|. Other trains remain \verb|planned/1|. The rescheduling then is done as described in Section \ref{simple_consequence}.
+A complex consequence includes multiple agents that require rescheduling (multiple \verb|conequence/3| atoms). However, it also covers the case where the adjustment of one agent's path influences another train, e.g. the rerouted or waiting train would cause a collision with an unaffected train. The trains that were planned as passing through the track malfunction are marked with \verb|consequence/3|. Those agents and the ones indirectly affected are marked as \verb|calculate/1|. Other trains remain \verb|planned/1|. The rescheduling then is done as described above.
 
 
 \section{Experiments}
-We have conducted four experiments to test the capabilities of our encodings in multiple environments. We tested the following scenarios:
-\begin{itemize}
-	\item Rescheduling: base encoding vs. secondary encoding with heuristic
-	\item Secondary encoding: heuristic vs. no heuristic
-	\item Base encoding vs. secondary encoding with time prioritization
-	\item Secondary encoding: Time vs. first plan prioritization
-\end{itemize}
+We have conducted four experiments to test the capabilities of our encodings in multiple environments. Clingo reports total elapsed time and time spent on solving. For each experiment, we assume that most of the non-solving time is used to ground the rules. We base our comparisons on time differences in computing since rescheduling is a  time-sensitive interruption with only a limited window for decision making.
 
-Clingo reports total elapsed time and time spent on solving. For each experiment, we assume that most of the non-solving time is used to ground the rules. We base our comparisons on time differences in computing since rescheduling is a  time-sensitive interruption with only a limited window for decision making.
+\subsubsection{Experiment 1: Effect of the Heuristic}
+Subsequently, a heuristic was added to the secondary encoding (Line 6 in Code \ref{heuristic_code}). Due to the size of most Flatland environments and the low rate of track malfunctions (1\%), we could assume that most malfunctions cause no or simple consequences. Clingo should be able to transfer the original plan for planned trains rather quickly. However, we had to encourage and direct this behaviour in Clingo with a heuristic. Experiment 2 compares performance of the secondary encoding with and without the heuristic prioritizing planned trains.
 
-Experiment 1 investigates if rescheduling with the secondary encoding is indeed preferable over replanning with the base encoding (Redo Planning).
-Experiment 2 compares performance of the secondary encoding with and without the heuristic prioritizing planned trains.
-Experiment 3 evaluates if the base or the secondary encoding with time prioritization is better for getting the time optimized solution. 
+
+% Heuristic Flag in Clingo Code
+\begin{lstlisting}[style=mystyle, language=Clingo, caption={The heuristic flag in line 6 prioritizes solutions with planned trains.}, label=heuristic_code]
+	
+	% planned is a train that is not affected by the malfunction and we don't want to reroute it
+	{planned(ID)}:- train(ID), not consequence(train(ID), _, _).
+	
+	% Prioritize planned trains when solving
+	#heuristic planned(ID): train(ID). [100, true]
+	
+\end{lstlisting}
+
+\subsubsection{Experiment 2: Base Encoding vs. Secondary Encoding}
+Experiment 1 investigates if rescheduling with the secondary encoding is indeed preferable over replanning with the Base Encoding (Redo Planning).
+
+
+\subsubsection{Experiment 3: Base Encoding vs. Secondary Encoding with Time Prioritization}
+Experiment 3 evaluates if rescheduling with the secondary encoding with time prioritization is better than the base encoding (Redo Planning) for getting the time optimized solution. 
+
+\subsubsection{Experiment 4: Heuristic vs. Time Prioritization}
 Experiment 4 evaluates the weighting of optimization statements in the secondary encoding.
 
 \subsection{Testing environments}
 Six testing environments of varying sizes and numbers of agents were used in each experiment (see Figure \ref{test_envs}). In each environment, we have identified tracks for the three types of track malfunctions (simple, complex, no consequence - see Section \ref{encoding_2}).
 
 % add crosses to show malfunction cells
-\begin{figure}[hbt!]
+\begin{figure}[hbtp]
 	
 	\begin{subfigure}{.475\linewidth}
 		\includegraphics[width=\linewidth]{env_016--3_2.png}
-		\caption{20x20, 3 agents}
+		\caption{env\_016, 20x20, 3 agents}
 		\label{016}
 	\end{subfigure}\hfill % <-- "\hfill"
 	~ % optional tilde b/t figures for readability.
 	% this solution will not work w/ empty lines b/t subfigures
 	\begin{subfigure}{.475\linewidth}
 		\includegraphics[width=\linewidth]{env_007--6_6.png}
-		\caption{50x50, 6 agents}
+		\caption{env\_007, 50x50, 6 agents}
 		\label{007}
 	\end{subfigure}
 
 	\begin{subfigure}{.475\linewidth}
 		\includegraphics[width=\linewidth]{env_028--2_2.png}
-		\caption{20x15, 3 agents}
+		\caption{env\_028, 20x15, 3 agents}
 		\label{028}
 	\end{subfigure}\hfill % <-- "\hfill"
 	~ % optional tilde b/t figures for readability.
 	% this solution will not work w/ empty lines b/t subfigures
 	\begin{subfigure}{.475\linewidth}
 		\includegraphics[width=\linewidth]{env_009--10_10.png}
-		\caption{30x30, 10 agents}
+		\caption{env\_009, 30x30, 10 agents}
 		\label{009}
 	\end{subfigure}
 	
 	\begin{subfigure}{.475\linewidth}
 		\includegraphics[width=\linewidth]{env_033--5_4.png}
-		\caption{25x40, 5 agents}
+		\caption{env\_033, 25x40, 5 agents}
 		\label{033}
 	\end{subfigure}\hfill % <-- "\hfill"
 	% or just a comment and no tilde
 	\begin{subfigure}{.475\linewidth}
 		\includegraphics[width=\linewidth]{env_035--10_8.png}
-		\caption{25x40, 10 agents}
+		\caption{env\_035, 25x40, 10 agents}
 		\label{035}
 	\end{subfigure}
 	\caption{These are the testing environments.}
@@ -488,15 +494,94 @@ non-consequent train would improve the overall travel time, only the base
 encoding and the secondary encoding with time prioritization will derive this
 solution. The other two encodings will not be able to choose this solution.
 
-\section{Results}
-The raw results are listed in Appendix \ref{sec:appendix}. Tables \ref{tab:rescheduling_times_base}, \ref{tab:rescheduling_times_heuristic} and \ref{tab:rescheduling_time_priority} report the results by experiment.
+\section[Results]{Results\footnotemark}
+\footnotetext{The raw results are listed in Appendix \ref{sec:appendix}.}
 
-\subsection{Base Encoding vs. Secondary Encoding with Heuristics}
-For smaller environments, the running time is low for both encodings.
-For larger environments, the secondary encoding with heuristics is always preferable.
+
+\subsection{Experiment 1: Heuristic vs. no Heuristic}
+
+Results are reported in Table \ref{tab:rescheduling_times_heuristic}. A positive $\Delta T_{\mathrm{res}}$ indicates that the encoding with the heuristic is faster. The encoding with the heuristic is significantly faster in all environments except env\_016 and env\_028. In some runs of those instances, the encoding without the heuristic performed marginally better. This difference is mostly negligibly small.
+
+The biggest differences can be found in env\_007 and env\_035 - the biggest and densest environments tested. Especially, for the no consequence scenario the heuristic can significantly enhance calculation time. In those instances, any secondary encoding needs to
+re-prove that the original schedule was optimal. Without the heuristic, Clingo starts with an initial solution that recalculated all the trains and, after many iterations, eventually reached the original planned solution.
+
+With the heuristic flag, Clingo assumes that most trains should use the
+original planned solution. We assume that since the secondary encoding has more rules and options, it is harder to solve without redirecting Clingo toward the planned train solution.
+
+
+\begin{table}[hbtp]
+	\centering
+	\footnotesize
+	\setlength{\tabcolsep}{4pt}
+	\renewcommand{\arraystretch}{0.9}
+	\begin{tabular}{@{}llrrr@{}}
+		\toprule
+		\textbf{Environment} &
+		\textbf{Malfunction type} &
+		\makecell[r]{\textbf{heuristic}} &
+		\makecell[r]{\textbf{~~no heuristic}} &
+		\makecell[r]{\textbf{$\Delta T_{\mathrm{res}}$}} \\
+		\midrule
+		
+		\textbf{env\_016--3\_2}
+		& Non-consequent & 0.116 & 0.097 & -0.019 \\
+		& Consequent 1 & 0.071 & 0.091 & +0.020 \\
+		& Consequent 2 & 0.084 & 0.054 & -0.030 \\
+		& Consequent + collisions & 0.070 & 0.075 & +0.005 \\
+		
+		\midrule
+		
+		\textbf{env\_033--5\_4}
+		& Non-consequent & 0.576 & 5.142 & +4.566 \\
+		& Consequent 1 & 0.561 & 7.897 & +7.336 \\
+		& Consequent 2 & 0.389 & 0.421 & +0.032 \\
+		& Consequent + collisions & 0.867 & 2.722 & +1.855 \\
+		
+		\midrule
+		
+		\textbf{env\_007--6\_6}
+		& Non-consequent & 10.794 & 256.370 & +245.576 \\
+		& Consequent 1 & 9.941 & 206.032 & +196.091 \\
+		& Consequent 2 & 10.245 & 90.477 & +80.232 \\
+		& Consequent + collisions & 25.852 & 57.022 & +31.170 \\
+		
+		\midrule
+		
+		\textbf{env\_009--10\_10}
+		& Non-consequent & 1.303 & 83.612 & +82.309 \\
+		& Consequent 1 & 1.610 & 96.502 & +94.892 \\
+		& Consequent 2 & 0.509 & 0.888 & +0.379 \\
+		& Consequent + collisions & 2.587 & 71.364 & +68.777 \\
+		
+		\midrule
+		
+		\textbf{env\_028--2\_2}
+		& Non-consequent & 0.071 & 0.042 & -0.029 \\
+		& Consequent 1 & 0.032 & 0.032 & 0.000 \\
+		& Consequent + collisions & 0.048 & 0.047 & -0.001 \\
+		
+		\midrule
+		
+		\textbf{env\_35--10\_8}
+		& Non-consequent & 4.508 & 110.196 & +105.688 \\
+		& Consequent 1 & 1.231 & 17.976 & +16.745 \\
+		& Consequent 2 & 1.344 & 31.010 & +29.666 \\
+		
+		\bottomrule
+	\end{tabular}
+	\vspace{4mm}
+	\caption{Comparison of total rescheduling times, $T_{\mathrm{res}}$, for Secondary + heuristic and Secondary without heuristic. The difference is computed as $\Delta T_{\mathrm{res}} = T_{\mathrm{res}}^{\mathrm{Secondary+heuristic}} - T_{\mathrm{res}}^{\mathrm{Secondary,\ no\ heuristic}}$. Positive values indicate that using the heuristic is faster than without the heuristic.}
+	\label{tab:rescheduling_times_heuristic}
+\end{table}
+
+
+\subsection{Experiment 2: Base Encoding vs. Secondary Encoding with Heuristics}
+Results are reported in Table \ref{tab:rescheduling_times_base}. Negative $\Delta T_{\mathrm{res}}$ indicate that the Secondary Encoding is faster. For smaller environments, like env\_028 and env\_016, the running time is low and very similar for both encodings.
+For larger environments, the secondary encoding with heuristics is significantly faster.
 For example, in \texttt{env\_007-6\_6}, the differences in the running time were substantial.
-In the non-consequent malfunction the secondary encoding with heuristics ran two minutes faster than
-the base encoding.
+In the non-consequent malfunction, the secondary encoding with heuristics ran two minutes faster than
+the base encoding. 
+The Secondary Encoding makes use of the forwarded information and can find an optimal solution more efficiently than the Base Encoding (Redo Planning).
 
 \begin{table}[htbp]
 	\centering
@@ -565,103 +650,6 @@ the base encoding.
 	\vspace{4mm}
 	\caption{Comparison of total rescheduling times for Base and Secondary + heuristic. Negative values of $\Delta T_{\mathrm{res}}$ indicate that Secondary + heuristic is faster than Base.}
 	\label{tab:rescheduling_times_base}
-\end{table}
-
-\subsection{Secondary Encoding: Heuristic vs. no Heuristic}
-
-Secondary encoding with heuristic is always faster than secondary encoding without heuristic.
-
-In the beginning, we implemented the secondary encoding without the heuristic
-addition (Line 6 in Code \ref{heuristic_code}). We were perplexed by the fact that running the environment with
-the secondary encoding took more time than with the base encoding.
-
-For us, it was obvious that since most malfunctions either do not affect the
-trains or affect only one or two trains, most trains should be able to simply
-use the output from the base encoding. However, Clingo still needed to
-re-prove that the solution was optimal.
-
-Clingo started with an initial solution that recalculated all the trains and,
-after many iterations, eventually reached the original planned solution.
-
-After adding the heuristic flag, Clingo found that most trains should use the
-original planned solution already in the first iteration.
-
-We assume that since the secondary encoding has more rules and options,
-it is harder to solve without redirecting Clingo toward the planned train solution.
-
-% Heuristic Flag in Clingo Code
-\begin{lstlisting}[style=mystyle, language=Clingo, caption={heuristic code.}, label=heuristic_code]
-	
-	% planned is a train that is not affected by the malfunction and we don't want to reroute it
-	{planned(ID)}:- train(ID), not consequence(train(ID), _, _).
-	
-	% Prioritize planned trains when solving
-	#heuristic planned(ID): train(ID). [100, true]
-\end{lstlisting}
-
-\begin{table}[htbp]
-	\centering
-	\footnotesize
-	\setlength{\tabcolsep}{4pt}
-	\renewcommand{\arraystretch}{0.9}
-	\begin{tabular}{@{}llrrr@{}}
-		\toprule
-		\textbf{Environment} &
-		\textbf{Malfunction type} &
-		\makecell[r]{\textbf{heuristic}} &
-		\makecell[r]{\textbf{~~no heuristic}} &
-		\makecell[r]{\textbf{$\Delta T_{\mathrm{res}}$}} \\
-		\midrule
-		
-		\textbf{env\_016--3\_2}
-		& Non-consequent & 0.116 & 0.097 & -0.019 \\
-		& Consequent 1 & 0.071 & 0.091 & +0.020 \\
-		& Consequent 2 & 0.084 & 0.054 & -0.030 \\
-		& Consequent + collisions & 0.070 & 0.075 & +0.005 \\
-		
-		\midrule
-		
-		\textbf{env\_033--5\_4}
-		& Non-consequent & 0.576 & 5.142 & +4.566 \\
-		& Consequent 1 & 0.561 & 7.897 & +7.336 \\
-		& Consequent 2 & 0.389 & 0.421 & +0.032 \\
-		& Consequent + collisions & 0.867 & 2.722 & +1.855 \\
-		
-		\midrule
-		
-		\textbf{env\_007--6\_6}
-		& Non-consequent & 10.794 & 256.370 & +245.576 \\
-		& Consequent 1 & 9.941 & 206.032 & +196.091 \\
-		& Consequent 2 & 10.245 & 90.477 & +80.232 \\
-		& Consequent + collisions & 25.852 & 57.022 & +31.170 \\
-		
-		\midrule
-		
-		\textbf{env\_009--10\_10}
-		& Non-consequent & 1.303 & 83.612 & +82.309 \\
-		& Consequent 1 & 1.610 & 96.502 & +94.892 \\
-		& Consequent 2 & 0.509 & 0.888 & +0.379 \\
-		& Consequent + collisions & 2.587 & 71.364 & +68.777 \\
-		
-		\midrule
-		
-		\textbf{env\_028--2\_2}
-		& Non-consequent & 0.071 & 0.042 & -0.029 \\
-		& Consequent 1 & 0.032 & 0.032 & 0.000 \\
-		& Consequent + collisions & 0.048 & 0.047 & -0.001 \\
-		
-		\midrule
-		
-		\textbf{env\_35--10\_8}
-		& Non-consequent & 4.508 & 110.196 & +105.688 \\
-		& Consequent 1 & 1.231 & 17.976 & +16.745 \\
-		& Consequent 2 & 1.344 & 31.010 & +29.666 \\
-		
-		\bottomrule
-	\end{tabular}
-	\vspace{4mm}
-	\caption{Comparison of total rescheduling times, $T_{\mathrm{res}}$, for Secondary + heuristic and Secondary without heuristic. The difference is computed as $\Delta T_{\mathrm{res}} = T_{\mathrm{res}}^{\mathrm{Secondary+heuristic}} - T_{\mathrm{res}}^{\mathrm{Secondary,\ no\ heuristic}}$. Positive values indicate that using the heuristic is faster than without the heuristic.}
-	\label{tab:rescheduling_times_heuristic}
 \end{table}
 
 \subsection{Base Encoding vs. Secondary Encoding with Time Prioritization}
@@ -1030,7 +1018,7 @@ output:
 	\item How do we feel about the results?
 \end{itemize}
 
-\section{Future Work}
+\section{Future Work}\label{future-work}
 Future work could consider other approaches than uniform randomness as a decider for a track malfunction. For instance, malfunctions on highly frequented tracks or crossings could be more likely than on straight connections. 
 
 In our current pipeline, scheduling and rescheduling are tied together tightly. For benchmarking of different encoding options, it can be useful to separate out these two steps. Such a set-up would have to save the scheduling plan from the base encoding, then create a malfunction and call the plan again for generating the information to forward for rescheduling. This approach could ease comparisons between rescheduling encodings by using the exact same model from the base encoding.

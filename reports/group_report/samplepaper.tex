@@ -822,6 +822,73 @@ Secondary encoding that prioritizes the first plan is always faster than the sec
 \end{table}
 
 
+\section{Discussion}
+
+Our proposed secondary encoding including a heuristic for prioritizing the least amount of changes improves running time compared to Redo Planning with the base encoding. The heuristic improves total calculation time significantly. However, by prioritizing the least amount of changes qualitative details can be missed.
+
+Figure \ref{fig:purple_train} illustrates this discrepancy. It shows snapshots from two rescheduling solutions: the secondary encoding with heuristic (left) and the secondary encoding prioritizing time (right). Part of this environment is a purple train (as shown in Figure \ref{fig:image5}). A malfunction is triggered from time step 70 to 90 (see Figure \ref{fig:image1} and \ref{fig:image2}). The heuristic prioritizes changing the least amount of trains which is why the purple train waits for 29 time steps on track (6,6) (see Figure \ref{fig:image1}). The westmost station is connected to the station northeast from it by only one track. Thus, the purple agent has to wait for the green train (see Figure \ref{fig:image3}) because it enters this section earlier.
+In the alternative encoding, both the red and the green agent disrupt their journey slightly by one and six seconds, respectively. The purple continues its journey without delay and can pass the green train ten seconds earlier (see Figure \ref{fig:image4}).
+
+In the given example, time prioritization offers the better solution in terms of total waiting time of agents (7s vs. 29s) and total time steps in the environment (136 vs. 146). It disrupts the plans of more trains but for shorter periods. In real-life application time prioritization would be the qualitatively preferable solution. It facilitates higher customer satisfaction, shortest total delay time across agents and therefore better chances for further connections.
+
+However, the computational costs of both encodings differ significantly. The heuristic approach was much faster (4.508s) than the prioritization of time (39.227s, see Table \ref{tab:rescheduling_time_prioritization}). Time prioritization thus requires a longer reaction time after the registration of a track malfunction.
+
+
+\begin{figure}[htbp]
+	\centering
+	\makebox[\textwidth][c]{
+		\begin{minipage}{1.5\textwidth}
+		\centering
+			% Figure 5 centered above the grid
+			\begin{subfigure}{0.5\textwidth}
+				\centering
+				\includegraphics[width=\linewidth]{frame-011_edited.png}
+				\caption{The purple train starts in (19,35) for both solutions and terminates at the station marked in red. }
+				\label{fig:image5}
+			\end{subfigure}
+	
+		\vspace{0.5cm}
+	
+			% Top row of the 2x2 grid
+			\begin{subfigure}{0.45\linewidth}
+				\centering
+				\includegraphics[width=\linewidth]{frame-081_edited.png}
+				\caption{Heuristic. The purple train waits in (6,6) for 29 time steps.}
+				\label{fig:image1}
+			\end{subfigure}
+		\hspace{3mm}
+			\begin{subfigure}{0.45\linewidth}
+				\centering
+				\includegraphics[width=\linewidth]{frame-081-time_edited.png}
+				\caption{Time Prioritization. The purple train continues. The red train waits for one time step.}
+				\label{fig:image2}
+			\end{subfigure}
+	
+		\vspace{0.5cm}
+	
+			% Bottom row of the 2x2 grid
+			\begin{subfigure}{0.45\textwidth}
+				\centering
+				\includegraphics[width=\linewidth]{frame-129_edited.png}
+				\caption{Heuristic. The purple and green train pass each other at time step 129.}
+				\label{fig:image3}
+			\end{subfigure}
+		\hspace{3mm}
+			\begin{subfigure}{0.45\textwidth}
+				\centering
+				\includegraphics[width=\linewidth]{frame-119_edited.png}
+				\caption{Time Prioritization. The purple and green train pass each other at time step 119.}
+				\label{fig:image4}
+			\end{subfigure}
+	
+		\caption{Qualitative comparison of rescheduling with heuristic/least changes (left) and time prioritization (right).}
+		\label{fig:purple_train}
+	
+		\end{minipage}
+	}
+\end{figure}
+
+
 \subsection{Encoding Selection After a Track Malfunction}
 
 There are two possible goals that a user might want when rescheduling after
@@ -911,7 +978,7 @@ output:
 		% First decision
 		\node[decision, below=of start] (consequence)
 		{Consequence in\\
-		solution A?};
+			solution A?};
 		
 		% No consequence branch
 		\node[process, below=of consequence, xshift=-3.5cm] (no)
@@ -922,7 +989,7 @@ output:
 		% Consequence branch
 		\node[decision, below=of consequence, xshift=3.5cm] (goal)
 		{Is time \\
-		prioritization required?};
+			prioritization required?};
 		
 		% Least changed trains
 		\node[process, below=of goal, xshift=-3.2cm] (least)
@@ -956,6 +1023,12 @@ output:
 	\caption{Decision process for selecting a rescheduling encoding.}
 	\label{fig:rescheduling-encoding-selection}
 \end{figure}
+
+
+\begin{itemize}
+	\item add summary of results for each experiment
+	\item How do we feel about the results?
+\end{itemize}
 
 \section{Future Work}
 Future work could consider other approaches than uniform randomness as a decider for a track malfunction. For instance, malfunctions on highly frequented tracks or crossings could be more likely than on straight connections. 

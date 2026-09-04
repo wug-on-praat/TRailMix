@@ -430,10 +430,27 @@ Experiment 1 investigates if rescheduling with the secondary encoding is indeed 
 
 
 \subsubsection{Experiment 3: Base Encoding vs. Secondary Encoding with Time Prioritization}
-Experiment 3 evaluates if rescheduling with the secondary encoding with time prioritization is better than the base encoding (Redo Planning) for getting the time optimized solution. 
+The Secondary Encoding contains three optimization statements (see Code \ref{optimize_code}). In Experiment 3, we seek to test if prioritizing time can still lead to a more efficient rescheduling than Redo Planning. The Secondary Encoding that prioritizes time differs from the Secondary Encoding + heuristic in such that it switches the weights for the two top-most optimization statements. In the time prioritization the weights are as shown in Code \ref{optimize_code}. 
+%Experiment 3 evaluates if rescheduling with the secondary encoding with time prioritization is better than the base encoding (Redo Planning) for getting the time optimized solution. 
+
+% Time Prioritization
+\begin{lstlisting}[style=mystyle, language=Clingo, caption={Optimization statements in Secondary Encoding + time prioritization.}, label=optimize_code]
+	
+	% we want as many OG train plans as possible
+	#maximize { 1@2, ID : planned(ID)}.
+
+	% Finish as early as possible
+	#minimize { 1@3, ID, T : action(train(ID), _, T) }.
+
+	% Prefer fewer distinct waiting episodes
+	wait_start(ID, T) :- action(train(ID), wait, T), action(train(ID), A, T-1), A != wait.
+
+	#minimize { 1@1, ID, T : wait_start(ID, T) }.
+	
+\end{lstlisting}
 
 \subsubsection{Experiment 4: Heuristic vs. Time Prioritization}
-Experiment 4 evaluates the weighting of optimization statements in the secondary encoding.
+Experiment 4 then evaluates how the Secondary Encoding + heuristic competes against Secondary Encoding + time prioritization. Thus, we can determine the best version of the Secondary Encoding for rescheduling after a track malfunction.
 
 \subsection{Testing environments}
 Six testing environments of varying sizes and numbers of agents were used in each experiment (see Figure \ref{test_envs}). In each environment, we have identified tracks for the three types of track malfunctions (simple, complex, no consequence - see Section \ref{encoding_2}).

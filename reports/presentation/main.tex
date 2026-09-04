@@ -41,6 +41,9 @@
 
 \usepackage{caption}
 
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric, decorations.pathreplacing, fit}
+
 
 \title{Track Malfunctions in Flatland}
 %\subtitle{Subtitle}
@@ -56,7 +59,7 @@
 
 %----------------------------------------------------------------
 
-\begin{frame}
+\begin{frame}[fragile]
 \frametitle{Malfunctions in Flatland}
 
 \begin{itemize}
@@ -68,8 +71,20 @@
 	\item Information forwarded:
 	\begin{itemize}
 		\item actions as constraints;
+		    \begin{verbatim}
+				:- not action(train(0),move_forward,22).
+				:- not action(train(1),move_forward,22).
+				:- not action(train(1),wait,24).
+        	\end{verbatim}
 		\item the malfunction atom;
+			\begin{verbatim}
+				malfunction(1,6,23).
+        	\end{verbatim}
 		\item \textsf{planned\_action}.
+			\begin{verbatim}
+				planned_action(train(0),move_forward,0).
+				planned_action(train(0),move_forward,1).
+        	\end{verbatim}
 	\end{itemize}
 \end{itemize}
 
@@ -105,46 +120,55 @@
 \end{frame}
 
 %----------------------------------------------------------------
-\begin{frame}
+\begin{frame}[fragile]
 	\frametitle{Create a Track Malfunction}
 
-%\begin{lstlisting}[style=mystyle, language=Python]
-%	
-%	malfunction_rate=10/30
-%	min_duration=2
-%	max_duration=6
+	\begin{lstlisting}[style=mystyle, language=Python]
+def create_trkmalf(self, timestep, predefined_mals):
 
-%    def create_trkmalf(self, timestep, predefined_mals) -> set:       # malfunction generator
-%
-%""" create track malfunction or implement predefined track malfunctions if provided """
-%
-%if not predefined_mals:
-%malfunction_ind = random.random()   # decider for malfunction: create value btw 0-1
-%
-%if malfunction_ind > 0.99:
-%malfunction_cell = tuple(random.choice(self.grid))
-%malfunction_duration = random.randint(2,20)    # maybe define with function (make 5 more likely than 20)
-%mal_timestep = timestep
-%
-%else: 
-%return([])
-%	
-%\end{lstlisting}
+	if not predefined_mals:
+		malfunction_ind = random.random()
+
+		if malfunction_ind > 0.99:
+			malfunction_cell = tuple(random.choice(self.grid))
+			malfunction_duration = random.randint(2,20)
+			mal_timestep = timestep
+			
+		else: 
+			return([])
+	...
+	self.track_malfunctions.append((malfunction_cell, malfunction_duration))
+	self.track_record.append((malfunction_cell, mal_timestep, malfunction_duration))
+	return([(malfunction_cell, malfunction_duration)])
+	\end{lstlisting}
 	
 \end{frame}
 
 %----------------------------------------------------------------
 
-\begin{frame}
+\begin{frame}[fragile]
 	\frametitle{Additional Forwarded Information}
 	\begin{itemize}
 		\item track malfunction 
+			\begin{verbatim}
+				track_malfunction((17, 19), 21, 13).
+			\end{verbatim}
 		\item position constraint rules
+			\begin{verbatim}
+				:- position( _, (17, 19), 14, _).
+				:- position( _, (17, 19), 15, _).
+			\end{verbatim}
 		\item planned position
+			\begin{verbatim}
+				planned_position(0, (20, 3), 15, s).
+				planned_position(1, (28, 25), 15, n).
+			\end{verbatim}
 		\item current position
+			\begin{verbatim}
+				current_position(0, (19, 3), 14, s).
+				current_position(1, (29, 25), 14, n).
+			\end{verbatim}
 	\end{itemize}
-	
-% add Output
 
 \end{frame}
 
@@ -161,14 +185,51 @@
 
 %----------------------------------------------------------------
 
-\begin{frame}
+\begin{frame}[fragile]
 	\frametitle{Rescheduling}
+	The basis of our secondary encoding is to determine which 
+	trains are affected by the malfunction
+	and reschedule only them unless there is a collision
+	and then reschedule also the trains affected by the collision
+	\begin{small}
 	\begin{itemize}
-		\item planned, consequence, calculate
-		\item heuristic
-		\item (should be 5 rules in total)
+		\item Check if there is a consequence
+			\begin{verbatim}
+consequence(train(ID), P, T) :- planned_position(ID, P, T, _),
+track_malfunction(P, Dur_mal, T_mal), Dur_mal + T_mal >= T.\end{verbatim}
+		\item Use as many planned trains as possible
+			\begin{verbatim}
+{planned(ID)}:- train(ID), not consequence(train(ID), _, _).
+#maximize { 1@3, ID : planned(ID)}.\end{verbatim}
+		\item Recalculate schedule for unplanned trains
+			\begin{verbatim}
+calculate(ID) :- consequence(train(ID), _, _).
+calculate(ID) :- train(ID), not planned(ID).\end{verbatim}	
+		\item Using heuristic speeds up the process
+		\begin{verbatim}
+#heuristic planned(ID): train(ID). [100, true]\end{verbatim}
 	\end{itemize}
+	\end{small}
+
 % show the clingo code for this OR add diagram
+\end{frame}
+
+%----------------------------------------------------------------
+
+\begin{frame}[fragile]
+	\frametitle{Secondary Encoding vs Secondary Encoding with Time Prioritization}
+	The encodings are different only in their optimization rule prioritization
+	\begin{itemize}
+		\item Secondary Encoding
+			\begin{verbatim}
+#maximize { 1@3, ID : planned(ID)}.
+#minimize { 1@2, ID, T : action(train(ID), _, T) }.\end{verbatim}
+		\item Secondary Encoding with Time Prioritization
+			\begin{verbatim}
+#maximize { 1@2, ID : planned(ID)}.
+#minimize { 1@3, ID, T : action(train(ID), _, T) }.\end{verbatim}
+	\end{itemize}
+	
 \end{frame}
 
 %----------------------------------------------------------------
@@ -176,9 +237,10 @@
 \begin{frame}
 	\frametitle{Experiments}
 	\begin{itemize}
-		\item Base vs. Secondary
-		\item Heuristic vs. no heuristic
-		\item Planned trains (heuristic) vs. Time Optimization
+		\item Effect of the Heuristic
+		\item Base Encoding vs. Secondary Encoding
+		\item Base Encoding vs. Secondary Encoding with Time Prioritization
+		\item Heuristic vs. Time Prioritization
 	\end{itemize}
 	
 \end{frame}
@@ -188,9 +250,10 @@
 \begin{frame}
 	\frametitle{Results}
 	\begin{itemize}
-		\item secondary+heuristic is fastest
-		\item heuristic better than no heuristic
-		\item Time Optimization 
+		\item Time optimization and base encoding outputs different schedule than secondary encoding
+		\item Secondary encoding with heuristic is better than no heuristic
+		\item Secondary encoding with heuristic is the fastest
+		\item Time prioritization is faster than base encoding when there is a consequence
 	\end{itemize}
 	
 \end{frame}
@@ -199,10 +262,83 @@
 
 \begin{frame}
 	\frametitle{Discussion}
-	\begin{itemize}
-		\item add fig decision process
-		\item 
-	\end{itemize}
+		\begin{figure}[H]
+		\centering
+		\begin{tikzpicture}[
+			node distance=0.3cm,
+			every node/.style={font=\small},
+			process/.style={
+				rectangle,
+				rounded corners,
+				draw,
+				align=center,
+				minimum width=4.2cm,
+				minimum height=0.9cm
+			},
+			decision/.style={
+				diamond,
+				draw,
+				align=center,
+				aspect=2.5,
+				inner sep=1pt
+			},
+			arrow/.style={
+				-{Stealth}
+			}
+			]
+			
+			% Start
+			\node[process] (start)
+			{Run secondary encoding with heuristic\\
+				and derive solution A};
+			
+			% First decision
+			\node[decision, below=of start] (consequence)
+			{Consequence in\\
+				solution A?};
+			
+			% No consequence branch
+			\node[process, below=of consequence, xshift=-1.5cm] (no)
+			{Solution A is optimized for\\
+				both time and\\
+				amount of changed trains};
+			
+			% Consequence branch
+			\node[decision, below=of consequence, xshift=3.5cm] (goal)
+			{Is time \\
+				prioritization required?};
+			
+			% Least changed trains
+			\node[process, below=of goal, xshift=-3.2cm] (least)
+			{Solution A already\\
+				minimizes changed trains};
+			
+			% Most optimized
+			\node[process, below=of goal, xshift=2.0cm] (optimized)
+			{Run secondary encoding with\\
+				time prioritization and\\
+				derive solution B};
+			
+			% Arrows from start
+			\draw[arrow] (start) -- (consequence);
+			
+			% Consequence branches
+			\draw[arrow] (consequence)
+			-- node[above left] {No} (no);
+			
+			\draw[arrow] (consequence)
+			-- node[above right] {Yes} (goal);
+			
+			% User goal branches
+			\draw[arrow] (goal)
+			-- node[above left] {No} (least);
+			
+			\draw[arrow] (goal)
+			-- node[above right] {Yes} (optimized);
+			
+		\end{tikzpicture}
+		\label{fig:rescheduling-encoding-selection}
+		\end{figure}
 	
 \end{frame}
 

@@ -226,7 +226,7 @@ Our Base Encoding includes rules and additional information to represent the env
 	\label{fig:overview_primary}
 \end{wrapfigure}
 
-\subsubsection{Move Agents}
+\subsubsection{Move Agents}\label{move_agents}
 The \verb|position(ID, CELL, TIME, DIRECTION)| argument handles the position of a train (ID) in the environment at any given time step and thus generates the sequential moves for that agent. A train is marked as \verb|finish(ID, TIME)| once it has reached its destination and doesn't move further. The position atoms are subsequently translated to action predicates containing necessary information, namely train ID and the required action at a given time step, for Flatland to visualise the solved environment.
 
 Our optimization objectives encourage trains to reach their destination as soon as possible and prefer one consecutive waiting period over repeated stop-and-go behaviour.
@@ -430,7 +430,8 @@ Experiment 1 investigates if rescheduling with the secondary encoding is indeed 
 
 
 \subsubsection{Experiment 3: Base Encoding vs. Secondary Encoding with Time Prioritization}
-The Secondary Encoding contains three optimization statements (see Code \ref{optimize_code}). In Experiment 3, we seek to test if prioritizing time can still lead to a more efficient rescheduling than Redo Planning. The Secondary Encoding that prioritizes time differs from the Secondary Encoding + heuristic in such that it switches the weights for the two top-most optimization statements. In the time prioritization the weights are as shown in Code \ref{optimize_code}. 
+The Secondary Encoding contains three optimization statements (see Code \ref{optimize_code}). In Experiment 3, we seek to test if prioritizing time can still lead to a more efficient rescheduling than Redo Planning. The Base Encoding also prioritizes time via its optimization statements (see Section \ref{move_agents}). The Secondary Encoding that prioritizes time differs from the Secondary Encoding + heuristic in such that it switches the weights for the two top-most optimization statements. The heuristic flag is included in both versions. In the time prioritization the weights are as shown in Code \ref{optimize_code}. 
+%We compared these two encodings because these are the only encoding that can output the most optimized reschedule after a malfunciton.
 %Experiment 3 evaluates if rescheduling with the secondary encoding with time prioritization is better than the base encoding (Redo Planning) for getting the time optimized solution. 
 
 % Time Prioritization
@@ -669,13 +670,11 @@ The Secondary Encoding makes use of the forwarded information and can find an op
 	\label{tab:rescheduling_times_base}
 \end{table}
 
-\subsection{Base Encoding vs. Secondary Encoding with Time Prioritization}
+\subsection{Experiment 3: Base Encoding vs. Secondary Encoding with Time Prioritization}
 
-We compared these two encodings because these are the only encoding that can output the most optimized reschedule 
-after a malfunciton.
-The base encoding is sometimes faster when there is no consequence,
-whereas the secondary encoding with time prioritization is always faster when there
-is a consequence.
+Table \ref{tab:rescheduling_time_prioritization} reports the results for Experiment 3. Negative $\Delta T_{\mathrm{res}}$ values indicate that the Secondary Encoding with time prioritization is faster than the Base Encoding (Redo Planning). 
+The Base Encoding is faster or equally as fast (marginal difference) as the compared encoding when there is no consequence.
+The Secondary Encoding with time prioritization is significantly faster when there is a consequence. Especially in scenarios with complex consequences the Secondary Encoding's calculation time is much lower, e.g. in env\_009, a medium environment with dense agent activity, the Secondary Encoding with time prioritization can reduce computation time by more than 50\%.
 
 \begin{table}[htbp]
 	\centering
@@ -750,9 +749,9 @@ is a consequence.
 	\label{tab:rescheduling_time_prioritization}
 \end{table}
 
-\subsection{Secondary encoding: Time vs. first plan prioritization}
+\subsection{Experiment 4: Time vs. first plan prioritization}
 
-Secondary encoding that prioritizes the first plan is always faster than the secondary encoding that prioritizes time optimization.
+Table \ref{tab:rescheduling_time_priority} reports the results from Experiment 4. Positive $\Delta T_{\mathrm{res}}$ values indicate that the encoding prioritizing the first plan (or least number of train changes) is faster. The Secondary Encoding that prioritizes the first plan is faster in almost all environments and scenarios. The differences between the encodings are negligible in small environments, like env\_016 and env\_028. However, in larger environments the Secondary Encoding prioritizing first plans is significantly more efficient. The difference is particularly pronounced in the largest environment env\_007 with the first plan encoding being almost 3 minutes faster.
 
 \begin{table}[htbp]
 	\centering
@@ -815,7 +814,7 @@ Secondary encoding that prioritizes the first plan is always faster than the sec
 		
 		\bottomrule
 	\end{tabular}
-	\vspace{4mm¸}
+	\vspace{4mm}
 	\caption{Comparison of total rescheduling times, $T_{\mathrm{res}}$, for
 		Secondary + heuristic and Secondary + time priority. The difference is
 		computed as
@@ -1030,11 +1029,6 @@ output:
 \end{figure}
 
 
-\begin{itemize}
-	\item add summary of results for each experiment
-	\item How do we feel about the results?
-\end{itemize}
-
 \section{Future Work}\label{future-work}
 Future work could consider other approaches than uniform randomness as a decider for a track malfunction. For instance, malfunctions on highly frequented tracks or crossings could be more likely than on straight connections. 
 
@@ -1044,9 +1038,6 @@ Additionally, our approach currently only handles one emerging track malfunction
 
 Finally, we noticed that sometimes a malfunction can cause an environment to be unsatisfiable, i.e. when a malfunction hits a particularly crucial track. Then the program crashes without any visual output despite having successfully calculated the original schedule. Future projects could focus on handling this issue and generating the base plan in Flatland or maybe even visualizing when and why the program fails.
 
-\begin{itemize}
-	\item heuristic assumes loose rail network BUT not realistic (maybe discussion part)
-\end{itemize}
 
 
 \bibliographystyle{splncs04}

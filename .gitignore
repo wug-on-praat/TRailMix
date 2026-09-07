@@ -2,8 +2,6 @@ envs/
 tmp/
 output/
 __pycache__/
-reports/group_report/samplepaper.pdf
-reports/group_report/samplepaper.synctex.gz
 reports/presentation/main.log
 reports/presentation/main.synctex.gz
 reports/presentation/main.pdf

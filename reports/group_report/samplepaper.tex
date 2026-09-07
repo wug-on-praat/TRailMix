@@ -140,7 +140,7 @@ Track malfunctions are a common real world issue in railway systems. It negative
 \section{Track Malfunctions in Flatland}
 
 
-Building on existing work about malfunctioning trains, we implement track malfunctions to simulate realistic scheduling challenges (see Sections \ref{flatland_mals} and \ref{trkmals}). We base our approach on previous work by Gilkra \cite{gilkra2025} and propose a similar structure for dealing with track-based disruptions in the original schedule. Flatland doesn't natively include track malfunctions. Alternatively, we generate track malfunctions in the main solving pipeline (see Section \ref{solve}). By reusing plans for trains from the original schedule,  we aimed to improve computation time during rescheduling through a secondary encoding (see Section \ref{encoding_2}).
+Building on existing work about malfunctioning trains, we implement \cite{TRailMix2026} track malfunctions to simulate realistic scheduling challenges (see Sections \ref{flatland_mals} and \ref{trkmals}). We base our approach on previous work by Gilkra \cite{gilkra2025} and propose a similar structure for dealing with track-based disruptions in the original schedule. Flatland doesn't natively include track malfunctions. Alternatively, we generate track malfunctions in the main solving pipeline (see Section \ref{solve}). By reusing plans for trains from the original schedule,  we aimed to improve computation time during rescheduling through a secondary encoding (see Section \ref{encoding_2}).
 
 
 \subsection{Base Encoding} \label{encoding_1}
@@ -232,18 +232,17 @@ The \verb|position(ID, CELL, TIME, DIRECTION)| argument handles the position of 
 Our optimization objectives encourage trains to reach their destination as soon as possible and prefer one consecutive waiting period over repeated stop-and-go behaviour.
 
 \subsubsection{Constraints}
-We implemented two types of constraints on agent movements: single train constraints and train coordination constraints. Single train constraints ensure that a train behaves normally. They forbid u-turns and multiple positions of one agent in the environment and ensure termination upon arrival at the destination.
+We implemented two types of constraints on agent movements: single train constraints and train coordination constraints. Single train constraints ensure that a train behaves normally. They forbid multiple positions of one agent in the environment and ensure termination upon arrival at the destination.
 
 Train Coordination constraints avoid behaviour that would cause collisions between agents. Any two given trains cannot occupy the same cell and two oncoming agents cannot immediately switch places or pass through each other.
 
 
 
 \subsection{Python Part}\label{solve}
-\subsubsection{Track Malfunction Implementation}
 
 Since we could not implement track malfunctions directly in Flatland, we implemented them in Python code that runs Clingo with Flatland input (\verb|solve.py|).
 
-The added code consists of multiple parts:
+The added code consists of the following parts:
 
 \begin{itemize}
     \item Creating track malfunctions either randomly or deterministically
@@ -262,7 +261,7 @@ A track malfunction Python object is a tuple consisting of three components:
 \end{verbatim}
 
 The \texttt{CELL} is an \texttt{(X, Y)} tuple that defines where the track malfunction occurred.
-The \texttt{TIMESTEP} represents the timestep at which the track malfunction was triggered. During this timestep, the malfunction has not yet occurred; it starts in the following timestep. This was an architectural decision to ensure that trains cannot be on a malfunctioning track when the malfunction starts.
+The \texttt{TIMESTEP} represents the timestep at which the track malfunction was triggered. During this timestep, the malfunction has not yet occurred but it starts in the following timestep. This was an architectural decision to ensure that trains cannot be on a malfunctioning track when the malfunction starts.
 The \texttt{DURATION} specifies the number of timesteps for which the track malfunction occurred.
 
 Track malfunctions can either be created randomly or predefined by the user. The variable \texttt{predefined\_malfunction} is used to store malfunctions that the user wants to enforce on the environment. If the variable is empty, there is a 1\% chance of a malfunction occurring at every timestep (this probability can be adjusted). In the current setup, only one malfunction can occur per timestep (see Section \ref{future-work}). Malfunctions are logged in a CSV file with the following parameters:
@@ -411,7 +410,7 @@ A complex consequence includes multiple agents that require rescheduling (multip
 We have conducted four experiments to test the capabilities of our encodings in multiple environments. Clingo reports total elapsed time and time spent on solving. For each experiment, we assume that most of the non-solving time is used to ground the rules. We base our comparisons on time differences in computing since rescheduling is a  time-sensitive interruption with only a limited window for decision making.
 
 \subsubsection{Experiment 1: Effect of the Heuristic}
-Subsequently, a heuristic was added to the secondary encoding (Line 6 in Code \ref{heuristic_code}). Due to the size of most Flatland environments and the low rate of track malfunctions (1\%), we could assume that most malfunctions cause no or simple consequences. Clingo should be able to transfer the original plan for planned trains rather quickly. However, we had to encourage and direct this behaviour in Clingo with a heuristic. Experiment 2 compares performance of the secondary encoding with and without the heuristic prioritizing planned trains.
+Subsequently, a heuristic was added to the secondary encoding (Line 6 in Code \ref{heuristic_code}). Due to the size of most Flatland environments and the low rate of track malfunctions (1\%), we could assume that most malfunctions cause no or simple consequences. Clingo should be able to transfer the original plan for planned trains rather quickly. However, we had to encourage and direct this behaviour in Clingo with a heuristic. Experiment 1 compares performance of the secondary encoding with and without the heuristic prioritizing planned trains.
 
 
 % Heuristic Flag in Clingo Code
@@ -426,7 +425,7 @@ Subsequently, a heuristic was added to the secondary encoding (Line 6 in Code \r
 \end{lstlisting}
 
 \subsubsection{Experiment 2: Base Encoding vs. Secondary Encoding}
-Experiment 1 investigates if rescheduling with the secondary encoding is indeed preferable over replanning with the Base Encoding (Redo Planning).
+Experiment 2 investigates if rescheduling with the secondary encoding is indeed preferable over replanning with the Base Encoding (Redo Planning).
 
 
 \subsubsection{Experiment 3: Base Encoding vs. Secondary Encoding with Time Prioritization}
@@ -460,43 +459,43 @@ Six testing environments of varying sizes and numbers of agents were used in eac
 \begin{figure}[hbtp]
 	
 	\begin{subfigure}{.475\linewidth}
-		\includegraphics[width=\linewidth]{env_016--3_2.png}
-		\caption{env\_016, 20x20, 3 agents}
-		\label{016}
+		\includegraphics[width=\linewidth]{env_3_2.png}
+		\caption{env\_3\_2, 20x20, 3 agents}
+		\label{3_2}
 	\end{subfigure}\hfill % <-- "\hfill"
 	~ % optional tilde b/t figures for readability.
 	% this solution will not work w/ empty lines b/t subfigures
 	\begin{subfigure}{.475\linewidth}
-		\includegraphics[width=\linewidth]{env_007--6_6.png}
-		\caption{env\_007, 50x50, 6 agents}
-		\label{007}
+		\includegraphics[width=\linewidth]{env_6_6.png}
+		\caption{env\_6\_6, 50x50, 6 agents}
+		\label{6_6}
 	\end{subfigure}
 
 	\begin{subfigure}{.475\linewidth}
-		\includegraphics[width=\linewidth]{env_028--2_2.png}
-		\caption{env\_028, 20x15, 3 agents}
-		\label{028}
+		\includegraphics[width=\linewidth]{env_2_2.png}
+		\caption{env\_2\_2, 20x15, 2 agents}
+		\label{2_2}
 	\end{subfigure}\hfill % <-- "\hfill"
 	~ % optional tilde b/t figures for readability.
 	% this solution will not work w/ empty lines b/t subfigures
 	\begin{subfigure}{.475\linewidth}
-		\includegraphics[width=\linewidth]{env_009--10_10.png}
-		\caption{env\_009, 30x30, 10 agents}
-		\label{009}
+		\includegraphics[width=\linewidth]{env_10_10.png}
+		\caption{env\_10\_10, 30x30, 10 agents}
+		\label{10_10}
 	\end{subfigure}
 	
 	\begin{subfigure}{.475\linewidth}
-		\includegraphics[width=\linewidth]{env_033--5_4.png}
-		\caption{env\_033, 25x40, 5 agents}
-		\label{033}
+		\includegraphics[width=\linewidth]{env_5_4.png}
+		\caption{env\_5\_4, 25x40, 5 agents}
+		\label{5_4}
 	\end{subfigure}\hfill % <-- "\hfill"
 	% or just a comment and no tilde
 	\begin{subfigure}{.475\linewidth}
-		\includegraphics[width=\linewidth]{env_035--10_8.png}
-		\caption{env\_035, 25x40, 10 agents}
-		\label{035}
+		\includegraphics[width=\linewidth]{env_10_8.png}
+		\caption{env\_10\_8, 25x40, 10 agents}
+		\label{10_8}
 	\end{subfigure}
-	\caption{These are the testing environments.}
+	\caption{Testing environments.}
 	\label{test_envs}
 \end{figure}
 
@@ -518,9 +517,9 @@ solution. The other two encodings will not be able to choose this solution.
 
 \subsection{Experiment 1: Heuristic vs. no Heuristic}
 
-Results are reported in Table \ref{tab:rescheduling_times_heuristic}. A positive $\Delta T_{\mathrm{res}}$ indicates that the encoding with the heuristic is faster. The encoding with the heuristic is significantly faster in all environments except env\_016 and env\_028. In some runs of those instances, the encoding without the heuristic performed marginally better. This difference is mostly negligibly small.
+Results are reported in Table \ref{tab:rescheduling_times_heuristic}. A positive $\Delta T_{\mathrm{res}}$ indicates that the encoding with the heuristic is faster. The encoding with the heuristic is significantly faster in all environments except \texttt{env\_3\_2} and \texttt{env\_2\_2}. In some runs of those instances, the encoding without the heuristic performed marginally better. This difference is mostly negligibly small.
 
-The biggest differences can be found in env\_007 and env\_035 - the biggest and densest environments tested. Especially, for the no consequence scenario the heuristic can significantly enhance calculation time. In those instances, any secondary encoding needs to
+The biggest differences can be found in \texttt{env\_6\_6} and \texttt{env\_10\_8} - the biggest and densest environments tested. Especially, for the no consequence scenario the heuristic can significantly enhance calculation time. In those instances, any secondary encoding needs to
 re-prove that the original schedule was optimal. Without the heuristic, Clingo starts with an initial solution that recalculated all the trains and, after many iterations, eventually reached the original planned solution.
 
 With the heuristic flag, Clingo assumes that most trains should use the
@@ -540,8 +539,15 @@ original planned solution. We assume that since the secondary encoding has more 
 		\makecell[r]{\textbf{~~no heuristic}} &
 		\makecell[r]{\textbf{$\Delta T_{\mathrm{res}}$}} \\
 		\midrule
+
+		\textbf{env\_2\_2}
+		& Non-consequent & 0.071 & 0.042 & -0.029 \\
+		& Consequent 1 & 0.032 & 0.032 & 0.000 \\
+		& Consequent + collisions & 0.048 & 0.047 & -0.001 \\
 		
-		\textbf{env\_016--3\_2}
+		\midrule
+		
+		\textbf{env\_3\_2}
 		& Non-consequent & 0.116 & 0.097 & -0.019 \\
 		& Consequent 1 & 0.071 & 0.091 & +0.020 \\
 		& Consequent 2 & 0.084 & 0.054 & -0.030 \\
@@ -549,7 +555,7 @@ original planned solution. We assume that since the secondary encoding has more 
 		
 		\midrule
 		
-		\textbf{env\_033--5\_4}
+		\textbf{env\_5\_4}
 		& Non-consequent & 0.576 & 5.142 & +4.566 \\
 		& Consequent 1 & 0.561 & 7.897 & +7.336 \\
 		& Consequent 2 & 0.389 & 0.421 & +0.032 \\
@@ -557,49 +563,42 @@ original planned solution. We assume that since the secondary encoding has more 
 		
 		\midrule
 		
-		\textbf{env\_007--6\_6}
+		\textbf{env\_6\_6}
 		& Non-consequent & 10.794 & 256.370 & +245.576 \\
 		& Consequent 1 & 9.941 & 206.032 & +196.091 \\
 		& Consequent 2 & 10.245 & 90.477 & +80.232 \\
 		& Consequent + collisions & 25.852 & 57.022 & +31.170 \\
+
+		\midrule
+		
+		\textbf{env\_10\_8}
+		& Non-consequent & 4.508 & 110.196 & +105.688 \\
+		& Consequent 1 & 1.231 & 17.976 & +16.745 \\
+		& Consequent 2 & 1.344 & 31.010 & +29.666 \\
 		
 		\midrule
 		
-		\textbf{env\_009--10\_10}
+		\textbf{env\_10\_10}
 		& Non-consequent & 1.303 & 83.612 & +82.309 \\
 		& Consequent 1 & 1.610 & 96.502 & +94.892 \\
 		& Consequent 2 & 0.509 & 0.888 & +0.379 \\
 		& Consequent + collisions & 2.587 & 71.364 & +68.777 \\
 		
-		\midrule
-		
-		\textbf{env\_028--2\_2}
-		& Non-consequent & 0.071 & 0.042 & -0.029 \\
-		& Consequent 1 & 0.032 & 0.032 & 0.000 \\
-		& Consequent + collisions & 0.048 & 0.047 & -0.001 \\
-		
-		\midrule
-		
-		\textbf{env\_35--10\_8}
-		& Non-consequent & 4.508 & 110.196 & +105.688 \\
-		& Consequent 1 & 1.231 & 17.976 & +16.745 \\
-		& Consequent 2 & 1.344 & 31.010 & +29.666 \\
-		
 		\bottomrule
 	\end{tabular}
 	\vspace{4mm}
-	\caption{Comparison of total rescheduling times, $T_{\mathrm{res}}$, for Secondary + heuristic and Secondary without heuristic. The difference is computed as $\Delta T_{\mathrm{res}} = T_{\mathrm{res}}^{\mathrm{Secondary+heuristic}} - T_{\mathrm{res}}^{\mathrm{Secondary,\ no\ heuristic}}$. Positive values indicate that using the heuristic is faster than without the heuristic.}
+	\caption{Comparison of total rescheduling times, $T_{\mathrm{res}}$, for secondary + heuristic and secondary without heuristic. The difference is computed as $\Delta T_{\mathrm{res}} = T_{\mathrm{res}}^{\mathrm{secondary,\ no\ heuristic}} - T_{\mathrm{res}}^{\mathrm{secondary+heuristic}}$. Positive values indicate that using the heuristic is faster than without the heuristic.}
 	\label{tab:rescheduling_times_heuristic}
 \end{table}
 
 
 \subsection{Experiment 2: Base Encoding vs. Secondary Encoding with Heuristics}
-Results are reported in Table \ref{tab:rescheduling_times_base}. Negative $\Delta T_{\mathrm{res}}$ indicate that the Secondary Encoding is faster. For smaller environments, like env\_028 and env\_016, the running time is low and very similar for both encodings.
+Results are reported in Table \ref{tab:rescheduling_times_base}. Negative $\Delta T_{\mathrm{res}}$ indicate that the secondary encoding is faster. For smaller environments, like \texttt{env\_2\_2} and \texttt{env\_3\_2}, the running time is low and very similar for both encodings.
 For larger environments, the secondary encoding with heuristics is significantly faster.
-For example, in \texttt{env\_007-6\_6}, the differences in the running time were substantial.
+For example, in \texttt{env\_6\_6}, the differences in the running time were substantial.
 In the non-consequent malfunction, the secondary encoding with heuristics ran two minutes faster than
 the base encoding. 
-The Secondary Encoding makes use of the forwarded information and can find an optimal solution more efficiently than the Base Encoding (Redo Planning).
+The secondary encoding makes use of the forwarded information and can find an optimal solution more efficiently than the base encoding (Redo Planning).
 
 \begin{table}[htbp]
 	\centering
@@ -618,8 +617,15 @@ The Secondary Encoding makes use of the forwarded information and can find an op
 		\makecell[r]{\textbf{$T_{\mathrm{res}}$}} &
 		\makecell[r]{\textbf{}} \\
 		\midrule
+
+		\textbf{env\_2\_2}
+		& Non-consequent & 0.054 & 0.071 & +0.017 \\
+		& Consequent 1 & 0.040 & 0.032 & -0.008 \\
+		& Consequent + collisions & 0.053 & 0.048 & -0.005 \\
 		
-		\textbf{env\_016--3\_2}
+		\midrule
+		
+		\textbf{env\_3\_2}
 		& Non-consequent & 0.107 & 0.116 & +0.009 \\
 		& Consequent 1 & 0.104 & 0.071 & -0.033 \\
 		& Consequent 2 & 0.082 & 0.084 & +0.002 \\
@@ -627,7 +633,7 @@ The Secondary Encoding makes use of the forwarded information and can find an op
 		
 		\midrule
 		
-		\textbf{env\_033--5\_4}
+		\textbf{env\_5\_4}
 		& Non-consequent & 0.655 & 0.576 & -0.079 \\
 		& Consequent 1 & 0.635 & 0.561 & -0.074 \\
 		& Consequent 2 & 0.607 & 0.389 & -0.218 \\
@@ -635,46 +641,39 @@ The Secondary Encoding makes use of the forwarded information and can find an op
 		
 		\midrule
 		
-		\textbf{env\_007--6\_6}
+		\textbf{env\_6\_6}
 		& Non-consequent & 138.697 & 10.794 & -127.903 \\
 		& Consequent 1 & 127.527 & 9.941 & -117.586 \\
 		& Consequent 2 & 97.934 & 10.245 & -87.689 \\
 		& Consequent + collisions & 100.216 & 25.852 & -74.364 \\
+
+		\midrule
+		
+		\textbf{env\_10\_8}
+		& Non-consequent & 24.704 & 4.508 & -20.196 \\
+		& Consequent 1 & 7.952 & 1.231 & -6.721 \\
+		& Consequent 2 & 25.222 & 1.344 & -23.878 \\
 		
 		\midrule
 		
-		\textbf{env\_009--10\_10}
+		\textbf{env\_10\_10}
 		& Non-consequent & 44.581 & 1.303 & -43.278 \\
 		& Consequent 1 & 97.233 & 1.610 & -95.623 \\
 		& Consequent 2 & 1.872 & 0.509 & -1.363 \\
 		& Consequent + collisions & 71.720 & 2.587 & -69.133 \\
 		
-		\midrule
-		
-		\textbf{env\_028--2\_2}
-		& Non-consequent & 0.054 & 0.071 & +0.017 \\
-		& Consequent 1 & 0.040 & 0.032 & -0.008 \\
-		& Consequent + collisions & 0.053 & 0.048 & -0.005 \\
-		
-		\midrule
-		
-		\textbf{env\_35--10\_8}
-		& Non-consequent & 24.704 & 4.508 & -20.196 \\
-		& Consequent 1 & 7.952 & 1.231 & -6.721 \\
-		& Consequent 2 & 25.222 & 1.344 & -23.878 \\
-		
 		\bottomrule
 	\end{tabular}
 	\vspace{4mm}
-	\caption{Comparison of total rescheduling times for Base and Secondary + heuristic. Negative values of $\Delta T_{\mathrm{res}}$ indicate that Secondary + heuristic is faster than Base.}
+	\caption{Comparison of total rescheduling times for base and secondary + heuristic. Negative values of $\Delta T_{\mathrm{res}}$ indicate that secondary + heuristic is faster than base.}
 	\label{tab:rescheduling_times_base}
 \end{table}
 
 \subsection{Experiment 3: Base Encoding vs. Secondary Encoding with Time Prioritization}
 
-Table \ref{tab:rescheduling_time_prioritization} reports the results for Experiment 3. Negative $\Delta T_{\mathrm{res}}$ values indicate that the Secondary Encoding with time prioritization is faster than the Base Encoding (Redo Planning). 
-The Base Encoding is faster or equally as fast (marginal difference) as the compared encoding when there is no consequence.
-The Secondary Encoding with time prioritization is significantly faster when there is a consequence. Especially in scenarios with complex consequences the Secondary Encoding's calculation time is much lower, e.g. in env\_009, a medium environment with dense agent activity, the Secondary Encoding with time prioritization can reduce computation time by more than 50\%.
+Table \ref{tab:rescheduling_time_prioritization} reports the results for experiment 3. Negative $\Delta T_{\mathrm{res}}$ values indicate that the secondary encoding with time prioritization is faster than the base encoding (Redo Planning). 
+The base encoding is faster or equally as fast (marginal difference) as the compared encoding when there is no consequence.
+The secondary encoding with time prioritization is significantly faster when there is a consequence. Especially in scenarios with complex consequences the secondary encoding's calculation time is much lower, e.g. in \texttt{env\_10\_10}, a medium environment with dense agent activity, the secondary Encoding with time prioritization can reduce computation time by more than 50\%.
 
 \begin{table}[htbp]
 	\centering
@@ -690,8 +689,15 @@ The Secondary Encoding with time prioritization is significantly faster when the
 		\makecell[r]{\textbf{~~time prioritization}} &
 		\makecell[r]{\textbf{$\Delta T_{\mathrm{res}}$}} \\
 		\midrule
+
+		\textbf{env\_2\_2}
+		& Non-consequent & 0.054 & 0.050 & -0.004 \\
+		& Consequent 1 & 0.040 & 0.031 & -0.009 \\
+		& Consequent + collisions & 0.053 & 0.045 & -0.008 \\
+
+		\midrule
 		
-		\textbf{env\_016--3\_2}
+		\textbf{env\_3\_2}
 		& Non-consequent & 0.107 & 0.099 & -0.008 \\
 		& Consequent 1 & 0.104 & 0.093 & -0.011 \\
 		& Consequent 2 & 0.082 & 0.058 & -0.024 \\
@@ -699,7 +705,7 @@ The Secondary Encoding with time prioritization is significantly faster when the
 
 		\midrule
 
-		\textbf{env\_033--5\_4}
+		\textbf{env\_5\_4}
 		& Non-consequent & 0.655 & 0.983 & +0.328 \\
 		& Consequent 1 & 0.635 & 0.807 & +0.172 \\
 		& Consequent 2 & 0.607 & 0.585 & -0.022 \\
@@ -707,7 +713,7 @@ The Secondary Encoding with time prioritization is significantly faster when the
 
 		\midrule
 
-		\textbf{env\_007--6\_6}
+		\textbf{env\_6\_6}
 		& Non-consequent & 138.697 & 179.266 & +40.569 \\
 		& Consequent 1 & 127.527 & 87.676 & -39.851 \\
 		& Consequent 2 & 97.934 & 67.346 & -30.588 \\
@@ -715,43 +721,35 @@ The Secondary Encoding with time prioritization is significantly faster when the
 
 		\midrule
 
-		\textbf{env\_009--10\_10}
-		& Non-consequent & 44.581 & 9.817 & -34.764 \\
-		& Consequent 1 & 97.233 & 66.304 & -30.929 \\
-		& Consequent 2 & 1.872 & 0.740 & -1.132 \\
-		& Consequent + collisions & 71.720 & 24.082 & -47.638 \\
-
-		\midrule
-
-		\textbf{env\_028--2\_2}
-		& Non-consequent & 0.054 & 0.050 & -0.004 \\
-		& Consequent 1 & 0.040 & 0.031 & -0.009 \\
-		& Consequent + collisions & 0.053 & 0.045 & -0.008 \\
-
-		\midrule
-
-		\textbf{env\_35--10\_8}
+		\textbf{env\_10\_8}
 		& Non-consequent & 24.704 & 39.227 & +14.523 \\
 		& Consequent 1 & 7.952 & 1.735 & -6.217 \\
 		& Consequent 2 & 25.222 & 5.410 & -19.812 \\
 
+		\midrule
+
+		\textbf{env\_10\_10}
+		& Non-consequent & 44.581 & 9.817 & -34.764 \\
+		& Consequent 1 & 97.233 & 66.304 & -30.929 \\
+		& Consequent 2 & 1.872 & 0.740 & -1.132 \\
+		& Consequent + collisions & 71.720 & 24.082 & -47.638 \\
 		
 		\bottomrule
 	\end{tabular}
 	\vspace{4mm}
 	\caption{Comparison of total rescheduling times, $T_{\mathrm{res}}$, for
-		Base and Secondary + time prioritization. The difference is
+		base and secondary + time prioritization. The difference is
 		computed as
 		$\Delta T_{\mathrm{res}} =
-		T_{\mathrm{res}}^{\mathrm{Secondary+time\ priority}} -
-		T_{\mathrm{res}}^{\mathrm{Base}}$.
-		Positive values indicate that Base is faster.}
+		T_{\mathrm{res}}^{\mathrm{secondary+time\ priority}} -
+		T_{\mathrm{res}}^{\mathrm{base}}$.
+		positive values indicate that base is faster.}
 	\label{tab:rescheduling_time_prioritization}
 \end{table}
 
 \subsection{Experiment 4: Time vs. first plan prioritization}
 
-Table \ref{tab:rescheduling_time_priority} reports the results from Experiment 4. Positive $\Delta T_{\mathrm{res}}$ values indicate that the encoding prioritizing the first plan (or least number of train changes) is faster. The Secondary Encoding that prioritizes the first plan is faster in almost all environments and scenarios. The differences between the encodings are negligible in small environments, like env\_016 and env\_028. However, in larger environments the Secondary Encoding prioritizing first plans is significantly more efficient. The difference is particularly pronounced in the largest environment env\_007 with the first plan encoding being almost 3 minutes faster.
+Table \ref{tab:rescheduling_time_priority} reports the results from experiment 4. Positive $\Delta T_{\mathrm{res}}$ values indicate that the encoding prioritizing the first plan (or least number of train changes) is faster. The secondary encoding that prioritizes the first plan is faster in almost all environments and scenarios. The differences between the encodings are negligible in small environments, like \texttt{env\_3\_2} and \texttt{env\_2\_2}. However, in larger environments the secondary encoding prioritizing first plans is significantly more efficient. The difference is particularly pronounced in the largest environment \texttt{env\_6\_6} with the first plan encoding being almost 3 minutes faster.
 
 \begin{table}[htbp]
 	\centering
@@ -767,8 +765,15 @@ Table \ref{tab:rescheduling_time_priority} reports the results from Experiment 4
 		\makecell[r]{\textbf{~~time priority}} &
 		\makecell[r]{\textbf{$\Delta T_{\mathrm{res}}$}} \\
 		\midrule
+
+		\textbf{env\_2\_2}
+		& Non-consequent & 0.071 & 0.050 & -0.021 \\
+		& Consequent 1 & 0.032 & 0.031 & -0.001 \\
+		& Consequent + collisions & 0.048 & 0.045 & -0.003 \\
 		
-		\textbf{env\_016--3\_2}
+		\midrule
+		
+		\textbf{env\_3\_2}
 		& Non-consequent & 0.116 & 0.099 & -0.017 \\
 		& Consequent 1 & 0.071 & 0.093 & +0.022 \\
 		& Consequent 2 & 0.084 & 0.058 & -0.026 \\
@@ -776,7 +781,7 @@ Table \ref{tab:rescheduling_time_priority} reports the results from Experiment 4
 		
 		\midrule
 		
-		\textbf{env\_033--5\_4}
+		\textbf{env\_5\_4}
 		& Non-consequent & 0.576 & 0.983 & +0.407 \\
 		& Consequent 1 & 0.561 & 0.807 & +0.246 \\
 		& Consequent 2 & 0.389 & 0.585 & +0.196 \\
@@ -784,7 +789,7 @@ Table \ref{tab:rescheduling_time_priority} reports the results from Experiment 4
 		
 		\midrule
 		
-		\textbf{env\_007--6\_6}
+		\textbf{env\_6\_6}
 		& Non-consequent & 10.794 & 179.266 & +168.472 \\
 		& Consequent 1 & 9.941 & 87.676 & +77.735 \\
 		& Consequent 2 & 10.245 & 67.346 & +57.101 \\
@@ -792,25 +797,18 @@ Table \ref{tab:rescheduling_time_priority} reports the results from Experiment 4
 		
 		\midrule
 		
-		\textbf{env\_009--10\_10}
+		\textbf{env\_10\_8}
+		& Non-consequent & 4.508 & 39.227 & +34.719 \\
+		& Consequent 1 & 1.231 & 1.735 & +0.504 \\
+		& Consequent 2 & 1.344 & 5.410 & +4.066 \\
+		
+		\midrule
+		
+		\textbf{env\_10\_10}
 		& Non-consequent & 1.303 & 9.817 & +8.514 \\
 		& Consequent 1 & 1.610 & 66.304 & +64.694 \\
 		& Consequent 2 & 0.509 & 0.740 & +0.231 \\
 		& Consequent + collisions & 2.587 & 24.082 & +21.495 \\
-		
-		\midrule
-		
-		\textbf{env\_028--2\_2}
-		& Non-consequent & 0.071 & 0.050 & -0.021 \\
-		& Consequent 1 & 0.032 & 0.031 & -0.001 \\
-		& Consequent + collisions & 0.048 & 0.045 & -0.003 \\
-		
-		\midrule
-		
-		\textbf{env\_35--10\_8}
-		& Non-consequent & 4.508 & 39.227 & +34.719 \\
-		& Consequent 1 & 1.231 & 1.735 & +0.504 \\
-		& Consequent 2 & 1.344 & 5.410 & +4.066 \\
 		
 		\bottomrule
 	\end{tabular}
@@ -819,8 +817,8 @@ Table \ref{tab:rescheduling_time_priority} reports the results from Experiment 4
 		Secondary + heuristic and Secondary + time priority. The difference is
 		computed as
 		$\Delta T_{\mathrm{res}} =
-		T_{\mathrm{res}}^{\mathrm{Secondary+time\ priority}} -
-		T_{\mathrm{res}}^{\mathrm{Secondary+heuristic}}$.
+		T_{\mathrm{res}}^{\mathrm{secondary+time\ priority}} -
+		T_{\mathrm{res}}^{\mathrm{secondary+heuristic}}$.
 		Positive values indicate that Secondary + heuristic is faster.}
 	\label{tab:rescheduling_time_priority}
 \end{table}
@@ -931,103 +929,22 @@ encoding with time prioritization is the better choice in most cases.
 Otherwise, the base encoding is faster.
 
 Combining all the conclusions derived above, we can create a flow that
-describes how to handle a malfunction. First, the secondary encoding is run
-to derive Solution A. If there is no consequence, Solution A is both the most
+describes how to handle a malfunction. First, the secondary encoding with heuristic is run
+to derive aolution A. If there is no consequence, solution A is both the most
 optimized solution and the solution with the least amount of changed trains.
 If there is a consequence, the appropriate solution depends on the user's
-goal. If the goal is to minimize the number of changed trains, Solution A can
+goal. If the goal is to minimize the number of changed trains, solution A can
 be used directly. If the goal is to obtain the most optimized solution, the
-secondary encoding with time prioritization is run to derive Solution B.
+secondary encoding with time prioritization is run to derive solution B.
 Most malfunctions will not have a consequence, so it is better to run the
-secondary encoding first and determine whether rescheduling is necessary.
-The secondary encoding is also very fast in all cases, so an answer will be
+secondary encoding with heuristic first and determine whether rescheduling is necessary.
+The secondary encoding with heuristic is also very fast in all cases, so an answer will be
 available before the other encodings.
 
 Using the secondary encoding with time prioritization only when a consequence
 is detected was faster than the base encoding in all tested cases.
 
-The following graph depicts which encoding should be used based on the desired
-output:
-\begin{figure}[H]
-	\centering
-	\begin{tikzpicture}[
-		node distance=0.5cm,
-		every node/.style={font=\small},
-		process/.style={
-			rectangle,
-			rounded corners,
-			draw,
-			align=center,
-			minimum width=4.2cm,
-			minimum height=0.9cm
-		},
-		decision/.style={
-			diamond,
-			draw,
-			align=center,
-			aspect=2,
-			inner sep=2pt
-		},
-		arrow/.style={
-			-{Stealth},
-			thick
-		}
-		]
-		
-		% Start
-		\node[process] (start)
-		{Run secondary encoding with heuristic\\
-			and derive solution A};
-		
-		% First decision
-		\node[decision, below=of start] (consequence)
-		{Consequence in\\
-			solution A?};
-		
-		% No consequence branch
-		\node[process, below=of consequence, xshift=-3.5cm] (no)
-		{Solution A is optimized for\\
-			both time and\\
-			amount of changed trains};
-		
-		% Consequence branch
-		\node[decision, below=of consequence, xshift=3.5cm] (goal)
-		{Is time \\
-			prioritization required?};
-		
-		% Least changed trains
-		\node[process, below=of goal, xshift=-3.2cm] (least)
-		{Solution A already\\
-			minimizes changed trains};
-		
-		% Most optimized
-		\node[process, below=of goal, xshift=3.2cm] (optimized)
-		{Run secondary encoding with\\
-			time prioritization and\\
-			derive solution B};
-		
-		% Arrows from start
-		\draw[arrow] (start) -- (consequence);
-		
-		% Consequence branches
-		\draw[arrow] (consequence)
-		-- node[above left] {No} (no);
-		
-		\draw[arrow] (consequence)
-		-- node[above right] {Yes} (goal);
-		
-		% User goal branches
-		\draw[arrow] (goal)
-		-- node[above left] {No} (least);
-		
-		\draw[arrow] (goal)
-		-- node[above right] {Yes} (optimized);
-		
-	\end{tikzpicture}
-	\caption{Decision process for selecting a rescheduling encoding.}
-	\label{fig:rescheduling-encoding-selection}
-\end{figure}
-
+A flowchart depicting which encoding should be used based on the desired output can be viewed in Figure~\ref{fig:rescheduling-encoding-selection}.
 
 \section{Future Work}\label{future-work}
 Future work could consider other approaches than uniform randomness as a decider for a track malfunction. For instance, malfunctions on highly frequented tracks or crossings could be more likely than on straight connections. 
@@ -1095,7 +1012,67 @@ Finally, we noticed that sometimes a malfunction can cause an environment to be 
 % Environment 1
 % =========================================================
 
-\multicolumn{6}{@{}l@{}}{\textbf{env\_016--3\_2}} \\[1pt]
+\multicolumn{6}{@{}l@{}}{\textbf{env\_2\_2}} \\[1pt]
+
+& \makecell[l]{Non-consequent}
+& Base
+& 0.034 & 0.02 & 0.054 \\
+
+& &
+Secondary + heuristic
+& 0.071 & 0 & 0.071 \\
+
+& &
+Secondary + time priority
+& 0.040 & 0.01 & 0.050 \\
+
+& &
+Secondary, no heuristic
+& 0.042 & 0 & 0.042 \\
+
+\cmidrule(lr){2-6}
+
+& \makecell[l]{Consequent 1}
+& Base
+& 0.040 & 0 & 0.040 \\
+
+& &
+Secondary + heuristic
+& 0.032 & 0 & 0.032 \\
+
+& &
+Secondary + time priority
+& 0.031 & 0 & 0.031 \\
+
+& &
+Secondary, no heuristic
+& 0.032 & 0 & 0.032 \\
+
+\cmidrule(lr){2-6}
+
+& \makecell[l]{Consequent + collisions}
+& Base
+& 0.043 & 0.01 & 0.053 \\
+
+& &
+Secondary + heuristic
+& 0.038 & 0.01 & 0.048 \\
+
+& &
+Secondary + time priority
+& 0.035 & 0.01 & 0.045 \\
+
+& &
+Secondary, no heuristic
+& 0.037 & 0.01 & 0.047 \\
+
+\midrule
+
+% =========================================================
+% Environment 2
+% =========================================================
+
+\multicolumn{6}{@{}l@{}}{\textbf{env\_3\_2}} \\[1pt]
 
 & \makecell[l]{Non-consequent}
 & Base
@@ -1168,10 +1145,10 @@ Secondary, no heuristic
 \midrule
 
 % =========================================================
-% Environment 2
+% Environment 3
 % =========================================================
 
-\multicolumn{6}{@{}l@{}}{\textbf{env\_033--5\_4}} \\[1pt]
+\multicolumn{6}{@{}l@{}}{\textbf{env\_5\_4}} \\[1pt]
 
 & \makecell[l]{Non-consequent}
 & Base
@@ -1244,10 +1221,10 @@ Secondary, no heuristic
 \midrule
 
 % =========================================================
-% Environment 3
+% Environment 4
 % =========================================================
 
-\multicolumn{6}{@{}l@{}}{\textbf{env\_007--6\_6}} \\[1pt]
+\multicolumn{6}{@{}l@{}}{\textbf{env\_6\_6}} \\[1pt]
 
 & \makecell[l]{Non-consequent}
 & Base
@@ -1320,10 +1297,68 @@ Secondary, no heuristic
 \midrule
 
 % =========================================================
-% Environment 4
+% Environment 5
 % =========================================================
 
-\multicolumn{6}{@{}l@{}}{\textbf{env\_009--10\_10}} \\[1pt]
+\multicolumn{6}{@{}l@{}}{\textbf{env\_10\_8}} \\[1pt]
+
+& \makecell[l]{Non-consequent}
+& Base
+& 3.874 & 20.83 & 24.704 \\
+
+& &
+Secondary + heuristic
+& 4.408 & 0.10 & 4.508 \\
+
+& &
+Secondary + time priority
+& 3.997 & 35.23 & 39.227 \\
+
+& &
+Secondary, no heuristic
+& 4.116 & 106.08 & 110.196 \\
+
+\cmidrule(lr){2-6}
+
+& \makecell[l]{Consequent 1}
+& Base
+& 3.472 & 4.48 & 7.952 \\
+
+& &
+Secondary + heuristic
+& 1.181 & 0.05 & 1.231 \\
+
+& &
+Secondary + time priority
+& 0.475 & 1.26 & 1.735 \\
+
+& &
+Secondary, no heuristic
+& 1.356 & 16.62 & 17.976 \\
+
+& \makecell[l]{Consequent 2}
+& Base
+& 3.582 & 21.64 & 25.222 \\
+
+& &
+Secondary + heuristic
+& 1.194 & 0.15 & 1.344 \\
+
+& &
+Secondary + time priority
+& 1.450 & 3.96 & 5.410 \\
+
+& &
+Secondary, no heuristic
+& 1.210 & 29.80 & 31.010 \\
+
+\midrule
+
+% =========================================================
+% Environment 6
+% =========================================================
+
+\multicolumn{6}{@{}l@{}}{\textbf{env\_10\_10}} \\[1pt]
 
 & \makecell[l]{Non-consequent}
 & Base
@@ -1393,124 +1428,6 @@ Secondary + time priority
 Secondary, no heuristic
 & 1.594 & 69.77 & 71.364 \\
 
-\midrule
-
-% =========================================================
-% Environment 5
-% =========================================================
-
-\multicolumn{6}{@{}l@{}}{\textbf{env\_028--2\_2}} \\[1pt]
-
-& \makecell[l]{Non-consequent}
-& Base
-& 0.034 & 0.02 & 0.054 \\
-
-& &
-Secondary + heuristic
-& 0.071 & 0 & 0.071 \\
-
-& &
-Secondary + time priority
-& 0.040 & 0.01 & 0.050 \\
-
-& &
-Secondary, no heuristic
-& 0.042 & 0 & 0.042 \\
-
-\cmidrule(lr){2-6}
-
-& \makecell[l]{Consequent 1}
-& Base
-& 0.040 & 0 & 0.040 \\
-
-& &
-Secondary + heuristic
-& 0.032 & 0 & 0.032 \\
-
-& &
-Secondary + time priority
-& 0.031 & 0 & 0.031 \\
-
-& &
-Secondary, no heuristic
-& 0.032 & 0 & 0.032 \\
-
-\cmidrule(lr){2-6}
-
-& \makecell[l]{Consequent + collisions}
-& Base
-& 0.043 & 0.01 & 0.053 \\
-
-& &
-Secondary + heuristic
-& 0.038 & 0.01 & 0.048 \\
-
-& &
-Secondary + time priority
-& 0.035 & 0.01 & 0.045 \\
-
-& &
-Secondary, no heuristic
-& 0.037 & 0.01 & 0.047 \\
-
-\midrule
-
-% =========================================================
-% Environment 6
-% =========================================================
-
-\multicolumn{6}{@{}l@{}}{\textbf{env\_35--10\_8}} \\[1pt]
-
-& \makecell[l]{Non-consequent}
-& Base
-& 3.874 & 20.83 & 24.704 \\
-
-& &
-Secondary + heuristic
-& 4.408 & 0.10 & 4.508 \\
-
-& &
-Secondary + time priority
-& 3.997 & 35.23 & 39.227 \\
-
-& &
-Secondary, no heuristic
-& 4.116 & 106.08 & 110.196 \\
-
-\cmidrule(lr){2-6}
-
-& \makecell[l]{Consequent 1}
-& Base
-& 3.472 & 4.48 & 7.952 \\
-
-& &
-Secondary + heuristic
-& 1.181 & 0.05 & 1.231 \\
-
-& &
-Secondary + time priority
-& 0.475 & 1.26 & 1.735 \\
-
-& &
-Secondary, no heuristic
-& 1.356 & 16.62 & 17.976 \\
-
-& \makecell[l]{Consequent 2}
-& Base
-& 3.582 & 21.64 & 25.222 \\
-
-& &
-Secondary + heuristic
-& 1.194 & 0.15 & 1.344 \\
-
-& &
-Secondary + time priority
-& 1.450 & 3.96 & 5.410 \\
-
-& &
-Secondary, no heuristic
-& 1.210 & 29.80 & 31.010 \\
-
 \bottomrule
 
 \caption[Running times for different malfunction and rescheduling configurations.]{Running times for different malfunction and rescheduling configurations. Here, $T_{\mathrm{ground}}$, $T_{\mathrm{solve}}$, and $T_{\mathrm{res}}$
@@ -1519,6 +1436,89 @@ Secondary, no heuristic
 \label{tab:rescheduling_times} \\
 
 \end{longtable}
+
+\section{Decision process for selecting a rescheduling encoding}
+
+\begin{figure}
+\centering
+\begin{tikzpicture}[
+	node distance=0.3cm,
+	every node/.style={font=\small},
+	process/.style={
+		rectangle,
+		rounded corners,
+		draw,
+		align=center,
+		minimum width=4.2cm,
+		minimum height=0.9cm
+	},
+	decision/.style={
+		diamond,
+		draw,
+		align=center,
+		aspect=2.5,
+		inner sep=1pt
+	},
+	arrow/.style={
+		-{Stealth}
+	}
+	]
+	
+	% Start
+	\node[process] (start)
+	{Run secondary encoding with heuristic\\
+		and derive solution A};
+	
+	% First decision
+	\node[decision, below=of start] (consequence)
+	{Consequence in\\
+		solution A?};
+	
+	% No consequence branch
+	\node[process, below=of consequence, xshift=-1.5cm] (no)
+	{Solution A is optimized for\\
+		both time and\\
+		amount of changed trains};
+	
+	% Consequence branch
+	\node[decision, below=of consequence, xshift=3.5cm] (goal)
+	{Is time \\
+		prioritization required?};
+	
+	% Least changed trains
+	\node[process, below=of goal, xshift=-3.2cm] (least)
+	{Solution A already\\
+		minimizes changed trains};
+	
+	% Most optimized
+	\node[process, below=of goal, xshift=2.0cm] (optimized)
+	{Run secondary encoding with\\
+		time prioritization and\\
+		derive solution B};
+	
+	% Arrows from start
+	\draw[arrow] (start) -- (consequence);
+	
+	% Consequence branches
+	\draw[arrow] (consequence)
+	-- node[above left] {No} (no);
+	
+	\draw[arrow] (consequence)
+	-- node[above right] {Yes} (goal);
+	
+	% User goal branches
+	\draw[arrow] (goal)
+	-- node[above left] {No} (least);
+	
+	\draw[arrow] (goal)
+	-- node[above right] {Yes} (optimized);
+	
+\end{tikzpicture}
+\caption{Decision process for selecting a rescheduling encoding.}
+\label{fig:rescheduling-encoding-selection}
+
+\end{figure}
+
 
 %
 % ---- Bibliography ----

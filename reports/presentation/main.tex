@@ -10,6 +10,7 @@
 
 \usepackage{tcolorbox}
 \usepackage{listings}
+\usepackage{animate}
 
 \lstdefinestyle{mystyle}{
 	backgroundcolor=\color{backcolour},   
@@ -48,13 +49,28 @@
 \title{Track Malfunctions in Flatland}
 %\subtitle{Subtitle}
 \author{Baruch Shteken \and Lena Friedek}
-\institute[]{Railway Scheduling, Universität Potsdam}
+\institute[]{Railway Scheduling, Universität Potsdam \\ \url{https://github.com/wug-on-praat/TRailMix}}
+
 \date{21st Sep 2026}
 
 \begin{document}
 
 \begin{frame}
 \titlepage
+\end{frame}
+
+%----------------------------------------------------------------
+
+\begin{frame}
+	\frametitle{Track Malfunctions}
+	\begin{itemize}
+		\item real-world issue
+		\item negatively affects punctuality
+		\item reasons: weather, fires, trespassing, repairs, high-frequent use
+	\end{itemize}
+	
+	% add DB Meme or Fun
+	
 \end{frame}
 
 %----------------------------------------------------------------
@@ -66,7 +82,7 @@
 	\item \textsf{solve.py} handles train malfunctions.
 	
 	\item Base encoding for scheduling and forwarding information;
-	secondary encoding for rescheduling (Gilka and Murphy).
+	secondary encoding for rescheduling (Gilkra \cite{Gilkra2025} and Murphy \cite{Murphy2026a}).
 	
 	\item Information forwarded:
 	\begin{itemize}
@@ -90,20 +106,6 @@
 
 % add picture from output
 
-\end{frame}
-
-%----------------------------------------------------------------
-
-\begin{frame}
-\frametitle{Track Malfunctions}
-\begin{itemize}
-    \item real-world issue
-    \item negatively affects punctuality
-    \item reasons: weather, fires, trespassing, repairs, high-frequent use
-\end{itemize}
- 
- % add DB Meme or Fun
- 
 \end{frame}
 
 %----------------------------------------------------------------
@@ -205,9 +207,6 @@ track_malfunction(P, Dur_mal, T_mal), Dur_mal + T_mal >= T.\end{verbatim}
 			\begin{verbatim}
 calculate(ID) :- consequence(train(ID), _, _).
 calculate(ID) :- train(ID), not planned(ID).\end{verbatim}	
-		\item Using heuristic speeds up the process
-		\begin{verbatim}
-#heuristic planned(ID): train(ID). [100, true]\end{verbatim}
 	\end{itemize}
 	\end{small}
 
@@ -217,17 +216,72 @@ calculate(ID) :- train(ID), not planned(ID).\end{verbatim}
 %----------------------------------------------------------------
 
 \begin{frame}[fragile]
-	\frametitle{Secondary Encoding vs Secondary Encoding with Time Prioritization}
+	\frametitle{Experiment 1 - Heuristic vs. no heuristic}
+	\begin{itemize}
+		\item Does the Heuristic improve solving?
+		\item prefer planned trains:
+		\begin{verbatim}
+			#heuristic planned(ID): train(ID). [100, true] \end{verbatim}
+		\vspace{0.7cm}
+		\item \textbf{Results - Yes!}
+		\begin{itemize}
+			\item small environments: no difference
+			\item big/dense environments: heuristic significantly faster (especially in no consequence scenarios - 4~mins)
+			\item[->] less re-proving necessary
+		\end{itemize}
+	\end{itemize}
+	
+\end{frame}
+
+%----------------------------------------------------------------
+
+\begin{frame}[fragile]
+	\frametitle{Experiment 2 - Base vs. Secondary}
+	\begin{itemize}
+		\item Is Secondary really better than Redo Planning (Waldow \cite{waldow2025})?
+
+		\vspace{1cm}
+		\item \textbf{Results - Yes!}
+		\begin{itemize}
+			\item small environments: little/ no difference
+			\item big/dense environments: secondary encoding significantly faster (2~mins in no consequence)
+			\item[->] successful use of forwarded information
+		\end{itemize}
+	\end{itemize}
+	
+\end{frame}
+
+%----------------------------------------------------------------
+\begin{frame}[fragile]
+	\frametitle{Prioritization}
 	The encodings are different only in their optimization rule prioritization
 	\begin{itemize}
-		\item Secondary Encoding
-			\begin{verbatim}
-#maximize { 1@3, ID : planned(ID)}.
-#minimize { 1@2, ID, T : action(train(ID), _, T) }.\end{verbatim}
-		\item Secondary Encoding with Time Prioritization
-			\begin{verbatim}
-#maximize { 1@2, ID : planned(ID)}.
-#minimize { 1@3, ID, T : action(train(ID), _, T) }.\end{verbatim}
+		\item First Plan Prioritization
+		\begin{verbatim}
+			#maximize { 1@3, ID : planned(ID)}.
+			#minimize { 1@2, ID, T : action(train(ID), _, T) }.\end{verbatim}
+		\item Time Prioritization
+		\begin{verbatim}
+			#maximize { 1@2, ID : planned(ID)}.
+			#minimize { 1@3, ID, T : action(train(ID), _, T) }.\end{verbatim}
+	\end{itemize}
+	
+\end{frame}
+
+%----------------------------------------------------------------
+
+\begin{frame}[fragile]
+	\frametitle{Experiment 3 - Base vs. Time Prio}
+	\begin{itemize}
+		\item Is Secondary with Time Prioritization better than Redo Planning?
+		
+		\vspace{1cm}
+		\item \textbf{Results - Yes??}
+		\begin{itemize}
+			\item no consequence: base is faster (40~s in large, dense environment) or similar
+			\item other consequences: secondary is significantly faster (50\% in a complex scenario)
+			\item[->] Time Prio struggles with direct translation of original plan
+		\end{itemize}
 	\end{itemize}
 	
 \end{frame}
@@ -235,30 +289,31 @@ calculate(ID) :- train(ID), not planned(ID).\end{verbatim}
 %----------------------------------------------------------------
 
 \begin{frame}
-	\frametitle{Experiments}
+	\frametitle{Experiment 4 - First Plan vs. Time Prioritization}
 	\begin{itemize}
-		\item Effect of the Heuristic
-		\item Base Encoding vs. Secondary Encoding
-		\item Base Encoding vs. Secondary Encoding with Time Prioritization
-		\item Heuristic vs. Time Prioritization
+		\item Is Time Prioritization better than First Plan Prioritization?
+		
+		\vspace{1cm}
+		\item \textbf{Results - No!}
+		\begin{itemize}
+			\item first plan encoding is significantly faster in almost all environments and scenarios
+			\item similar performance in small environments
+			\item[->] First Plan Prio is faster BUT...
+		\end{itemize}
+	
 	\end{itemize}
 	
 \end{frame}
 
 %----------------------------------------------------------------
 
-\begin{frame}
-	\frametitle{Results}
-	\begin{itemize}
-		\item Time optimization and base encoding outputs different schedule than secondary encoding
-		\item Secondary encoding with heuristic is better than no heuristic
-		\item Secondary encoding with heuristic is the fastest
-		\item Time prioritization is faster than base encoding when there is a consequence
-	\end{itemize}
-	
+\begin{frame}{Purple Train}
+\begin{figure}
+	\includegraphics[width=0.8\linewidth]{frame-081_edited.png}
+	\caption{Qualitative differences between encodings.}
+\end{figure}
 \end{frame}
 
-%----------------------------------------------------------------
 
 \begin{frame}
 	\frametitle{Discussion}
@@ -354,5 +409,11 @@ calculate(ID) :- train(ID), not planned(ID).\end{verbatim}
 \end{frame}
 
 %----------------------------------------------------------------
+
+\begin{frame}
+	\frametitle{References}
+	\bibliography{refs.bib}
+	\bibliographystyle{splncs04.bst}
+\end{frame}
 
 \end{document}

@@ -3,17 +3,16 @@
 \providecommand{\urlprefix}{URL }
 \providecommand{\doi}[1]{https://doi.org/#1}
 
+\bibitem{TRailMix2026}
+Friedek, L., Shteken, B.: Trailmix. \url{https://github.com/wug-on-praat/TRailMix} (2026), gitHub repository
+
 \bibitem{Gilkra2025}
-{Gili i Bueno}, G., Kratzsch, F.: Flatland: Malfunctions research on train
-  training (2025),
-  \url{https://github.com/krr-up/railway-research/blob/main/railway-course/2024-wise/gilkra2025a.pdf}
+{Gili i Bueno}, G., Kratzsch, F.: Flatland: Malfunctions research on train training (2025), \url{https://github.com/krr-up/railway-research/blob/main/railway-course/2024-wise/gilkra2025a.pdf}
 
 \bibitem{Murphy2026a}
-Murphy, K.R.: Flatland (2026), \url{https://github.com/krr-up/flatland},
-  {Accessed: 17.08.2026}
+Murphy, K.R.: Flatland (2026), \url{https://github.com/krr-up/flatland}, {Accessed: 17.08.2026}
 
 \bibitem{waldow2025}
-Waldow, I.: Intelligent malfunction handling in large railway systems (2025),
-  \url{https://github.com/krr-up/railway-research/blob/main/theses/waldow2025a.pdf}
+Waldow, I.: Intelligent malfunction handling in large railway systems (2025), \url{https://github.com/krr-up/railway-research/blob/main/theses/waldow2025a.pdf}
 
 \end{thebibliography}

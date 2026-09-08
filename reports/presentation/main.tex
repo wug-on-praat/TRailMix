@@ -11,6 +11,7 @@
 \usepackage{tcolorbox}
 \usepackage{listings}
 \usepackage{animate}
+\usepackage{wrapfig}
 
 \lstdefinestyle{mystyle}{
 	backgroundcolor=\color{backcolour},   
@@ -112,6 +113,7 @@
 
 \begin{frame}
 	\frametitle{Our Contribution}
+	TRailMix \cite{TRailMix2026}
 	\begin{itemize}
 		\item create malfunction (randomly/deterministically)
 		\item forwarding additional information
@@ -177,13 +179,195 @@ def create_trkmalf(self, timestep, predefined_mals):
 %----------------------------------------------------------------
 
 \begin{frame}
-	\frametitle{Secondary Encoding}
-	\begin{itemize}
-		\item add figures for base and secondary
-		\item 
-	\end{itemize}
-	
+    \frametitle{Base and Secondary Encoding Overview}
+
+    \begin{columns}[c]
+
+        % ==================================================
+        % LEFT: BASE ENCODING
+        % ==================================================
+        \begin{column}{0.50\textwidth}
+            \centering
+
+            {\textbf{Base Encoding}}
+
+            \vspace{0.2cm}
+
+            \begin{tikzpicture}[
+                box/.style={
+                    draw=gray!75,
+                    fill=gray!8,
+                    rounded corners=5pt,
+                    minimum width=2.8cm,
+                    minimum height=0.68cm,
+                    text width=2.5cm,
+                    align=center,
+                    font=\sffamily\scriptsize
+                },
+                container/.style={
+                    draw=gray!75,
+                    fill=gray!3,
+                    rounded corners=7pt,
+                    inner sep=6pt
+                },
+                arrow/.style={
+                    -{Latex[length=1.8mm]},
+                    draw=teal!60!black,
+                    line width=0.7pt
+                },
+                node distance=0.15cm
+            ]
+
+            \node[box] (setup) {
+                \textbf{Environment Set-Up}\\[-1pt]
+                {\tiny time, track types, connected cells and tracks}
+            };
+
+            \node[box, below=of setup] (move) {
+                \textbf{Move Agents}\\[-1pt]
+                {\tiny position and finish}
+            };
+
+            \node[box, below=of move] (train) {
+                \textbf{Single Train Constraints}
+            };
+
+            \node[box, below=of train] (coordination) {
+                \textbf{Train Coordination Constraints}
+            };
+
+            \node[box, below=of coordination] (translation) {
+                \textbf{Action Translation}\\[-1pt]
+                {\tiny action atoms for Flatland}
+            };
+
+            \node[box, below=of translation] (optimization) {
+                \textbf{Optimization}
+            };
+
+            \draw[arrow] (setup) -- (move);
+            \draw[arrow] (move) -- (train);
+            \draw[arrow] (train) -- (coordination);
+            \draw[arrow] (coordination) -- (translation);
+            \draw[arrow] (translation) -- (optimization);
+
+            \end{tikzpicture}
+
+        \end{column}
+
+
+        % ==================================================
+        % RIGHT: SECONDARY ENCODING
+        % ==================================================
+        \begin{column}{0.50\textwidth}
+            \centering
+
+            {\textbf{Secondary Encoding}}
+
+            \vspace{0.2cm}
+
+            \begin{tikzpicture}[
+                box/.style={
+                    draw=gray!75,
+                    fill=white,
+                    rounded corners=5pt,
+                    minimum width=2.8cm,
+                    minimum height=0.68cm,
+                    text width=2.5cm,
+                    align=center,
+                    font=\sffamily\scriptsize
+                },
+                container/.style={
+                    draw=gray!75,
+                    fill=gray!3,
+                    rounded corners=7pt,
+                    inner sep=6pt
+                },
+                arrow/.style={
+                    -{Latex[length=1.8mm]},
+                    draw=teal!60!black,
+                    line width=0.7pt
+                },
+                node distance=0.15cm
+            ]
+
+            % ------------------------------------------
+            % Environment Set-Up
+            % ------------------------------------------
+            \node[
+                container,
+                minimum width=3.8cm,
+                minimum height=3.35cm
+            ] (setup2) {};
+
+            \node[
+                anchor=north west,
+                font=\sffamily\scriptsize
+            ] at ([xshift=6pt,yshift=-6pt]setup2.north west)
+            {\textbf{Environment Set-Up}};
+
+            % Future Time
+            \node[box] (future)
+                at ([yshift=-28pt]setup2.north)
+                {Future Time};
+
+            % Past Time Steps
+            \node[
+                box,
+                below=0.15cm of future
+            ] (past)
+            {Past Time Steps\\[-1pt]
+             {\tiny - past time, past actions}};
+
+            % Unstarted Trains
+            \node[
+                box,
+                below=0.15cm of past
+            ] (trains)
+            {Unstarted Trains};
+
+            % Arrows
+            \draw[arrow] (future) -- (past);
+            \draw[arrow] (past) -- (trains);
+
+            % ------------------------------------------
+            % Replan Agents
+            % ------------------------------------------
+            \node[
+                container,
+                minimum width=3.8cm,
+                minimum height=0.68cm,
+                below=0.15cm of setup2.south
+            ] (replan) {};
+
+            \node[
+                font=\sffamily\scriptsize
+            ] at (replan.center)
+            {\textbf{Replan Agents}};
+
+            \draw[arrow] (setup2) -- (replan);
+
+            % ------------------------------------------
+            % Optimization
+            % ------------------------------------------
+            \node[
+                container,
+                minimum width=3.8cm,
+                minimum height=0.68cm,
+                below=0.15cm of replan.south
+            ] (optimize)
+            {\textbf{\scriptsize Optimization}};
+
+            \draw[arrow] (replan) -- (optimize);
+
+            \end{tikzpicture}
+
+        \end{column}
+
+    \end{columns}
+
 \end{frame}
+
 
 %----------------------------------------------------------------
 
@@ -402,8 +586,10 @@ calculate(ID) :- train(ID), not planned(ID).\end{verbatim}
 \begin{frame}
 	\frametitle{Future Work}
 	\begin{itemize}
-		\item add figures for base and secondary
-		\item 
+		\item Add different random approaches to track malfunctions, e.g frequented tracks might be more prone to a malfunction
+		\item Seperate scheduling and rescheduling processes in order to run rescheduling without the scheduling part
+		\item Enhance to code to accept the creation of multiple track malfunction per timestep
+		\item Visualize the scheduling answer if no rescheduling answer is possible
 	\end{itemize}
 	
 \end{frame}

@@ -62,20 +62,6 @@
 
 %----------------------------------------------------------------
 
-\begin{frame}
-	\frametitle{Track Malfunctions}
-	\begin{itemize}
-		\item real-world issue
-		\item negatively affects punctuality
-		\item reasons: weather, fires, trespassing, repairs, high-frequent use
-	\end{itemize}
-	
-	% add DB Meme or Fun
-	
-\end{frame}
-
-%----------------------------------------------------------------
-
 \begin{frame}[fragile]
 \frametitle{Malfunctions in Flatland}
 
@@ -107,6 +93,19 @@
 
 % add picture from output
 
+%----------------------------------------------------------------
+
+\end{frame}
+\begin{frame}
+	\frametitle{Track Malfunctions}
+	\begin{itemize}
+		\item Real-world issue
+		\item Negatively affects punctuality
+		\item Reasons: weather, fires, trespassing, repairs, high-frequent use
+	\end{itemize}
+	
+	% add DB Meme or Fun
+	
 \end{frame}
 
 %----------------------------------------------------------------
@@ -115,10 +114,10 @@
 	\frametitle{Our Contribution}
 	TRailMix \cite{TRailMix2026}
 	\begin{itemize}
-		\item create malfunction (randomly/deterministically)
-		\item forwarding additional information
-		\item malfunction logging
-		\item visualization in Flatland
+		\item Create malfunction (randomly/deterministically)
+		\item Forwarding additional information
+		\item Malfunction logging
+		\item Visualization in Flatland
 	\end{itemize}
 	
 \end{frame}
@@ -400,18 +399,18 @@ calculate(ID) :- train(ID), not planned(ID).\end{verbatim}
 %----------------------------------------------------------------
 
 \begin{frame}[fragile]
-	\frametitle{Experiment 1 - Heuristic vs. no heuristic}
+	\frametitle{Experiment 1 - Heuristic vs. no Heuristic}
 	\begin{itemize}
 		\item Does the Heuristic improve solving?
-		\item prefer planned trains:
+		\item Prefer planned trains:
 		\begin{verbatim}
 			#heuristic planned(ID): train(ID). [100, true] \end{verbatim}
 		\vspace{0.7cm}
 		\item \textbf{Results - Yes!}
 		\begin{itemize}
-			\item small environments: no difference
-			\item big/dense environments: heuristic significantly faster (especially in no consequence scenarios - 4~mins)
-			\item[->] less re-proving necessary
+			\item Small environments: no difference
+			\item Big/dense environments: heuristic significantly faster (especially in no consequence scenarios - 4~mins)
+			\item[$\rightarrow$] Less re-proving necessary
 		\end{itemize}
 	\end{itemize}
 	
@@ -427,9 +426,9 @@ calculate(ID) :- train(ID), not planned(ID).\end{verbatim}
 		\vspace{1cm}
 		\item \textbf{Results - Yes!}
 		\begin{itemize}
-			\item small environments: little/ no difference
-			\item big/dense environments: secondary encoding significantly faster (2~mins in no consequence)
-			\item[->] successful use of forwarded information
+			\item Small environments: little/ no difference
+			\item Big/dense environments: secondary encoding significantly faster (2~mins in no consequence)
+			\item[$\rightarrow$] successful use of forwarded information
 		\end{itemize}
 	\end{itemize}
 	
@@ -462,9 +461,9 @@ calculate(ID) :- train(ID), not planned(ID).\end{verbatim}
 		\vspace{1cm}
 		\item \textbf{Results - Yes??}
 		\begin{itemize}
-			\item no consequence: base is faster (40~s in large, dense environment) or similar
-			\item other consequences: secondary is significantly faster (50\% in a complex scenario)
-			\item[->] Time Prio struggles with direct translation of original plan
+			\item No consequence: base is faster (40~s in large, dense environment) or similar
+			\item Other consequences: secondary is significantly faster (50\% in a complex scenario)
+			\item[$\rightarrow$] Time Prio struggles with direct translation of original plan
 		\end{itemize}
 	\end{itemize}
 	
@@ -480,9 +479,9 @@ calculate(ID) :- train(ID), not planned(ID).\end{verbatim}
 		\vspace{1cm}
 		\item \textbf{Results - No!}
 		\begin{itemize}
-			\item first plan encoding is significantly faster in almost all environments and scenarios
-			\item similar performance in small environments
-			\item[->] First Plan Prio is faster BUT...
+			\item First plan encoding is significantly faster in almost all environments and scenarios
+			\item Similar performance in small environments
+			\item[$\rightarrow$] First Plan Prio is faster BUT...
 		\end{itemize}
 	
 	\end{itemize}
@@ -491,7 +490,7 @@ calculate(ID) :- train(ID), not planned(ID).\end{verbatim}
 
 %----------------------------------------------------------------
 
-\begin{frame}{Purple Train}
+\begin{frame}{Differences in Output Quality}
 \begin{figure}
 	\includegraphics[width=0.8\linewidth]{frame-081_edited.png}
 	\caption{Qualitative differences between encodings.}

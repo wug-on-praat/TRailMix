@@ -12,6 +12,7 @@
 \usepackage{listings}
 \usepackage{animate}
 \usepackage{wrapfig}
+\usepackage{hyperref}
 
 \lstdefinestyle{mystyle}{
 	backgroundcolor=\color{backcolour},   
@@ -98,13 +99,21 @@
 \end{frame}
 \begin{frame}
 	\frametitle{Track Malfunctions}
+	\vspace{1.3cm}
 	\begin{itemize}
 		\item Real-world issue
 		\item Negatively affects punctuality
 		\item Reasons: weather, fires, trespassing, repairs, high-frequent use
 	\end{itemize}
 	
-	% add DB Meme or Fun
+	\vspace{0.4cm}
+	
+	\begin{figure}
+		\raggedleft
+		\includegraphics[width=7cm]{punctuality.jpg}
+		\caption*{\raggedleft \tiny\href{https://schlechtewitze.com/static/media/681cd185b3eb129e934bd2bb.jpg}{(Source)}}
+	\end{figure}
+
 	
 \end{frame}
 
@@ -112,14 +121,29 @@
 
 \begin{frame}
 	\frametitle{Our Contribution}
-	TRailMix \cite{TRailMix2026}
-	\begin{itemize}
-		\item Create malfunction (randomly/deterministically)
-		\item Forwarding additional information
-		\item Malfunction logging
-		\item Visualization in Flatland
-	\end{itemize}
 	
+	\begin{columns}[T]
+		\begin{column}{0.58\textwidth}
+			\vspace{1cm}
+			TRailMix \cite{TRailMix2026}
+			\begin{itemize}
+				\item Create malfunction (randomly/deterministically)
+				\item Forwarding additional information
+				\item Malfunction logging
+				\item Visualization in Flatland
+			\end{itemize}
+		\end{column}
+		
+		\begin{column}{0.38\textwidth}
+			\centering
+			\includegraphics[width=\linewidth, scale=0.5]{track.jpg}
+			
+			\vspace{-1mm}
+			{\tiny
+				\href{https://schlechtewitze.com/static/media/681cd185b3eb129e934bd2bb.jpg}
+				{(Source)}}
+		\end{column}
+	\end{columns}
 \end{frame}
 
 %----------------------------------------------------------------

@@ -42,7 +42,7 @@ class TrackMalManager():
         return active_malfunctions
 
     def deduct(self) -> None:
-        """ decrease the duration of each malfunction by one and delete expired malfunctions """
+        """ decrease the duration of each track malfunction by one and delete expired malfunctions """
         malfunctions_to_remove = []
         for i, malf in enumerate(self.track_malfunctions):
             self.track_malfunctions[i] = (self.track_malfunctions[i][0], self.track_malfunctions[i][1] - 1)
@@ -53,21 +53,21 @@ class TrackMalManager():
         for i in sorted(malfunctions_to_remove, reverse=True):
             del self.track_malfunctions[i]
 
-    def create_trkmalf(self, timestep, predefined_mals) -> set:       # malfunction generator
-
+    def create_trkmal(self, timestep, predefined_mals) -> set:       # malfunction generator
         """ create track malfunction or implement predefined track malfunctions if provided """
-
+        # create random track malfunctions (if none were predefined)
         if not predefined_mals:
             malfunction_ind = random.random()   # decider for malfunction: create value btw 0-1
 
             if malfunction_ind > 0.99:
                 malfunction_cell = tuple(random.choice(self.grid))
                 malfunction_duration = random.randint(2,20)    # maybe define with function (make 5 more likely than 20)
-                mal_timestep = timestep
+                malfunction_timestep = timestep
 
             else: 
                 return([])
-        
+
+        # handle predefined track malfunctions
         else:
             current_predefined_mal = [t for t in predefined_mals if t[1] == timestep]
             if current_predefined_mal:
@@ -75,20 +75,16 @@ class TrackMalManager():
                 malfunction_cell = current_predefined_mal[0][0]
                 malfunction_duration = current_predefined_mal[0][2] 
 
-                mal_timestep = current_predefined_mal[0][1]
+                malfunction_timestep = current_predefined_mal[0][1]
 
             else: 
                 return([])
         # add new track malfunctions to current list
         self.track_malfunctions.append((malfunction_cell, malfunction_duration))
-        self.track_record.append((malfunction_cell, mal_timestep, malfunction_duration))
+        self.track_record.append((malfunction_cell, malfunction_timestep, malfunction_duration))
 
         return([(malfunction_cell, malfunction_duration)])
         
-
-    
-    
-
 
 class MalfunctionManager():
     def __init__(self, num_agents):
@@ -247,8 +243,6 @@ def main():
         env = pickle.load(open(args.env[0], "rb"))
         no_render = args.no_render
 
-    
-
     # create manager objects
     mal = MalfunctionManager(env.get_num_agents())
     sim = SimulationManager(env, params.primary, params.secondary)
@@ -273,7 +267,7 @@ def main():
     actions, positions = sim.build_actions()
 
     predefined_malfunction = []
-    new_trkmalfs = []
+    new_trkmals = []
 
     timestep = 0
     while len(actions) > timestep:
@@ -289,29 +283,24 @@ def main():
             break
 
         # check for new malfunctions
-        new_malfs = mal.check(info)
-
-        #for test env: if timestep == 2:
-        #for env_003--2_2-wait if timestep == 15:
-        # if indicator (value 0-1) over 0.9 malfunction triggers
+        new_mals = mal.check(info)
         
-        new_trkmalfs = trk.create_trkmalf(timestep, predefined_malfunction)  # generates the malfunction
-            
+        # handle predefined track malfunctions or maybe create random track malfunction for this timestep
+        new_trkmals = trk.create_trkmal(timestep, predefined_malfunction)  
 
-        if len(new_malfs) > 0:
+        if len(new_mals) > 0:
             context = sim.provide_context(actions, timestep, mal.get())
             actions, positions = sim.update_actions(context)
 
-        mal.deduct() #??? where in the loop should this go - before context?
+        mal.deduct() 
 
-        if len(new_trkmalfs) > 0:
+        if len(new_trkmals) > 0:
             context = sim.provide_context_trk(actions, timestep, trk.get(), positions)
             actions, positions = sim.update_actions(context)
             
-            for (coords, duration) in new_trkmalfs:
+            for (coords, duration) in new_trkmals:
                 log.add_track_mal(f'{timestep}; {coords}; {duration}\n')  
                  
-                
         trk.deduct()
         
         

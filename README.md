@@ -2,6 +2,9 @@
 
 ![Flatland animation](https://i.imgur.com/9cNtWjs.gif)
 
+This repo was cloned from https://github.com/krr-up/flatland.
+Malfunctions on and around tracks of a railway system are a common real-world situation. While train malfunctions render the agent immovable, issues on the track often allow a small window for decisions and rerouting of agents. We propose an implementation of track malfunctions for the Flatland framework leveraging environment solving with answer set programming. It investigates whether a secondary encoding for rescheduling of agents after a track malfunction is preferable to Redo Planning. 
+
 ## Background
 Flatland is a [railway scheduling challenge](https://flatland.aicrowd.com/intro.html) hosted by AICrowd that seeks to solve the problem of multi-agent pathfinding for trains in large railway networks.  Although approaches across all domains (e.g. reinforcement learning, operations research) are welcome, this repository focuses on integrating ASP-based solutions within the Flatland framework.
 

@@ -1,0 +1,89 @@
+Environment,Malfunction parameters,Malfunction type,Rescheduling type,Grounding time base encoding,Solving time base encoding,Total running time base encoding,Grounding time rescheduling,Solving time rescheduling,Total running time rescheduling
+env_2_2,"[((10, 9), 5, 9)]",non consequent malfunction,base encoding,0.097,0.02,0.117,0.034,0.02,0.054
+env_2_2,"[((10, 9), 5, 9)]",non consequent malfunction,secondary encoding with heuristic,0.049,0.01,0.059,0.071,0,0.071
+env_2_2,"[((10, 9), 5, 9)]",non consequent malfunction,secondary encoding prioritize time,0.038,0.02,0.058,0.04,0.01,0.05
+env_2_2,"[((10, 9), 5, 9)]",non consequent malfunction,secondary encoding no heuristic,0.044,0.01,0.054,0.042,0,0.042
+env_2_2,"[((6, 1), 14, 5)]",consequent malfunction,base encoding,0.044,0.01,0.054,0.04,0,0.04
+env_2_2,"[((6, 1), 14, 5)]",consequent malfunction,secondary encoding with heuristic,0.045,0.01,0.055,0.032,0,0.032
+env_2_2,"[((6, 1), 14, 5)]",consequent malfunction,secondary encoding prioritize time,0.05,0.01,0.06,0.031,0,0.031
+env_2_2,"[((6, 1), 14, 5)]",consequent malfunction,secondary encoding no heuristic,0.042,0.01,0.052,0.032,0,0.032
+env_2_2,"[((12, 1), 5, 9)]",consequent malfunction with collisions,base encoding,0.035,0.02,0.055,0.043,0.01,0.053
+env_2_2,"[((12, 1), 5, 9)]",consequent malfunction with collisions,secondary encoding with heuristic,0.044,0.01,0.054,0.038,0.01,0.048
+env_2_2,"[((12, 1), 5, 9)]",consequent malfunction with collisions,secondary encoding prioritize time,0.049,0.01,0.059,0.035,0.01,0.045
+env_2_2,"[((12, 1), 5, 9)]",consequent malfunction with collisions,secondary encoding no heuristic,0.043,0.01,0.053,0.037,0.01,0.047
+env_-3_2,"[((17,13), 3, 5)]",non consequent malfunction,base encoding,0.08,0.02,0.1,0.077,0.03,0.107
+env_-3_2,"[((17,13), 3, 5)]",non consequent malfunction,secondary encoding with heuristic,0.165,0.02,0.185,0.116,0,0.116
+env_-3_2,"[((17,13), 3, 5)]",non consequent malfunction,secondary encoding prioritize time,0.085,0.02,0.105,0.079,0.02,0.099
+env_-3_2,"[((17,13), 3, 5)]",non consequent malfunction,secondary encoding no heuristic,0.095,0.03,0.125,0.077,0.02,0.097
+env_-3_2,"[((17,12), 3, 5)]",consequent malfunction,base encoding,0.071,0.02,0.091,0.074,0.03,0.104
+env_-3_2,"[((17,12), 3, 5)]",consequent malfunction,secondary encoding with heuristic,0.072,0.02,0.092,0.071,0,0.071
+env_-3_2,"[((17,12), 3, 5)]",consequent malfunction,secondary encoding prioritize time,0.075,0.03,0.105,0.083,0.01,0.093
+env_-3_2,"[((17,12), 3, 5)]",consequent malfunction,secondary encoding no heuristic,0.079,0.02,0.099,0.081,0.01,0.091
+env_-3_2,"[((6,13), 14, 12)]",consequent malfunction,base encoding,0.075,0.02,0.095,0.072,0.01,0.082
+env_-3_2,"[((6,13), 14, 12)]",consequent malfunction,secondary encoding with heuristic,0.072,0.02,0.092,0.084,0,0.084
+env_-3_2,"[((6,13), 14, 12)]",consequent malfunction,secondary encoding prioritize time,0.133,0.03,0.163,0.058,0,0.058
+env_-3_2,"[((6,13), 14, 12)]",consequent malfunction,secondary encoding no heuristic,0.077,0.02,0.097,0.054,0,0.054
+env_-3_2,"[((9,12), 11, 12)]",consequent malfunction with collisions,base encoding,0.072,0.02,0.092,0.079,0.01,0.089
+env_-3_2,"[((9,12), 11, 12)]",consequent malfunction with collisions,secondary encoding with heuristic,0.077,0.02,0.097,0.06,0.01,0.07
+env_-3_2,"[((9,12), 11, 12)]",consequent malfunction with collisions,secondary encoding prioritize time,0.086,0.03,0.116,0.056,0.02,0.076
+env_-3_2,"[((9,12), 11, 12)]",consequent malfunction with collisions,secondary encoding no heuristic,0.078,0.02,0.098,0.065,0.01,0.075
+env_5_4,"[((6, 10), 4, 4)]",non consequent malfunction,base encoding,0.467,0.14,0.607,0.545,0.11,0.655
+env_5_4,"[((6, 10), 4, 4)]",non consequent malfunction,secondary encoding with heuristic,0.447,0.13,0.577,0.566,0.01,0.576
+env_5_4,"[((6, 10), 4, 4)]",non consequent malfunction,secondary encoding prioritize time,0.508,0.18,0.688,0.653,0.33,0.983
+env_5_4,"[((6, 10), 4, 4)]",non consequent malfunction,secondary encoding no heuristic,0.553,0.15,0.703,0.692,4.45,5.142
+env_5_4,"[((6, 15), 4, 5)]",consequent malfunction,base encoding,0.455,0.16,0.615,0.455,0.18,0.635
+env_5_4,"[((6, 15), 4, 5)]",consequent malfunction,secondary encoding with heuristic,0.507,0.17,0.677,0.541,0.02,0.561
+env_5_4,"[((6, 15), 4, 5)]",consequent malfunction,secondary encoding prioritize time,0.524,0.14,0.664,0.597,0.21,0.807
+env_5_4,"[((6, 15), 4, 5)]",consequent malfunction,secondary encoding no heuristic,0.536,0.17,0.706,0.587,7.31,7.897
+env_5_4,"[((15, 11), 17, 20)]",consequent malfunction,base encoding,0.483,0.1,0.583,0.507,0.1,0.607
+env_5_4,"[((15, 11), 17, 20)]",consequent malfunction,secondary encoding with heuristic,0.511,0.14,0.651,0.359,0.03,0.389
+env_5_4,"[((15, 11), 17, 20)]",consequent malfunction,secondary encoding prioritize time,0.518,0.18,0.698,0.395,0.19,0.585
+env_5_4,"[((15, 11), 17, 20)]",consequent malfunction,secondary encoding no heuristic,0.51,0.16,0.67,0.371,0.05,0.421
+env_5_4,"[((18, 21), 14, 11)]",consequent malfunction with collisions,base encoding,0.458,0.14,0.598,0.607,3.14,3.747
+env_5_4,"[((18, 21), 14, 11)]",consequent malfunction with collisions,secondary encoding with heuristic,0.439,0.15,0.589,0.467,0.4,0.867
+env_5_4,"[((18, 21), 14, 11)]",consequent malfunction with collisions,secondary encoding prioritize time,0.549,0.14,0.689,0.512,0.62,1.132
+env_5_4,"[((18, 21), 14, 11)]",consequent malfunction with collisions,secondary encoding no heuristic,0.541,0.15,0.691,0.472,2.25,2.722
+env_6_6,"[((11, 18), 17, 12)]",non consequent malfunction,base encoding,7.646,69.2,76.846,7.597,131.1,138.697
+env_6_6,"[((11, 18), 17, 12)]",non consequent malfunction,secondary encoding with heuristic,6.642,68.48,75.122,10.564,0.23,10.794
+env_6_6,"[((11, 18), 17, 12)]",non consequent malfunction,secondary encoding prioritize time,7.549,75.19,82.739,10.706,168.56,179.266
+env_6_6,"[((11, 18), 17, 12)]",non consequent malfunction,secondary encoding no heuristic,7.335,74.05,81.385,11.15,245.22,256.37
+env_6_6,"[((11, 13), 17, 12)]",consequent malfunction,base encoding,7.398,71.23,78.628,7.927,119.6,127.527
+env_6_6,"[((11, 13), 17, 12)]",consequent malfunction,secondary encoding with heuristic,7.487,68.7,76.187,9.211,0.73,9.941
+env_6_6,"[((11, 13), 17, 12)]",consequent malfunction,secondary encoding prioritize time,7.737,70.31,78.047,9.466,78.21,87.676
+env_6_6,"[((11, 13), 17, 12)]",consequent malfunction,secondary encoding no heuristic,7.363,76.01,83.373,10.102,195.93,206.032
+env_6_6,"[((11, 13), 10, 20)]",consequent malfunction,base encoding,7.073,69.31,76.383,8.254,89.68,97.934
+env_6_6,"[((11, 13), 10, 20)]",consequent malfunction,secondary encoding with heuristic,6.935,70.85,77.785,9.505,0.74,10.245
+env_6_6,"[((11, 13), 10, 20)]",consequent malfunction,secondary encoding prioritize time,5.94,73.92,79.86,8.516,58.83,67.346
+env_6_6,"[((11, 13), 10, 20)]",consequent malfunction,secondary encoding no heuristic,7.275,72.9,80.175,10.437,80.04,90.477
+env_6_6,"[((36, 32), 86, 8)]",consequent malfunction with collisions,base encoding,7.535,70.26,77.795,7.346,92.87,100.216
+env_6_6,"[((36, 32), 86, 8)]",consequent malfunction with collisions,secondary encoding with heuristic,7.05,71.3,78.35,5.342,20.51,25.852
+env_6_6,"[((36, 32), 86, 8)]",consequent malfunction with collisions,secondary encoding prioritize time,8.113,72.08,80.193,5.776,65.85,71.626
+env_6_6,"[((36, 32), 86, 8)]",consequent malfunction with collisions,secondary encoding no heuristic,7.536,75.7,83.236,5.322,51.7,57.022
+env_10_8,"[((8, 1), 25, 19)]",non consequent malfunction,base encoding,3.13,15.99,19.12,3.874,20.83,24.704
+env_10_8,"[((8, 1), 25, 19)]",non consequent malfunction,secondary encoding with heuristic,3.556,15.7,19.256,4.408,0.1,4.508
+env_10_8,"[((8, 1), 25, 19)]",non consequent malfunction,secondary encoding prioritize time,3.567,14.84,18.407,3.997,35.23,39.227
+env_10_8,"[((8, 1), 25, 19)]",non consequent malfunction,secondary encoding no heuristic,3.588,15.35,18.938,4.116,106.08,110.196
+env_10_8,"[((20, 18), 70, 5)]",consequent malfunction,base encoding,3.552,15.93,19.482,3.472,4.48,7.952
+env_10_8,"[((20, 18), 70, 5)]",consequent malfunction,secondary encoding with heuristic,3.364,15.58,18.944,1.181,0.05,1.231
+env_10_8,"[((20, 18), 70, 5)]",consequent malfunction,secondary encoding prioritize time,3.589,15.13,18.719,0.475,1.26,1.735
+env_10_8,"[((20, 18), 70, 5)]",consequent malfunction,secondary encoding no heuristic,3.775,15.98,19.755,1.356,16.62,17.976
+env_10_8,"[((8, 1), 70, 20)]",consequent malfunction,base encoding,3.469,14.77,18.239,3.582,21.64,25.222
+env_10_8,"[((8, 1), 70, 20)]",consequent malfunction,secondary encoding with heuristic,3.38,16.02,19.4,1.194,0.15,1.344
+env_10_8,"[((8, 1), 70, 20)]",consequent malfunction,secondary encoding prioritize time,3.366,16,19.366,1.45,3.96,5.41
+env_10_8,"[((8, 1), 70, 20)]",consequent malfunction,secondary encoding no heuristic,3.369,15.82,19.189,1.21,29.8,31.01
+env_10_10,"[((11, 12), 39, 16)]",non consequent malfunction,base encoding,1.409,228.77,230.179,1.441,43.14,44.581
+env_10_10,"[((11, 12), 39, 16)]",non consequent malfunction,secondary encoding with heuristic,1.207,215.11,216.317,1.273,0.03,1.303
+env_10_10,"[((11, 12), 39, 16)]",non consequent malfunction,secondary encoding prioritize time,1.421,230.87,232.291,1.357,8.46,9.817
+env_10_10,"[((11, 12), 39, 16)]",non consequent malfunction,secondary encoding no heuristic,1.308,239.21,240.518,1.312,82.3,83.612
+env_10_10,"[((5, 16), 15, 2)]",consequent malfunction,base encoding,1.429,250.4,251.829,1.513,95.72,97.233
+env_10_10,"[((5, 16), 15, 2)]",consequent malfunction,secondary encoding with heuristic,1.342,261.55,262.892,1.55,0.06,1.61
+env_10_10,"[((5, 16), 15, 2)]",consequent malfunction,secondary encoding prioritize time,1.413,216.87,218.283,1.564,64.74,66.304
+env_10_10,"[((5, 16), 15, 2)]",consequent malfunction,secondary encoding no heuristic,1.319,256.8,258.119,1.662,94.84,96.502
+env_10_10,"[((10, 22), 55, 8)]",consequent malfunction,base encoding,1.347,240.73,242.077,1.472,0.4,1.872
+env_10_10,"[((10, 22), 55, 8)]",consequent malfunction,secondary encoding with heuristic,1.445,264.22,265.665,0.479,0.03,0.509
+env_10_10,"[((10, 22), 55, 8)]",consequent malfunction,secondary encoding prioritize time,1.442,246.56,248.002,0.47,0.27,0.74
+env_10_10,"[((10, 22), 55, 8)]",consequent malfunction,secondary encoding no heuristic,1.398,232.84,234.238,0.478,0.41,0.888
+env_10_10,"[((5, 16), 15, 20)]",consequent malfunction with collisions,base encoding,1.38,208.39,209.77,1.38,70.34,71.72
+env_10_10,"[((5, 16), 15, 20)]",consequent malfunction with collisions,secondary encoding with heuristic,1.805,216.86,218.665,2.077,0.51,2.587
+env_10_10,"[((5, 16), 15, 20)]",consequent malfunction with collisions,secondary encoding prioritize time,1.427,237.54,238.967,1.552,22.53,24.082
+env_10_10,"[((5, 16), 15, 20)]",consequent malfunction with collisions,secondary encoding no heuristic,1.426,231.53,232.956,1.594,69.77,71.364

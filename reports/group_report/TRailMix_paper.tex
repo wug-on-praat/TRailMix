@@ -1,17 +1,11 @@
-% This is samplepaper.tex, a sample chapter demonstrating the
 % LLNCS macro package for Springer Computer Science proceedings;
 % Version 2.21 of 2022/01/12
 %
 \documentclass[runningheads]{llncs}
 %
 \usepackage[T1]{fontenc}
-% T1 fonts will be used to generate the final print and online PDFs,
-% so please use T1 fonts in your manuscript whenever possible.
-% Other font encondings may result in incorrect characters.
-%
+
 \usepackage{graphicx}
-% Used for displaying a sample figure. If possible, figure files should
-% be included in EPS format.
 
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta, positioning, shapes.geometric, decorations.pathreplacing, fit}
@@ -65,13 +59,6 @@
 % set the name for code blocks to be displayed
 \renewcommand{\lstlistingname}{Code}
 
-
-%\lstset{style=mystyle}
-% If you use the hyperref package, please uncomment the following two lines
-% to display URLs in blue roman font according to Springer's eBook style:
-%\usepackage{color}
-%\renewcommand\UrlFont{\color{blue}\rmfamily}
-%\urlstyle{rm}
 %
 \begin{document}
 %
@@ -101,7 +88,7 @@ Malfunctions on and around tracks of a railway system are a common real-world si
 
 \keywords{ASP  \and Flatland \and MAPF \and Rescheduling \and VRSP.}
 \end{abstract}
-%
+
 
 \section{Introduction to Flatland and its malfunction handling}
 Flatland is a framework developed by AICrowd and SBB for multi-agent path finding problems and more specifically railway scheduling and rescheduling issues \cite{mohanty2020}. The initial simulation environment was designed for Python-based reinforcement learning approaches. It offers a contained experimentation sandbox around the vehicle rescheduling problem (VRSP) and simple two-dimensional visualisation of environments and agent movement.
@@ -152,13 +139,6 @@ The environment specifications are defined for Clingo during environment creatio
 
 Our Base Encoding includes rules and additional information to represent the environment. First, it imports a fact file (\verb|connections_nswe.lp|) with additional world information applicable to all Flatland environments. It defines how track types translate to the directions north, south, west and east. For instance, the fact \verb|connection(4608, (s,w))| is track type 4608, a curve that connects south and west. Furthermore, it contains definitions for directions and turns, a move in a certain direction in terms of movement on the X- and Y-axis, relations between directions (e.g. west is the inverse of east) and which track types allow a choice in direction. The fact file has been taken from Murphy \cite{Murphy2026a} in big parts and expanded by us. Then, the Base Encoding creates a grid of adjacent cells and checks which are reachable by an agent.
 
-
-%\begin{wrapfigure}{r}{0.2\textwidth}
-%	\centering
-%	\includegraphics[scale=0.5, width=\linewidth]{base_encoding.jpg}
-%	\caption{High-level overview of Base Encoding.}
-%	\label{overview_primary}
-%\end{wrapfigure}
 
 \begin{wrapfigure}[23]{r}{0.2\textwidth}
 	\centering
@@ -430,8 +410,7 @@ Experiment 2 investigates if rescheduling with the secondary encoding is indeed 
 
 \subsubsection{Experiment 3: Base Encoding vs. Secondary Encoding with Time Prioritization}
 The Secondary Encoding contains three optimization statements (see Code \ref{optimize_code}). In Experiment 3, we seek to test if prioritizing time can still lead to a more efficient rescheduling than Redo Planning. The Base Encoding also prioritizes time via its optimization statements (see Section \ref{move_agents}). The Secondary Encoding that prioritizes time differs from the Secondary Encoding + heuristic in such that it switches the weights for the two top-most optimization statements. The heuristic flag is included in both versions. In the time prioritization the weights are as shown in Code \ref{optimize_code}. 
-%We compared these two encodings because these are the only encoding that can output the most optimized reschedule after a malfunciton.
-%Experiment 3 evaluates if rescheduling with the secondary encoding with time prioritization is better than the base encoding (Redo Planning) for getting the time optimized solution. 
+
 
 % Time Prioritization
 \begin{lstlisting}[style=mystyle, language=Clingo, caption={Optimization statements in Secondary Encoding + time prioritization.}, label=optimize_code]
@@ -462,9 +441,8 @@ Six testing environments of varying sizes and numbers of agents were used in eac
 		\includegraphics[width=\linewidth]{env_3_2.png}
 		\caption{env\_3\_2, 20x20, 3 agents}
 		\label{3_2}
-	\end{subfigure}\hfill % <-- "\hfill"
-	~ % optional tilde b/t figures for readability.
-	% this solution will not work w/ empty lines b/t subfigures
+	\end{subfigure}\hfill 
+	
 	\begin{subfigure}{.475\linewidth}
 		\includegraphics[width=\linewidth]{env_6_6.png}
 		\caption{env\_6\_6, 50x50, 6 agents}
@@ -1519,38 +1497,4 @@ Secondary, no heuristic
 
 \end{figure}
 
-
-%
-% ---- Bibliography ----
-%
-% BibTeX users should specify bibliography style 'splncs04'.
-% References will then be sorted and formatted in the correct style.
-%
-
-%%
-%\begin{thebibliography}{8}
-%\bibitem{ref_article1}
-%Author, F.: Article title. Journal \textbf{2}(5), 99--110 (2016)
-%
-%\bibitem{ref_lncs1}
-%Author, F., Author, S.: Title of a proceedings paper. In: Editor,
-%F., Editor, S. (eds.) CONFERENCE 2016, LNCS, vol. 9999, pp. 1--13.
-%Springer, Heidelberg (2016). \doi{10.10007/1234567890}
-%
-%\bibitem{ref_book1}
-%Author, F., Author, S., Author, T.: Book title. 2nd edn. Publisher,
-%Location (1999)
-%
-%\bibitem{ref_proc1}
-%Author, A.-B.: Contribution title. In: 9th International Proceedings
-%on Proceedings, pp. 1--2. Publisher, Location (2010)
-
-%\bibitem{ref_url1}
-%LNCS Homepage, \url{http://www.springer.com/lncs}, last accessed 2023/10/25
-%
-%\bibitem{flatlandpaper}
-%Mohanty et. al: Flatland-RL: Multi-Agent Reinforcement Learning on Trains. \url{https://arxiv.org/abs/2012.05893}, 2020.
-%
-%
-%\end{thebibliography}
 \end{document}

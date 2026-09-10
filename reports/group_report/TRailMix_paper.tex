@@ -1,0 +1,1500 @@
+% LLNCS macro package for Springer Computer Science proceedings;
+% Version 2.21 of 2022/01/12
+%
+\documentclass[runningheads]{llncs}
+%
+\usepackage[T1]{fontenc}
+
+\usepackage{graphicx}
+
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric, decorations.pathreplacing, fit}
+\usepackage{float}
+
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{makecell}
+
+\usepackage{hyperref}
+\usepackage{subcaption}
+\usepackage{wrapfig}
+
+\usepackage{xcolor}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\usepackage{listings}
+\lstdefinelanguage{Clingo}{
+	morekeywords=[1]{position, time, end, calculate, finish, consequence, planned_position, track_malfunction, planned, train},
+	%morekeywords=[2]{ID,POS,T,T',D,X,Y},
+	sensitive=true,
+	morecomment=[l]{\%},
+	morestring=[b]",
+	alsoletter={'},
+	literate=
+	{:-}{{$\;{:\!-}\;$}}2
+	{->}{{$\rightarrow$}}2
+}
+
+\lstdefinestyle{mystyle}{
+	backgroundcolor=\color{backcolour},   
+	%commentstyle=\color{codegreen},
+	keywordstyle=\bfseries,
+	numberstyle=\tiny\color{codegray},
+	stringstyle=\color{codepurple},
+	basicstyle=\footnotesize,
+	breakatwhitespace=true,         
+	breaklines=true,                 
+	captionpos=b,                    
+	keepspaces=true,                 
+	numbers=left,                    
+	numbersep=5pt,                  
+	showspaces=false,                
+	showstringspaces=false,
+	showtabs=false,                  
+	tabsize=2
+}
+% set the name for code blocks to be displayed
+\renewcommand{\lstlistingname}{Code}
+
+%
+\begin{document}
+%
+\title{Track Malfunctions in Flatland}
+%
+%\titlerunning{Abbreviated paper title}
+% If the paper title is too long for the running head, you can set
+% an abbreviated paper title here
+%
+\author{TRailMix: Baruch Shteken\inst{1} \and
+Lena Friedek\inst{2}}
+%
+%\authorrunning{F. Author et al.}
+% First names are abbreviated in the running head.
+% If there are more than two authors, 'et al.' is used.
+%
+\institute{Universität Potsdam,
+\email{baruch.shteken@uni-potsdam.de}\\
+\and
+Universität Potsdam,
+\email{lena.friedek@uni-potsdam.de}}
+%
+\maketitle              % typeset the header of the contribution
+%
+\begin{abstract}
+Malfunctions on and around tracks of a railway system are a common real-world situation. While train malfunctions render the agent immovable, issues on the track often allow a small window for decisions and rerouting of agents. We propose an implementation of track malfunctions for the Flatland framework leveraging environment solving with answer set programming. It investigates whether a secondary encoding for rescheduling of agents after a track malfunction is preferable to Redo Planning. 
+
+\keywords{ASP  \and Flatland \and MAPF \and Rescheduling \and VRSP.}
+\end{abstract}
+
+
+\section{Introduction to Flatland and its malfunction handling}
+Flatland is a framework developed by AICrowd and SBB for multi-agent path finding problems and more specifically railway scheduling and rescheduling issues \cite{mohanty2020}. The initial simulation environment was designed for Python-based reinforcement learning approaches. It offers a contained experimentation sandbox around the vehicle rescheduling problem (VRSP) and simple two-dimensional visualisation of environments and agent movement.
+
+
+
+\subsection{Flatland and Answer Set Programming}
+Murphy has built a toolkit to integrate answer set programming solutions in the Flatland framework \cite{Murphy2026a}. The approach solves instances with Clingo \cite{gebser2018clingo} and then translates the solution to execute and visualize in Flatland. Environments are generated beforehand to adhere to Flatland prerequisites but also encode the instance for Clingo. The ASP encoding for solving has to generate action predicates which communicate all agents' steps to Flatland.  
+
+
+\subsection{Malfunctions in Flatland}
+\label{flatland_mals}
+Flatland environments can natively include agent malfunctions. The aspect is called Stochasticity and defines how often and for how long trains will be disrupted \cite{Flatland2023}. Murphy included this aspect in the script for building new environments \cite{Murphy2026a}. The parameters in Code \ref{build_mals} define train malfunctions occurring in a new environment. The given \verb|malfunction_rate| sets the Poisson rate so that we can expect 10 malfunctions over 30 time steps.
+
+\begin{lstlisting}[style=mystyle, language=Python, caption={Generate train malfunctions in build.py.}, label={build_mals}]
+	
+	malfunction_rate=10/30
+	min_duration=2
+	max_duration=6
+	
+\end{lstlisting}
+
+Murphy's interface between Clingo and Flatland allows to define separate encodings \cite{Murphy2026a}. The first encoding derives the original schedule for all agents. The secondary encoding then solves the rescheduling after every train malfunction. It includes a feature for forwarding information from the scheduling encoding to be reused in the secondary encoding \cite{Murphy2026a} \cite{gilkra2025}. 
+
+Gilkra have used these features to benchmark different attempts for secondary encodings after train malfunctions \cite{gilkra2025}. They have been able reuse calculated plans from the scheduling step and thus reduce computing time during rescheduling.
+
+Waldow approaches train malfunctions by identifying conflict points, cells where two agents can collide due to a train malfunction \cite{waldow2025}. Deltas then define the distance of an agent to such a conflict point and help deduce whether a given train malfunction can be "waited out" (triviality) or if multiple agents have to wait. He calls replanning by solving the environment anew with the same base encoding "Redo Planning" \cite[p.~24]{waldow2025}.
+
+
+\subsection{Track Malfunctions}
+\label{trkmals}
+Track malfunctions are a common real world issue in railway systems. It negatively affects punctuality and interferes with scheduling of trains. Deutsche Bahn reports old facilities in need of repairs just as well as an intense, high-frequent use of existing infrastructure as reasons for malfunctions around the track \cite{DB2025}. Other factors can be weather incidents, such as flooding \cite{AusPunctuality2025} or fires \cite{DB2025}, or trespassing individuals that make railway sections temporarily unusable \cite{SZdelayarticle2023}.
+
+
+
+\section{Track Malfunctions in Flatland}
+
+
+Building on existing work about malfunctioning trains, we implement \cite{TRailMix2026} track malfunctions to simulate realistic scheduling challenges (see Sections \ref{flatland_mals} and \ref{trkmals}). We base our approach on previous work by Gilkra \cite{gilkra2025} and propose a similar structure for dealing with track-based disruptions in the original schedule. Flatland doesn't natively include track malfunctions. Alternatively, we generate track malfunctions in the main solving pipeline (see Section \ref{solve}). By reusing plans for trains from the original schedule,  we aimed to improve computation time during rescheduling through a secondary encoding (see Section \ref{encoding_2}).
+
+
+\subsection{Base Encoding} \label{encoding_1}
+
+The base encoding is Clingo code that solves a Flatland environment and schedules agents. It sets up the environment, generates sequential and valid positions for agents and then translates the positions into action atoms for Flatland (see Figure \ref{fig:overview_primary}). 
+
+\subsubsection{Setting-up the environment} \label{setup_base}
+The environment specifications are defined for Clingo during environment creation with \verb|build.py|. It consists of a global time limit, information about the trains including agent ID, start, end and speed, and the cells with their given track type.
+
+Our Base Encoding includes rules and additional information to represent the environment. First, it imports a fact file (\verb|connections_nswe.lp|) with additional world information applicable to all Flatland environments. It defines how track types translate to the directions north, south, west and east. For instance, the fact \verb|connection(4608, (s,w))| is track type 4608, a curve that connects south and west. Furthermore, it contains definitions for directions and turns, a move in a certain direction in terms of movement on the X- and Y-axis, relations between directions (e.g. west is the inverse of east) and which track types allow a choice in direction. The fact file has been taken from Murphy \cite{Murphy2026a} in big parts and expanded by us. Then, the Base Encoding creates a grid of adjacent cells and checks which are reachable by an agent.
+
+
+\begin{wrapfigure}[23]{r}{0.2\textwidth}
+	\centering
+	\vspace{-3em}
+	\begin{tikzpicture}[
+		box/.style={
+			draw=gray!75,
+			fill=gray!8,
+			rounded corners=7pt,
+			minimum width=3.1cm,
+			minimum height=1.15cm,
+			text width=2.75cm,
+			align=center,
+			font=\sffamily\footnotesize
+		},
+		arrow/.style={
+			-{Latex[length=2mm]},
+			draw=teal!60!black,
+			line width=0.8pt
+		},
+		node distance=0.4cm
+		]
+		
+		\node[box] (setup) {
+			\textbf{\\ Environment \\ Set-Up}\\%[-1pt]
+			{\scriptsize - time, track types\\
+				connected cells and \\ 
+				tracks\\}
+		};
+		
+		\node[box, below=of setup] (move) {
+			\textbf{Move Agents}\\[-1pt]
+			{\scriptsize - position and finish}
+		};
+		
+		\node[box, below=of move] (train) {
+			\textbf{Single Train}\\[-1pt]
+			\textbf{Constraints}
+		};
+		
+		\node[box, below=of train] (coordination) {
+			\textbf{Train Coordination}\\[-1pt]
+			\textbf{Constraints}
+		};
+		
+		\node[box, below=of coordination] (translation) {
+			\textbf{Action Translation}\\%[-1pt]
+			{\scriptsize - action atoms for \\[-.5pt]
+				Flatland}
+		};
+		
+		\node[box, below=of translation] (optimization) {
+			\textbf{Optimization}
+		};
+		
+		\draw[arrow] (setup) -- (move);
+		\draw[arrow] (move) -- (train);
+		\draw[arrow] (train) -- (coordination);
+		\draw[arrow] (coordination) -- (translation);
+		\draw[arrow] (translation) -- (optimization);
+		
+	\end{tikzpicture}
+	
+	\caption{Overview of Base Encoding.}
+	\label{fig:overview_primary}
+\end{wrapfigure}
+
+\subsubsection{Move Agents}\label{move_agents}
+The \verb|position(ID, CELL, TIME, DIRECTION)| argument handles the position of a train (ID) in the environment at any given time step and thus generates the sequential moves for that agent. A train is marked as \verb|finish(ID, TIME)| once it has reached its destination and doesn't move further. The position atoms are subsequently translated to action predicates containing necessary information, namely train ID and the required action at a given time step, for Flatland to visualise the solved environment.
+
+Our optimization objectives encourage trains to reach their destination as soon as possible and prefer one consecutive waiting period over repeated stop-and-go behaviour.
+
+\subsubsection{Constraints}
+We implemented two types of constraints on agent movements: single train constraints and train coordination constraints. Single train constraints ensure that a train behaves normally. They forbid multiple positions of one agent in the environment and ensure termination upon arrival at the destination.
+
+Train Coordination constraints avoid behaviour that would cause collisions between agents. Any two given trains cannot occupy the same cell and two oncoming agents cannot immediately switch places or pass through each other.
+
+
+
+\subsection{Python Part}\label{solve}
+
+Since we could not implement track malfunctions directly in Flatland, we implemented them in Python code that runs Clingo with Flatland input (\verb|solve.py|).
+
+The added code consists of the following parts:
+
+\begin{itemize}
+    \item Creating track malfunctions either randomly or deterministically
+    \item Translating the track malfunction Python object into Clingo
+    \item Forwarding the atoms to Clingo
+    \item Logging the malfunction in a file
+    \item Depicting the malfunction in the Flatland output
+\end{itemize}
+
+\subsubsection{Track Malfunction Atom Definition}
+
+A track malfunction Python object is a tuple consisting of three components:
+
+\begin{verbatim}
+(CELL, TIMESTEP, DURATION)
+\end{verbatim}
+
+The \texttt{CELL} is an \texttt{(X, Y)} tuple that defines where the track malfunction occurred.
+The \texttt{TIMESTEP} represents the timestep at which the track malfunction was triggered. During this timestep, the malfunction has not yet occurred but it starts in the following timestep. This was an architectural decision to ensure that trains cannot be on a malfunctioning track when the malfunction starts.
+The \texttt{DURATION} specifies the number of timesteps for which the track malfunction occurred.
+
+Track malfunctions can either be created randomly or predefined by the user. The variable \texttt{predefined\_malfunction} is used to store malfunctions that the user wants to enforce on the environment. If the variable is empty, there is a 1\% chance of a malfunction occurring at every timestep (this probability can be adjusted). In the current setup, only one malfunction can occur per timestep (see Section \ref{future-work}). Malfunctions are logged in a CSV file with the following parameters:
+
+\begin{verbatim}
+	timestep;cell;duration
+\end{verbatim}
+
+\subsubsection{Track malfunction Implementation in Clingo}\label{fwd_info_2_clingo}
+
+When a malfunction is triggered in Python, multiple atoms and rules are generated and forwarded to the program that calculates the rescheduling (Secondary Encoding - see Section \ref{encoding_2}).
+
+\begin{itemize}
+    \item \textbf{\texttt{action} constraint rules} -- To preserve the actions taken up to this point, a constraint rule is generated for each action, ensuring that all past actions must be present in the output of the rescheduling.
+
+    \item \textbf{\texttt{track\_malfunction} atoms} -- to provide the location, timestep and duration of the malfunction.
+
+    \item \textbf{\texttt{position} constraint rules} -- Since the track malfunction starts one timestep after it is triggered, the actions at the time the malfunction is triggered are preserved. Consequently, their positions in the next timestep are also preserved. These constraints only include the next position.
+
+    \item \textbf{\texttt{planned\_action} atoms} -- Include all actions that were planned before the malfunction occurred.
+
+    \item \textbf{\texttt{planned\_position} atoms} -- Include all positions that were planned before the malfunction occurred.
+
+    \item \textbf{\texttt{current\_position} atoms} -- Include all positions occupied at the timestep at which the malfunction occurred.
+\end{itemize}
+
+\subsubsection{Track malfunction Depiction}
+
+Similar to a train malfunction, a track malfunction is depicted as a red \textbf{X} over the malfunctioning track.
+
+
+\subsection{Secondary Encoding} \label{encoding_2}
+
+The secondary encoding reschedules the environment after a track malfunction. Our goal was to reduce computational cost by avoiding recalculation of the environment and agents. Our approach, similar to Gilkra \cite{gilkra2025}, reuses information and train schedules from the original plan unless the track malfunction interferes with an agent. 
+
+\verb|secondary_encoding.lp| reuses ideas for solving from the base encoding, such as the general environment facts \verb|connections_nswe.lp| and \verb|trainjacent| atoms for finding valid movements (see Section \ref{setup_base}). Additionally, information is passed from the original schedule (see Section \ref{fwd_info_2_clingo}). Thus, the secondary encoding has access to 
+\begin{itemize}
+	\item basic Flatland information (\verb|connections_nswe.lp|)
+	\item details of the track malfunction (\verb|track_malfunction\3|)
+	\item agent history (\verb|action| and \verb|position| constraints, \verb|current_position\4|)
+	\item {initial plan for agents (\verb|planned_action\3| and \verb|planned_position\4|)}
+\end{itemize}
+
+\begin{wrapfigure}[18]{r}{0.3\textwidth}
+	\centering
+	\vspace{-2.5em}
+	\begin{tikzpicture}[
+		font=\sffamily,
+		>=Latex,
+		node distance=4mm, %and 8mm,
+		box/.style={
+			draw=black!70,
+			rounded corners=2pt,
+			minimum width=3.1cm,
+			minimum height=0.65cm,
+			align=center,
+			fill=white,
+			font=\sffamily\footnotesize
+		},
+		container/.style={
+			draw=black!60,
+			rounded corners=10pt,
+			inner sep=8pt,
+			fill=black!3,
+			font=\sffamily,
+		},
+		arrow/.style={
+			-{Latex[length=2mm]},
+			draw=black!75,
+			line width=0.7pt
+		}
+		]
+		
+		% Environment set-up container
+		\node[container,
+		minimum width=4.25cm,
+		minimum height=4.4cm] (setup) {};
+		
+		\node[anchor=north west] at ([xshift=7pt,yshift=-6pt]setup.north west)
+		{\textbf{Environment Set-Up}};
+		
+		% Main nodes
+		\node[box, minimum width=2.8cm] (future)
+		at ([yshift=-32pt]setup.north) {Future Time};
+		
+		\node[box, minimum width=2.8cm, below=4mm of future] (past)
+		{Past Time Steps\\[-1pt]
+			\scriptsize - past time, past\\[-1pt]
+			\scriptsize actions};
+		
+		\node[box, minimum width=2.8cm, below=4mm of past] (trains)
+		{Unstarted Trains};
+		
+		% Arrows inside the container
+		\draw[arrow] (future) -- (past);
+		\draw[arrow] (past) -- (trains);
+		
+		% Replan agents label
+		\node[container, minimum width=4.25cm, minimum height=8mm, below=4mm of setup.south] (replan)
+		{};
+		
+		\node[anchor=north west] at ([xshift=-36pt,yshift=-4pt]replan.north)
+		{\textbf{Replan Agents}};
+		
+		\draw[arrow] (setup) -- (replan);
+		
+		% Optimization
+		\node[container, minimum width=4.25cm, below=4mm of replan.south] (optimize)
+		{\textbf{Optimization}};
+		
+		\draw[arrow] (replan) -- (optimize);	
+		
+	\end{tikzpicture}
+	
+	\caption{High-level overview of Secondary Encoding.}
+	\label{fig:overview_secondary}
+\end{wrapfigure}
+
+First, the program sets up the required environment with \verb|connections_nswe.lp| and creates two time counters. \verb|time(T)| counts time from one step after the track malfunction. \verb|past_time(T)| counts time up until and including the step of the track malfunction. This distinction is required to restore actions up until the malfunction time. These past action atoms are necessary for Flatland to depict the solution correctly.
+
+If a track malfunction triggers before all trains of the environment have been initialized in their starting position, they have to be positioned during rescheduling by creating their starting \verb|position\4|. Then the replanning of trains starts. To identify whether an agent is affected by a track malfunction, it raises a \verb|consequence\3| (see Code \ref{consequence}). That means the train is planned to be on the malfunctioning track, it cannot continue on its original path and must adjust its behaviour. There are three scenarios our secondary encoding handles\footnote{If a track malfunction hits a cell while there is a train on its track, the simulation breaks, effectively corresponding to an accident on the track. We discovered this behaviour and decided to keep it instead of handling that exception as it also depicts a realistic scenario and could be inspiration for future work in this course.}: a) the track malfunction doesn't interfere with the planned routes of agents (no consequence), b) one train is affected by the track malfunction (simple consequence) and c) multiple trains are affected by the track malfunction (complex consequence).
+
+
+\begin{lstlisting}[style=mystyle, language=Clingo, caption={Definition of consequence: if a train is attempting to go into a malfunctioning cell it raises a consequence.}, label={consequence}]
+	
+	% Consequence: train is affected by a track malfunction and has to be recalculated
+	consequence(train(ID), P, T) :- planned_position(ID, P, T, _), track_malfunction(P, Dur_mal, T_mal), Dur_mal + T_mal >= T.
+
+	% planned is a train that is not affected by the malfunction and we don't want to reroute it
+	{planned(ID)}:- train(ID), not consequence(train(ID), _, _).
+	
+\end{lstlisting}
+
+
+\subsubsection{No Consequence}
+If no agent is planned to visit the actively malfunctioning cell the trains can continue their paths as calculated in the base encoding. All agents are marked as \verb|planned\1|. Their planned actions and positions are translated into \verb|action\3| and \verb|position\4| atoms. 
+
+\subsubsection{Simple Consequence}\label{simple_consequence}
+In a simple consequence, only one train is scheduled to pass the track malfunction (only one \verb|consequence/3| atom). The train gets marked as \verb|calculate/1|. Other trains remain \verb|planned/1|. From its current position this agents gets rescheduled. The rescheduling is done similarly to the scheduling logic in the base encoding by checking reachable cells, creating \verb|position| and \verb|action| atoms, narrowing down the solution with constraints and selecting the best model via optimization statements (see Section \ref{encoding_1}). A rescheduled train can "wait out" the malfunction or be rerouted via other available tracks.
+
+\subsubsection{Complex Consequence}
+A complex consequence includes multiple agents that require rescheduling (multiple \verb|conequence/3| atoms). However, it also covers the case where the adjustment of one agent's path influences another train, e.g. the rerouted or waiting train would cause a collision with an unaffected train. The trains that were planned as passing through the track malfunction are marked with \verb|consequence/3|. Those agents and the ones indirectly affected are marked as \verb|calculate/1|. Other trains remain \verb|planned/1|. The rescheduling then is done as described above.
+
+
+\section{Experiments}
+We have conducted four experiments to test the capabilities of our encodings in multiple environments. Clingo reports total elapsed time and time spent on solving. For each experiment, we assume that most of the non-solving time is used to ground the rules. We base our comparisons on time differences in computing since rescheduling is a  time-sensitive interruption with only a limited window for decision making.
+
+\subsubsection{Experiment 1: Effect of the Heuristic}
+Subsequently, a heuristic was added to the secondary encoding (Line 6 in Code \ref{heuristic_code}). Due to the size of most Flatland environments and the low rate of track malfunctions (1\%), we could assume that most malfunctions cause no or simple consequences. Clingo should be able to transfer the original plan for planned trains rather quickly. However, we had to encourage and direct this behaviour in Clingo with a heuristic. Experiment 1 compares performance of the secondary encoding with and without the heuristic prioritizing planned trains.
+
+
+% Heuristic Flag in Clingo Code
+\begin{lstlisting}[style=mystyle, language=Clingo, caption={The heuristic flag in line 6 prioritizes solutions with planned trains.}, label=heuristic_code]
+	
+	% planned is a train that is not affected by the malfunction and we don't want to reroute it
+	{planned(ID)}:- train(ID), not consequence(train(ID), _, _).
+	
+	% Prioritize planned trains when solving
+	#heuristic planned(ID): train(ID). [100, true]
+	
+\end{lstlisting}
+
+\subsubsection{Experiment 2: Base Encoding vs. Secondary Encoding}
+Experiment 2 investigates if rescheduling with the secondary encoding is indeed preferable over replanning with the Base Encoding (Redo Planning).
+
+
+\subsubsection{Experiment 3: Base Encoding vs. Secondary Encoding with Time Prioritization}
+The Secondary Encoding contains three optimization statements (see Code \ref{optimize_code}). In Experiment 3, we seek to test if prioritizing time can still lead to a more efficient rescheduling than Redo Planning. The Base Encoding also prioritizes time via its optimization statements (see Section \ref{move_agents}). The Secondary Encoding that prioritizes time differs from the Secondary Encoding + heuristic in such that it switches the weights for the two top-most optimization statements. The heuristic flag is included in both versions. In the time prioritization the weights are as shown in Code \ref{optimize_code}. 
+
+
+% Time Prioritization
+\begin{lstlisting}[style=mystyle, language=Clingo, caption={Optimization statements in Secondary Encoding + time prioritization.}, label=optimize_code]
+	
+	% we want as many OG train plans as possible
+	#maximize { 1@2, ID : planned(ID)}.
+
+	% Finish as early as possible
+	#minimize { 1@3, ID, T : action(train(ID), _, T) }.
+
+	% Prefer fewer distinct waiting episodes
+	wait_start(ID, T) :- action(train(ID), wait, T), action(train(ID), A, T-1), A != wait.
+
+	#minimize { 1@1, ID, T : wait_start(ID, T) }.
+	
+\end{lstlisting}
+
+\subsubsection{Experiment 4: Heuristic vs. Time Prioritization}
+Experiment 4 then evaluates how the Secondary Encoding + heuristic competes against Secondary Encoding + time prioritization. Thus, we can determine the best version of the Secondary Encoding for rescheduling after a track malfunction.
+
+\subsection{Testing environments}
+Six testing environments of varying sizes and numbers of agents were used in each experiment (see Figure \ref{test_envs}). In each environment, we have identified tracks for the three types of track malfunctions (simple, complex, no consequence - see Section \ref{encoding_2}).
+
+% add crosses to show malfunction cells
+\begin{figure}[hbtp]
+	
+	\begin{subfigure}{.475\linewidth}
+		\includegraphics[width=\linewidth]{env_3_2.png}
+		\caption{env\_3\_2, 20x20, 3 agents}
+		\label{3_2}
+	\end{subfigure}\hfill 
+	
+	\begin{subfigure}{.475\linewidth}
+		\includegraphics[width=\linewidth]{env_6_6.png}
+		\caption{env\_6\_6, 50x50, 6 agents}
+		\label{6_6}
+	\end{subfigure}
+
+	\begin{subfigure}{.475\linewidth}
+		\includegraphics[width=\linewidth]{env_2_2.png}
+		\caption{env\_2\_2, 20x15, 2 agents}
+		\label{2_2}
+	\end{subfigure}\hfill % <-- "\hfill"
+	~ % optional tilde b/t figures for readability.
+	% this solution will not work w/ empty lines b/t subfigures
+	\begin{subfigure}{.475\linewidth}
+		\includegraphics[width=\linewidth]{env_10_10.png}
+		\caption{env\_10\_10, 30x30, 10 agents}
+		\label{10_10}
+	\end{subfigure}
+	
+	\begin{subfigure}{.475\linewidth}
+		\includegraphics[width=\linewidth]{env_5_4.png}
+		\caption{env\_5\_4, 25x40, 5 agents}
+		\label{5_4}
+	\end{subfigure}\hfill % <-- "\hfill"
+	% or just a comment and no tilde
+	\begin{subfigure}{.475\linewidth}
+		\includegraphics[width=\linewidth]{env_10_8.png}
+		\caption{env\_10\_8, 25x40, 10 agents}
+		\label{10_8}
+	\end{subfigure}
+	\caption{Testing environments.}
+	\label{test_envs}
+\end{figure}
+
+\subsection{Predictions}
+The output for each encoding when rescheduling after a malfunction will not
+necessarily be the same. The base encoding and the secondary encoding with
+time prioritization will output the optimal solution, meaning that the trains
+will spend the least possible amount of time on the network overall.
+
+However, the secondary encoding with and without heuristics prioritizes the
+preservation of the planned schedule. This means that even if delaying a
+non-consequent train would improve the overall travel time, only the base
+encoding and the secondary encoding with time prioritization will derive this
+solution. The other two encodings will not be able to choose this solution.
+
+\section[Results]{Results\footnotemark}
+\footnotetext{The raw results are listed in Appendix \ref{sec:appendix}.}
+
+
+\subsection{Experiment 1: Heuristic vs. no Heuristic}
+
+Results are reported in Table \ref{tab:rescheduling_times_heuristic}. A positive $\Delta T_{\mathrm{res}}$ indicates that the encoding with the heuristic is faster. The encoding with the heuristic is significantly faster in all environments except \texttt{env\_3\_2} and \texttt{env\_2\_2}. In some runs of those instances, the encoding without the heuristic performed marginally better. This difference is mostly negligibly small.
+
+The biggest differences can be found in \texttt{env\_6\_6} and \texttt{env\_10\_8} - the biggest and densest environments tested. Especially, for the no consequence scenario the heuristic can significantly enhance calculation time. In those instances, any secondary encoding needs to
+re-prove that the original schedule was optimal. Without the heuristic, Clingo starts with an initial solution that recalculated all the trains and, after many iterations, eventually reached the original planned solution.
+
+With the heuristic flag, Clingo assumes that most trains should use the
+original planned solution. We assume that since the secondary encoding has more rules and options, it is harder to solve without redirecting Clingo toward the planned train solution.
+
+
+\begin{table}[hbtp]
+	\centering
+	\footnotesize
+	\setlength{\tabcolsep}{4pt}
+	\renewcommand{\arraystretch}{0.9}
+	\begin{tabular}{@{}llrrr@{}}
+		\toprule
+		\textbf{Environment} &
+		\textbf{Malfunction type} &
+		\makecell[r]{\textbf{heuristic}} &
+		\makecell[r]{\textbf{~~no heuristic}} &
+		\makecell[r]{\textbf{$\Delta T_{\mathrm{res}}$}} \\
+		\midrule
+
+		\textbf{env\_2\_2}
+		& Non-consequent & 0.071 & 0.042 & -0.029 \\
+		& Consequent 1 & 0.032 & 0.032 & 0.000 \\
+		& Consequent + collisions & 0.048 & 0.047 & -0.001 \\
+		
+		\midrule
+		
+		\textbf{env\_3\_2}
+		& Non-consequent & 0.116 & 0.097 & -0.019 \\
+		& Consequent 1 & 0.071 & 0.091 & +0.020 \\
+		& Consequent 2 & 0.084 & 0.054 & -0.030 \\
+		& Consequent + collisions & 0.070 & 0.075 & +0.005 \\
+		
+		\midrule
+		
+		\textbf{env\_5\_4}
+		& Non-consequent & 0.576 & 5.142 & +4.566 \\
+		& Consequent 1 & 0.561 & 7.897 & +7.336 \\
+		& Consequent 2 & 0.389 & 0.421 & +0.032 \\
+		& Consequent + collisions & 0.867 & 2.722 & +1.855 \\
+		
+		\midrule
+		
+		\textbf{env\_6\_6}
+		& Non-consequent & 10.794 & 256.370 & +245.576 \\
+		& Consequent 1 & 9.941 & 206.032 & +196.091 \\
+		& Consequent 2 & 10.245 & 90.477 & +80.232 \\
+		& Consequent + collisions & 25.852 & 57.022 & +31.170 \\
+
+		\midrule
+		
+		\textbf{env\_10\_8}
+		& Non-consequent & 4.508 & 110.196 & +105.688 \\
+		& Consequent 1 & 1.231 & 17.976 & +16.745 \\
+		& Consequent 2 & 1.344 & 31.010 & +29.666 \\
+		
+		\midrule
+		
+		\textbf{env\_10\_10}
+		& Non-consequent & 1.303 & 83.612 & +82.309 \\
+		& Consequent 1 & 1.610 & 96.502 & +94.892 \\
+		& Consequent 2 & 0.509 & 0.888 & +0.379 \\
+		& Consequent + collisions & 2.587 & 71.364 & +68.777 \\
+		
+		\bottomrule
+	\end{tabular}
+	\vspace{4mm}
+	\caption{Comparison of total rescheduling times, $T_{\mathrm{res}}$, for secondary + heuristic and secondary without heuristic. The difference is computed as $\Delta T_{\mathrm{res}} = T_{\mathrm{res}}^{\mathrm{secondary,\ no\ heuristic}} - T_{\mathrm{res}}^{\mathrm{secondary+heuristic}}$. Positive values indicate that using the heuristic is faster than without the heuristic.}
+	\label{tab:rescheduling_times_heuristic}
+\end{table}
+
+
+\subsection{Experiment 2: Base Encoding vs. Secondary Encoding with Heuristics}
+Results are reported in Table \ref{tab:rescheduling_times_base}. Negative $\Delta T_{\mathrm{res}}$ indicate that the secondary encoding is faster. For smaller environments, like \texttt{env\_2\_2} and \texttt{env\_3\_2}, the running time is low and very similar for both encodings.
+For larger environments, the secondary encoding with heuristics is significantly faster.
+For example, in \texttt{env\_6\_6}, the differences in the running time were substantial.
+In the non-consequent malfunction, the secondary encoding with heuristics ran two minutes faster than
+the base encoding. 
+The secondary encoding makes use of the forwarded information and can find an optimal solution more efficiently than the base encoding (Redo Planning).
+
+\begin{table}[htbp]
+	\centering
+	\footnotesize
+	\setlength{\tabcolsep}{4pt}
+	\renewcommand{\arraystretch}{0.9}
+	\begin{tabular}{@{}llrrr@{}}
+		\toprule
+		\textbf{Environment} &
+		\textbf{Malfunction type} &
+		\textbf{Base} &
+		\textbf{~~Secondary} &
+		\textbf{$\Delta T_{\mathrm{res}}$} \\
+		& &
+		\makecell[r]{\textbf{$T_{\mathrm{res}}$}} &
+		\makecell[r]{\textbf{$T_{\mathrm{res}}$}} &
+		\makecell[r]{\textbf{}} \\
+		\midrule
+
+		\textbf{env\_2\_2}
+		& Non-consequent & 0.054 & 0.071 & +0.017 \\
+		& Consequent 1 & 0.040 & 0.032 & -0.008 \\
+		& Consequent + collisions & 0.053 & 0.048 & -0.005 \\
+		
+		\midrule
+		
+		\textbf{env\_3\_2}
+		& Non-consequent & 0.107 & 0.116 & +0.009 \\
+		& Consequent 1 & 0.104 & 0.071 & -0.033 \\
+		& Consequent 2 & 0.082 & 0.084 & +0.002 \\
+		& Consequent + collisions & 0.089 & 0.070 & -0.019 \\
+		
+		\midrule
+		
+		\textbf{env\_5\_4}
+		& Non-consequent & 0.655 & 0.576 & -0.079 \\
+		& Consequent 1 & 0.635 & 0.561 & -0.074 \\
+		& Consequent 2 & 0.607 & 0.389 & -0.218 \\
+		& Consequent + collisions & 3.747 & 0.867 & -2.880 \\
+		
+		\midrule
+		
+		\textbf{env\_6\_6}
+		& Non-consequent & 138.697 & 10.794 & -127.903 \\
+		& Consequent 1 & 127.527 & 9.941 & -117.586 \\
+		& Consequent 2 & 97.934 & 10.245 & -87.689 \\
+		& Consequent + collisions & 100.216 & 25.852 & -74.364 \\
+
+		\midrule
+		
+		\textbf{env\_10\_8}
+		& Non-consequent & 24.704 & 4.508 & -20.196 \\
+		& Consequent 1 & 7.952 & 1.231 & -6.721 \\
+		& Consequent 2 & 25.222 & 1.344 & -23.878 \\
+		
+		\midrule
+		
+		\textbf{env\_10\_10}
+		& Non-consequent & 44.581 & 1.303 & -43.278 \\
+		& Consequent 1 & 97.233 & 1.610 & -95.623 \\
+		& Consequent 2 & 1.872 & 0.509 & -1.363 \\
+		& Consequent + collisions & 71.720 & 2.587 & -69.133 \\
+		
+		\bottomrule
+	\end{tabular}
+	\vspace{4mm}
+	\caption{Comparison of total rescheduling times for base and secondary + heuristic. Negative values of $\Delta T_{\mathrm{res}}$ indicate that secondary + heuristic is faster than base.}
+	\label{tab:rescheduling_times_base}
+\end{table}
+
+\subsection{Experiment 3: Base Encoding vs. Secondary Encoding with Time Prioritization}
+
+Table \ref{tab:rescheduling_time_prioritization} reports the results for experiment 3. Negative $\Delta T_{\mathrm{res}}$ values indicate that the secondary encoding with time prioritization is faster than the base encoding (Redo Planning). 
+The base encoding is faster or equally as fast (marginal difference) as the compared encoding when there is no consequence.
+The secondary encoding with time prioritization is significantly faster when there is a consequence. Especially in scenarios with complex consequences the secondary encoding's calculation time is much lower, e.g. in \texttt{env\_10\_10}, a medium environment with dense agent activity, the secondary Encoding with time prioritization can reduce computation time by more than 50\%.
+
+\begin{table}[htbp]
+	\centering
+	\footnotesize
+	\setlength{\tabcolsep}{4pt}
+	\renewcommand{\arraystretch}{0.9}
+	
+	\begin{tabular}{@{}llrrr@{}}
+		\toprule
+		\textbf{Environment} &
+		\textbf{Malfunction type} &
+		\makecell[r]{\textbf{base}} &
+		\makecell[r]{\textbf{~~time prioritization}} &
+		\makecell[r]{\textbf{$\Delta T_{\mathrm{res}}$}} \\
+		\midrule
+
+		\textbf{env\_2\_2}
+		& Non-consequent & 0.054 & 0.050 & -0.004 \\
+		& Consequent 1 & 0.040 & 0.031 & -0.009 \\
+		& Consequent + collisions & 0.053 & 0.045 & -0.008 \\
+
+		\midrule
+		
+		\textbf{env\_3\_2}
+		& Non-consequent & 0.107 & 0.099 & -0.008 \\
+		& Consequent 1 & 0.104 & 0.093 & -0.011 \\
+		& Consequent 2 & 0.082 & 0.058 & -0.024 \\
+		& Consequent + collisions & 0.089 & 0.076 & -0.013 \\
+
+		\midrule
+
+		\textbf{env\_5\_4}
+		& Non-consequent & 0.655 & 0.983 & +0.328 \\
+		& Consequent 1 & 0.635 & 0.807 & +0.172 \\
+		& Consequent 2 & 0.607 & 0.585 & -0.022 \\
+		& Consequent + collisions & 3.747 & 1.132 & -2.615 \\
+
+		\midrule
+
+		\textbf{env\_6\_6}
+		& Non-consequent & 138.697 & 179.266 & +40.569 \\
+		& Consequent 1 & 127.527 & 87.676 & -39.851 \\
+		& Consequent 2 & 97.934 & 67.346 & -30.588 \\
+		& Consequent + collisions & 100.216 & 71.626 & -28.590 \\
+
+		\midrule
+
+		\textbf{env\_10\_8}
+		& Non-consequent & 24.704 & 39.227 & +14.523 \\
+		& Consequent 1 & 7.952 & 1.735 & -6.217 \\
+		& Consequent 2 & 25.222 & 5.410 & -19.812 \\
+
+		\midrule
+
+		\textbf{env\_10\_10}
+		& Non-consequent & 44.581 & 9.817 & -34.764 \\
+		& Consequent 1 & 97.233 & 66.304 & -30.929 \\
+		& Consequent 2 & 1.872 & 0.740 & -1.132 \\
+		& Consequent + collisions & 71.720 & 24.082 & -47.638 \\
+		
+		\bottomrule
+	\end{tabular}
+	\vspace{4mm}
+	\caption{Comparison of total rescheduling times, $T_{\mathrm{res}}$, for
+		base and secondary + time prioritization. The difference is
+		computed as
+		$\Delta T_{\mathrm{res}} =
+		T_{\mathrm{res}}^{\mathrm{secondary+time\ priority}} -
+		T_{\mathrm{res}}^{\mathrm{base}}$.
+		positive values indicate that base is faster.}
+	\label{tab:rescheduling_time_prioritization}
+\end{table}
+
+\subsection{Experiment 4: Time vs. first plan prioritization}
+
+Table \ref{tab:rescheduling_time_priority} reports the results from experiment 4. Positive $\Delta T_{\mathrm{res}}$ values indicate that the encoding prioritizing the first plan (or least number of train changes) is faster. The secondary encoding that prioritizes the first plan is faster in almost all environments and scenarios. The differences between the encodings are negligible in small environments, like \texttt{env\_3\_2} and \texttt{env\_2\_2}. However, in larger environments the secondary encoding prioritizing first plans is significantly more efficient. The difference is particularly pronounced in the largest environment \texttt{env\_6\_6} with the first plan encoding being almost 3 minutes faster.
+
+\begin{table}[htbp]
+	\centering
+	\footnotesize
+	\setlength{\tabcolsep}{4pt}
+	\renewcommand{\arraystretch}{0.9}
+	
+	\begin{tabular}{@{}llrrr@{}}
+		\toprule
+		\textbf{Environment} &
+		\textbf{Malfunction type} &
+		\makecell[r]{\textbf{heuristic}} &
+		\makecell[r]{\textbf{~~time priority}} &
+		\makecell[r]{\textbf{$\Delta T_{\mathrm{res}}$}} \\
+		\midrule
+
+		\textbf{env\_2\_2}
+		& Non-consequent & 0.071 & 0.050 & -0.021 \\
+		& Consequent 1 & 0.032 & 0.031 & -0.001 \\
+		& Consequent + collisions & 0.048 & 0.045 & -0.003 \\
+		
+		\midrule
+		
+		\textbf{env\_3\_2}
+		& Non-consequent & 0.116 & 0.099 & -0.017 \\
+		& Consequent 1 & 0.071 & 0.093 & +0.022 \\
+		& Consequent 2 & 0.084 & 0.058 & -0.026 \\
+		& Consequent + collisions & 0.070 & 0.076 & +0.006 \\
+		
+		\midrule
+		
+		\textbf{env\_5\_4}
+		& Non-consequent & 0.576 & 0.983 & +0.407 \\
+		& Consequent 1 & 0.561 & 0.807 & +0.246 \\
+		& Consequent 2 & 0.389 & 0.585 & +0.196 \\
+		& Consequent + collisions & 0.867 & 1.132 & +0.265 \\
+		
+		\midrule
+		
+		\textbf{env\_6\_6}
+		& Non-consequent & 10.794 & 179.266 & +168.472 \\
+		& Consequent 1 & 9.941 & 87.676 & +77.735 \\
+		& Consequent 2 & 10.245 & 67.346 & +57.101 \\
+		& Consequent + collisions & 25.852 & 71.626 & +45.774 \\
+		
+		\midrule
+		
+		\textbf{env\_10\_8}
+		& Non-consequent & 4.508 & 39.227 & +34.719 \\
+		& Consequent 1 & 1.231 & 1.735 & +0.504 \\
+		& Consequent 2 & 1.344 & 5.410 & +4.066 \\
+		
+		\midrule
+		
+		\textbf{env\_10\_10}
+		& Non-consequent & 1.303 & 9.817 & +8.514 \\
+		& Consequent 1 & 1.610 & 66.304 & +64.694 \\
+		& Consequent 2 & 0.509 & 0.740 & +0.231 \\
+		& Consequent + collisions & 2.587 & 24.082 & +21.495 \\
+		
+		\bottomrule
+	\end{tabular}
+	\vspace{4mm}
+	\caption{Comparison of total rescheduling times, $T_{\mathrm{res}}$, for
+		Secondary + heuristic and Secondary + time priority. The difference is
+		computed as
+		$\Delta T_{\mathrm{res}} =
+		T_{\mathrm{res}}^{\mathrm{secondary+time\ priority}} -
+		T_{\mathrm{res}}^{\mathrm{secondary+heuristic}}$.
+		Positive values indicate that Secondary + heuristic is faster.}
+	\label{tab:rescheduling_time_priority}
+\end{table}
+
+
+\section{Discussion}
+
+Our proposed secondary encoding including a heuristic for prioritizing the least amount of changes improves running time compared to Redo Planning with the base encoding. The heuristic improves total calculation time significantly. However, by prioritizing the least amount of changes qualitative details can be missed.
+
+Figure \ref{fig:purple_train} illustrates this discrepancy. It shows snapshots from two rescheduling solutions: the secondary encoding with heuristic (left) and the secondary encoding prioritizing time (right). Part of this environment is a purple train (as shown in Figure \ref{fig:image5}). A malfunction is triggered from time step 70 to 90 (see Figure \ref{fig:image1} and \ref{fig:image2}). The heuristic prioritizes changing the least amount of trains which is why the purple train waits for 29 time steps on track (6,6) (see Figure \ref{fig:image1}). The westmost station is connected to the station northeast from it by only one track. Thus, the purple agent has to wait for the green train (see Figure \ref{fig:image3}) because it enters this section earlier.
+In the alternative encoding, both the red and the green agent disrupt their journey slightly by one and six seconds, respectively. The purple continues its journey without delay and can pass the green train ten seconds earlier (see Figure \ref{fig:image4}).
+
+In the given example, time prioritization offers the better solution in terms of total waiting time of agents (7s vs. 29s) and total time steps in the environment (136 vs. 146). It disrupts the plans of more trains but for shorter periods. In real-life application time prioritization would be the qualitatively preferable solution. It facilitates higher customer satisfaction, shortest total delay time across agents and therefore better chances for further connections.
+
+However, the computational costs of both encodings differ significantly. The heuristic approach was much faster (4.508s) than the prioritization of time (39.227s, see Table \ref{tab:rescheduling_time_prioritization}). Time prioritization thus requires a longer reaction time after the registration of a track malfunction.
+
+
+\begin{figure}[htbp]
+	\centering
+	\makebox[\textwidth][c]{
+		\begin{minipage}{1.5\textwidth}
+		\centering
+			% Figure 5 centered above the grid
+			\begin{subfigure}{0.5\textwidth}
+				\centering
+				\includegraphics[width=\linewidth]{frame-011_edited.png}
+				\caption{The purple train starts in (19,35) for both solutions and terminates at the station marked in red. }
+				\label{fig:image5}
+			\end{subfigure}
+	
+		\vspace{0.5cm}
+	
+			% Top row of the 2x2 grid
+			\begin{subfigure}{0.45\linewidth}
+				\centering
+				\includegraphics[width=\linewidth]{frame-081_edited.png}
+				\caption{Heuristic. The purple train waits in (6,6) for 29 time steps.}
+				\label{fig:image1}
+			\end{subfigure}
+		\hspace{3mm}
+			\begin{subfigure}{0.45\linewidth}
+				\centering
+				\includegraphics[width=\linewidth]{frame-081-time_edited.png}
+				\caption{Time Prioritization. The purple train continues. The red train waits for one time step.}
+				\label{fig:image2}
+			\end{subfigure}
+	
+		\vspace{0.5cm}
+	
+			% Bottom row of the 2x2 grid
+			\begin{subfigure}{0.45\textwidth}
+				\centering
+				\includegraphics[width=\linewidth]{frame-129_edited.png}
+				\caption{Heuristic. The purple and green train pass each other at time step 129.}
+				\label{fig:image3}
+			\end{subfigure}
+		\hspace{3mm}
+			\begin{subfigure}{0.45\textwidth}
+				\centering
+				\includegraphics[width=\linewidth]{frame-119_edited.png}
+				\caption{Time Prioritization. The purple and green train pass each other at time step 119.}
+				\label{fig:image4}
+			\end{subfigure}
+	
+		\caption{Qualitative comparison of rescheduling with heuristic/least changes (left) and time prioritization (right).}
+		\label{fig:purple_train}
+	
+		\end{minipage}
+	}
+\end{figure}
+
+
+\subsection{Encoding Selection After a Track Malfunction}
+
+There are two possible goals that a user might want when rescheduling after
+a malfunction:
+
+\begin{itemize}
+	\item Change the least amount of trains possible, i.e., preserve the
+	previous schedule as much as possible.
+	\item Obtain the most optimized solution.
+\end{itemize}
+
+Both goals should be achieved as quickly as possible.
+
+For the purpose of comparing the encodings, we assume that the output of the
+initial schedule using the base encoding is already saved. This assumption
+reflects the real-world scenario in which the schedule is set in advance and
+the malfunction occurs later.
+
+For obtaining the most optimized solution, the base encoding and the
+secondary encoding with time prioritization are the preferred encodings. Conversely, 
+the secondary encoding with and without heuristics are used to produce 
+an answer with the least amount of changed trains.
+
+For smaller environments, defined as a height below 20, a
+width below 20, and fewer than 3 trains, all encodings are very fast, and no
+malfunction requires more than 5 seconds to find a solution.
+
+For larger environments, however, the differences between the encodings become
+significant. If the user wants to obtain the least amount of changed trains
+possible, they should choose the secondary encoding with heuristics, as it is
+consistently the fastest encoding, often by a large margin.
+
+If the user wants the most optimized solution, the preferred encoding depends
+on whether there is a consequence. If there is a consequence, the secondary
+encoding with time prioritization is the better choice in most cases.
+Otherwise, the base encoding is faster.
+
+Combining all the conclusions derived above, we can create a flow that
+describes how to handle a malfunction. First, the secondary encoding with heuristic is run
+to derive aolution A. If there is no consequence, solution A is both the most
+optimized solution and the solution with the least amount of changed trains.
+If there is a consequence, the appropriate solution depends on the user's
+goal. If the goal is to minimize the number of changed trains, solution A can
+be used directly. If the goal is to obtain the most optimized solution, the
+secondary encoding with time prioritization is run to derive solution B.
+Most malfunctions will not have a consequence, so it is better to run the
+secondary encoding with heuristic first and determine whether rescheduling is necessary.
+The secondary encoding with heuristic is also very fast in all cases, so an answer will be
+available before the other encodings.
+
+Using the secondary encoding with time prioritization only when a consequence
+is detected was faster than the base encoding in all tested cases.
+
+A flowchart depicting which encoding should be used based on the desired output can be viewed in Figure~\ref{fig:rescheduling-encoding-selection}.
+
+\section{Future Work}\label{future-work}
+Future work could consider other approaches than uniform randomness as a decider for a track malfunction. For instance, malfunctions on highly frequented tracks or crossings could be more likely than on straight connections. 
+
+In our current pipeline, scheduling and rescheduling are tied together tightly. For benchmarking of different encoding options, it can be useful to separate out these two steps. Such a set-up would have to save the scheduling plan from the base encoding, then create a malfunction and call the plan again for generating the information to forward for rescheduling. This approach could ease comparisons between rescheduling encodings by using the exact same model from the base encoding.
+
+Additionally, our approach currently only handles one emerging track malfunction at a given time step and overlapping malfunctions with different starting times. Future projects could consider adjusting \verb|solve.py| to handle two or more simultaneous track malfunctions.
+
+Finally, we noticed that sometimes a malfunction can cause an environment to be unsatisfiable, i.e. when a malfunction hits a particularly crucial track. Then the program crashes without any visual output despite having successfully calculated the original schedule. Future projects could focus on handling this issue and generating the base plan in Flatland or maybe even visualizing when and why the program fails.
+
+
+
+\bibliographystyle{splncs04}
+\bibliography{refs}
+
+\appendix
+%\pagebreak
+\section{Experiment Results}
+\label{sec:appendix}
+
+\setlength{\LTleft}{0pt}
+\setlength{\LTright}{0pt}
+\setlength{\tabcolsep}{4pt}
+
+\begin{longtable}{@{}
+    l
+    l
+    l
+    r
+    r
+    r
+@{}}
+
+\toprule
+\textbf{Environment} &
+\textbf{Malfunction type} &
+\textbf{Rescheduling type} &
+\makecell[r]{\textbf{$T_{\mathrm{ground}}$}} &
+\makecell[r]{\textbf{$T_{\mathrm{solve}}$}} &
+\makecell[r]{\textbf{$T_{\mathrm{res}}$}} \\
+\midrule
+\endfirsthead
+
+\multicolumn{6}{c}{%
+    \tablename\ \thetable{} -- continued from previous page%
+} \\
+\toprule
+\textbf{Environment} &
+\textbf{Malfunction type} &
+\textbf{Rescheduling type} &
+\makecell[r]{\textbf{$T_{\mathrm{ground}}$}} &
+\makecell[r]{\textbf{$T_{\mathrm{solve}}$}} &
+\makecell[r]{\textbf{$T_{\mathrm{res}}$}} \\
+\midrule
+\endhead
+
+\midrule
+\multicolumn{6}{r@{}}{\textit{Continued on next page}} \\
+\endfoot
+
+\bottomrule
+\endlastfoot
+
+% =========================================================
+% Environment 1
+% =========================================================
+
+\multicolumn{6}{@{}l@{}}{\textbf{env\_2\_2}} \\[1pt]
+
+& \makecell[l]{Non-consequent}
+& Base
+& 0.034 & 0.02 & 0.054 \\
+
+& &
+Secondary + heuristic
+& 0.071 & 0 & 0.071 \\
+
+& &
+Secondary + time priority
+& 0.040 & 0.01 & 0.050 \\
+
+& &
+Secondary, no heuristic
+& 0.042 & 0 & 0.042 \\
+
+\cmidrule(lr){2-6}
+
+& \makecell[l]{Consequent 1}
+& Base
+& 0.040 & 0 & 0.040 \\
+
+& &
+Secondary + heuristic
+& 0.032 & 0 & 0.032 \\
+
+& &
+Secondary + time priority
+& 0.031 & 0 & 0.031 \\
+
+& &
+Secondary, no heuristic
+& 0.032 & 0 & 0.032 \\
+
+\cmidrule(lr){2-6}
+
+& \makecell[l]{Consequent + collisions}
+& Base
+& 0.043 & 0.01 & 0.053 \\
+
+& &
+Secondary + heuristic
+& 0.038 & 0.01 & 0.048 \\
+
+& &
+Secondary + time priority
+& 0.035 & 0.01 & 0.045 \\
+
+& &
+Secondary, no heuristic
+& 0.037 & 0.01 & 0.047 \\
+
+\midrule
+
+% =========================================================
+% Environment 2
+% =========================================================
+
+\multicolumn{6}{@{}l@{}}{\textbf{env\_3\_2}} \\[1pt]
+
+& \makecell[l]{Non-consequent}
+& Base
+& 0.077 & 0.03 & 0.107 \\
+
+& &
+Secondary + heuristic
+& 0.116 & 0 & 0.116 \\
+
+& &
+Secondary + time priority
+& 0.079 & 0.02 & 0.099 \\
+
+& &
+Secondary, no heuristic
+& 0.077 & 0.02 & 0.097 \\
+
+\cmidrule(lr){2-6}
+
+& \makecell[l]{Consequent 1}
+& Base
+& 0.074 & 0.03 & 0.104 \\
+
+& &
+Secondary + heuristic
+& 0.071 & 0 & 0.071 \\
+
+& &
+Secondary + time priority
+& 0.083 & 0.01 & 0.093 \\
+
+& &
+Secondary, no heuristic
+& 0.081 & 0.01 & 0.091 \\
+
+& \makecell[l]{Consequent 2}
+& Base
+& 0.072 & 0.01 & 0.082 \\
+
+& &
+Secondary + heuristic
+& 0.084 & 0 & 0.084 \\
+
+& &
+Secondary + time priority
+& 0.058 & 0 & 0.058 \\
+
+& &
+Secondary, no heuristic
+& 0.054 & 0 & 0.054 \\
+
+\cmidrule(lr){2-6}
+
+& \makecell[l]{Consequent + collisions}
+& Base
+& 0.079 & 0.01 & 0.089 \\
+
+& &
+Secondary + heuristic
+& 0.060 & 0.01 & 0.070 \\
+
+& &
+Secondary + time priority
+& 0.056 & 0.02 & 0.076 \\
+
+& &
+Secondary, no heuristic
+& 0.065 & 0.01 & 0.075 \\
+
+\midrule
+
+% =========================================================
+% Environment 3
+% =========================================================
+
+\multicolumn{6}{@{}l@{}}{\textbf{env\_5\_4}} \\[1pt]
+
+& \makecell[l]{Non-consequent}
+& Base
+& 0.545 & 0.11 & 0.655 \\
+
+& &
+Secondary + heuristic
+& 0.566 & 0.01 & 0.576 \\
+
+& &
+Secondary + time priority
+& 0.653 & 0.33 & 0.983 \\
+
+& &
+Secondary, no heuristic
+& 0.692 & 4.45 & 5.142 \\
+
+\cmidrule(lr){2-6}
+
+& \makecell[l]{Consequent 1}
+& Base
+& 0.455 & 0.18 & 0.635 \\
+
+& &
+Secondary + heuristic
+& 0.541 & 0.02 & 0.561 \\
+
+& &
+Secondary + time priority
+& 0.597 & 0.21 & 0.807 \\
+
+& &
+Secondary, no heuristic
+& 0.587 & 7.31 & 7.897 \\
+
+& \makecell[l]{Consequent 2}
+& Base
+& 0.507 & 0.10 & 0.607 \\
+
+& &
+Secondary + heuristic
+& 0.359 & 0.03 & 0.389 \\
+
+& &
+Secondary + time priority
+& 0.395 & 0.19 & 0.585 \\
+
+& &
+Secondary, no heuristic
+& 0.371 & 0.05 & 0.421 \\
+
+\cmidrule(lr){2-6}
+
+& \makecell[l]{Consequent + collisions}
+& Base
+& 0.607 & 3.14 & 3.747 \\
+
+& &
+Secondary + heuristic
+& 0.467 & 0.40 & 0.867 \\
+
+& &
+Secondary + time priority
+& 0.512 & 0.62 & 1.132 \\
+
+& &
+Secondary, no heuristic
+& 0.472 & 2.25 & 2.722 \\
+
+\midrule
+
+% =========================================================
+% Environment 4
+% =========================================================
+
+\multicolumn{6}{@{}l@{}}{\textbf{env\_6\_6}} \\[1pt]
+
+& \makecell[l]{Non-consequent}
+& Base
+& 7.597 & 131.10 & 138.697 \\
+
+& &
+Secondary + heuristic
+& 10.564 & 0.23 & 10.794 \\
+
+& &
+Secondary + time priority
+& 10.706 & 168.56 & 179.266 \\
+
+& &
+Secondary, no heuristic
+& 11.150 & 245.22 & 256.370 \\
+
+\cmidrule(lr){2-6}
+
+& \makecell[l]{Consequent 1}
+& Base
+& 7.927 & 119.60 & 127.527 \\
+
+& &
+Secondary + heuristic
+& 9.211 & 0.73 & 9.941 \\
+
+& &
+Secondary + time priority
+& 9.466 & 78.21 & 87.676 \\
+
+& &
+Secondary, no heuristic
+& 10.102 & 195.93 & 206.032 \\
+
+& \makecell[l]{Consequent 2}
+& Base
+& 8.254 & 89.68 & 97.934 \\
+
+& &
+Secondary + heuristic
+& 9.505 & 0.74 & 10.245 \\
+
+& &
+Secondary + time priority
+& 8.516 & 58.83 & 67.346 \\
+
+& &
+Secondary, no heuristic
+& 10.437 & 80.04 & 90.477 \\
+
+\cmidrule(lr){2-6}
+
+& \makecell[l]{Consequent + collisions}
+& Base
+& 7.346 & 92.87 & 100.216 \\
+
+& &
+Secondary + heuristic
+& 5.342 & 20.51 & 25.852 \\
+
+& &
+Secondary + time priority
+& 5.776 & 65.85 & 71.626 \\
+
+& &
+Secondary, no heuristic
+& 5.322 & 51.70 & 57.022 \\
+
+\midrule
+
+% =========================================================
+% Environment 5
+% =========================================================
+
+\multicolumn{6}{@{}l@{}}{\textbf{env\_10\_8}} \\[1pt]
+
+& \makecell[l]{Non-consequent}
+& Base
+& 3.874 & 20.83 & 24.704 \\
+
+& &
+Secondary + heuristic
+& 4.408 & 0.10 & 4.508 \\
+
+& &
+Secondary + time priority
+& 3.997 & 35.23 & 39.227 \\
+
+& &
+Secondary, no heuristic
+& 4.116 & 106.08 & 110.196 \\
+
+\cmidrule(lr){2-6}
+
+& \makecell[l]{Consequent 1}
+& Base
+& 3.472 & 4.48 & 7.952 \\
+
+& &
+Secondary + heuristic
+& 1.181 & 0.05 & 1.231 \\
+
+& &
+Secondary + time priority
+& 0.475 & 1.26 & 1.735 \\
+
+& &
+Secondary, no heuristic
+& 1.356 & 16.62 & 17.976 \\
+
+& \makecell[l]{Consequent 2}
+& Base
+& 3.582 & 21.64 & 25.222 \\
+
+& &
+Secondary + heuristic
+& 1.194 & 0.15 & 1.344 \\
+
+& &
+Secondary + time priority
+& 1.450 & 3.96 & 5.410 \\
+
+& &
+Secondary, no heuristic
+& 1.210 & 29.80 & 31.010 \\
+
+\midrule
+
+% =========================================================
+% Environment 6
+% =========================================================
+
+\multicolumn{6}{@{}l@{}}{\textbf{env\_10\_10}} \\[1pt]
+
+& \makecell[l]{Non-consequent}
+& Base
+& 1.441 & 43.14 & 44.581 \\
+
+& &
+Secondary + heuristic
+& 1.273 & 0.03 & 1.303 \\
+
+& &
+Secondary + time priority
+& 1.357 & 8.46 & 9.817 \\
+
+& &
+Secondary, no heuristic
+& 1.312 & 82.30 & 83.612 \\
+
+\cmidrule(lr){2-6}
+
+& \makecell[l]{Consequent 1}
+& Base
+& 1.513 & 95.72 & 97.233 \\
+
+& &
+Secondary + heuristic
+& 1.550 & 0.06 & 1.610 \\
+
+& &
+Secondary + time priority
+& 1.564 & 64.74 & 66.304 \\
+
+& &
+Secondary, no heuristic
+& 1.662 & 94.84 & 96.502 \\
+
+& \makecell[l]{Consequent 2}
+& Base
+& 1.472 & 0.40 & 1.872 \\
+
+& &
+Secondary + heuristic
+& 0.479 & 0.03 & 0.509 \\
+
+& &
+Secondary + time priority
+& 0.470 & 0.27 & 0.740 \\
+
+& &
+Secondary, no heuristic
+& 0.478 & 0.41 & 0.888 \\
+
+\cmidrule(lr){2-6}
+
+& \makecell[l]{Consequent + collisions}
+& Base
+& 1.380 & 70.34 & 71.720 \\
+
+& &
+Secondary + heuristic
+& 2.077 & 0.51 & 2.587 \\
+
+& &
+Secondary + time priority
+& 1.552 & 22.53 & 24.082 \\
+
+& &
+Secondary, no heuristic
+& 1.594 & 69.77 & 71.364 \\
+
+\bottomrule
+
+\caption[Running times for different malfunction and rescheduling configurations.]{Running times for different malfunction and rescheduling configurations. Here, $T_{\mathrm{ground}}$, $T_{\mathrm{solve}}$, and $T_{\mathrm{res}}$
+	denote the grounding time, solving time, and total rescheduling time,
+	respectively. All times are reported in seconds.}
+\label{tab:rescheduling_times} \\
+
+\end{longtable}
+
+\section{Decision process for selecting a rescheduling encoding}
+
+\begin{figure}
+\centering
+\begin{tikzpicture}[
+	node distance=0.3cm,
+	every node/.style={font=\small},
+	process/.style={
+		rectangle,
+		rounded corners,
+		draw,
+		align=center,
+		minimum width=4.2cm,
+		minimum height=0.9cm
+	},
+	decision/.style={
+		diamond,
+		draw,
+		align=center,
+		aspect=2.5,
+		inner sep=1pt
+	},
+	arrow/.style={
+		-{Stealth}
+	}
+	]
+	
+	% Start
+	\node[process] (start)
+	{Run secondary encoding with heuristic\\
+		and derive solution A};
+	
+	% First decision
+	\node[decision, below=of start] (consequence)
+	{Consequence in\\
+		solution A?};
+	
+	% No consequence branch
+	\node[process, below=of consequence, xshift=-1.5cm] (no)
+	{Solution A is optimized for\\
+		both time and\\
+		amount of changed trains};
+	
+	% Consequence branch
+	\node[decision, below=of consequence, xshift=3.5cm] (goal)
+	{Is time \\
+		prioritization required?};
+	
+	% Least changed trains
+	\node[process, below=of goal, xshift=-3.2cm] (least)
+	{Solution A already\\
+		minimizes changed trains};
+	
+	% Most optimized
+	\node[process, below=of goal, xshift=2.0cm] (optimized)
+	{Run secondary encoding with\\
+		time prioritization and\\
+		derive solution B};
+	
+	% Arrows from start
+	\draw[arrow] (start) -- (consequence);
+	
+	% Consequence branches
+	\draw[arrow] (consequence)
+	-- node[above left] {No} (no);
+	
+	\draw[arrow] (consequence)
+	-- node[above right] {Yes} (goal);
+	
+	% User goal branches
+	\draw[arrow] (goal)
+	-- node[above left] {No} (least);
+	
+	\draw[arrow] (goal)
+	-- node[above right] {Yes} (optimized);
+	
+\end{tikzpicture}
+\caption{Decision process for selecting a rescheduling encoding.}
+\label{fig:rescheduling-encoding-selection}
+
+\end{figure}
+
+\end{document}

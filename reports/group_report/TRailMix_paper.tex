@@ -111,7 +111,7 @@ Flatland environments can natively include agent malfunctions. This aspect is ca
 	
 \end{lstlisting}
 
-Murphy's interface between Clingo and Flatland allows defining of separate encodings \cite{Murphy2026a}. The first encoding derives the original schedule for all agents. The secondary encoding then solves the rescheduling after every train malfunction. It includes a feature for forwarding information from the scheduling encoding to be reused in the secondary encoding \cite{Murphy2026a} \cite{gilkra2025}. 
+Murphy's interface between Clingo and Flatland allows defining separate encodings \cite{Murphy2026a}. The first encoding derives the original schedule for all agents. The secondary encoding then solves the rescheduling after every train malfunction. It includes a feature for forwarding information from the scheduling encoding to be reused in the secondary encoding \cite{Murphy2026a} \cite{gilkra2025}. 
 
 Gili i Bueno \& Kratzsch have used these features to benchmark different attempts for secondary encodings after train malfunctions \cite{gilkra2025}. They have been able reuse calculated plans from the scheduling step and thus reduce computing time during rescheduling.
 
@@ -394,7 +394,7 @@ If a track malfunction triggers before all trains of the environment have been i
 If no agent is planned to visit the actively malfunctioning cell the trains can continue their paths as calculated in the base encoding. All agents are marked as \verb|planned\1|. Their planned actions and positions are translated into \verb|action\3| and \verb|position\4| atoms. 
 
 \subsubsection{Simple Consequence}\label{simple_consequence}
-In a simple consequence, only one train is scheduled to pass the track malfunction (only one \verb|consequence/3| atom). The train gets marked as \verb|calculate/1|. Other trains remain \verb|planned/1|. From its current position this agents gets rescheduled. The rescheduling is done similarly to the scheduling logic in the base encoding by checking reachable cells, creating \verb|position| and \verb|action| atoms, narrowing down the solution with constraints and selecting the best model via optimization statements (see Section \ref{encoding_1}). A rescheduled train can "wait out" the malfunction or be rerouted via other available tracks.
+In a simple consequence, only one train is scheduled to pass the track malfunction (only one \verb|consequence/3| atom). The train gets marked as \verb|calculate/1|. Other trains remain \verb|planned/1|. From its current position this agent gets rescheduled. The rescheduling is done similarly to the scheduling logic in the base encoding by checking reachable cells, creating \verb|position| and \verb|action| atoms, narrowing down the solution with constraints and selecting the best model via optimization statements (see Section \ref{encoding_1}). A rescheduled train can "wait out" the malfunction or be rerouted via other available tracks.
 
 \subsubsection{Complex Consequence}
 A complex consequence includes multiple agents that require rescheduling (multiple \verb|conequence/3| atoms). However, it also covers the case where the adjustment of one agent's path influences another train, e.g. the rerouted or waiting train would cause a collision with an unaffected train. The trains that were planned as passing through the track malfunction are marked with \verb|consequence/3|. Those agents and the ones indirectly affected are marked as \verb|calculate/1|. Other trains remain \verb|planned/1|. The rescheduling then is done as described above.
@@ -511,14 +511,14 @@ solution. The other two encodings will not be able to choose this solution.
 
 \subsection{Experiment 1: Heuristic vs. no Heuristic}
 
-Results are reported in Table \ref{tab:rescheduling_times_heuristic}. A positive $\Delta T_{\mathrm{res}}$ indicates that the encoding with the heuristic is faster. The encoding with the heuristic is significantly faster in all environments except \texttt{env\_3\_2} and \texttt{env\_2\_2}. In some runs of those instances, the encoding without the heuristic performed marginally better. This difference is mostly negligibly small.
+Adding the heuristic improved substantially the running time of the secondary encoding. 
+A positive $\Delta T_{\mathrm{res}}$ in Table \ref{tab:rescheduling_times_heuristic} indicates that the encoding with the heuristic is faster. The encoding with the heuristic is significantly faster in all environments except \texttt{env\_3\_2} and \texttt{env\_2\_2}. In some runs of those instances, the encoding without the heuristic performed marginally better. This difference is mostly negligibly small.
 
 The biggest differences can be found in \texttt{env\_6\_6} and \texttt{env\_10\_8} - the biggest and densest environments tested. Especially, for the no consequence scenario the heuristic can significantly enhance calculation time. In those instances, any secondary encoding needs to
-re-prove that the original schedule was optimal. Without the heuristic, Clingo starts with an initial solution that recalculated all the trains and, after many iterations, eventually reached the original planned solution.
+re-prove that the original schedule was optimal. Without the heuristic, Clingo starts with an initial solution that recalculates all the trains and, after many iterations, eventually reaches the original planned solution.
 
 With the heuristic flag, Clingo assumes that most trains should use the
 original planned solution. We assume that since the secondary encoding has more rules and options, it is harder to solve without redirecting Clingo toward the planned train solution.
-
 
 \begin{table}[hbtp]
 	\centering
@@ -585,9 +585,10 @@ original planned solution. We assume that since the secondary encoding has more 
 	\label{tab:rescheduling_times_heuristic}
 \end{table}
 
-
 \subsection{Experiment 2: Base Encoding vs. Secondary Encoding with Heuristics}
-Results are reported in Table \ref{tab:rescheduling_times_base}. Negative $\Delta T_{\mathrm{res}}$ indicate that the secondary encoding is faster. For smaller environments, like \texttt{env\_2\_2} and \texttt{env\_3\_2}, the running time is low and very similar for both encodings.
+
+The secondary encoding is much faster than the base encoding.
+Negative $\Delta T_{\mathrm{res}}$ in Table \ref{tab:rescheduling_times_base} indicates that the secondary encoding is faster. For smaller environments, like \texttt{env\_2\_2} and \texttt{env\_3\_2}, the running time is low and very similar for both encodings.
 For larger environments, the secondary encoding with heuristics is significantly faster.
 For example, in \texttt{env\_6\_6}, the differences in the running time were substantial.
 In the non-consequent malfunction, the secondary encoding with heuristics ran two minutes faster than
@@ -665,9 +666,12 @@ The secondary encoding makes use of the forwarded information and can find an op
 
 \subsection{Experiment 3: Base Encoding vs. Secondary Encoding with Time Prioritization}
 
-Table \ref{tab:rescheduling_time_prioritization} reports the results for experiment 3. Negative $\Delta T_{\mathrm{res}}$ values indicate that the secondary encoding with time prioritization is faster than the base encoding (Redo Planning). 
-The base encoding is faster or equally as fast (marginal difference) as the compared encoding when there is no consequence.
+Secondary encoding with time prioritization is usually faster than base encoding.
+Negative $\Delta T_{\mathrm{res}}$ values in Table \ref{tab:rescheduling_time_prioritization} indicate that the secondary encoding with time prioritization is faster than the base encoding (Redo Planning). 
 The secondary encoding with time prioritization is significantly faster when there is a consequence. Especially in scenarios with complex consequences the secondary encoding's calculation time is much lower, e.g. in \texttt{env\_10\_10}, a medium environment with dense agent activity, the secondary Encoding with time prioritization can reduce computation time by more than 50\%.
+The base encoding is sometimes faster when there is no consequence. 
+On the one hand, time prioritization uses simple rules to create action atoms for the past. On the other hand, it needs to both find a new solution with more complex rules because of the planned logic and prove that it optimizes our criteria.
+We assume that in some environments the efficiency of the creation of the past atoms has sometimes bigger value than the overhead of adding the planned logic.
 
 \begin{table}[htbp]
 	\centering
@@ -743,7 +747,13 @@ The secondary encoding with time prioritization is significantly faster when the
 
 \subsection{Experiment 4: Time vs. first plan prioritization}
 
-Table \ref{tab:rescheduling_time_priority} reports the results from experiment 4. Positive $\Delta T_{\mathrm{res}}$ values indicate that the encoding prioritizing the first plan (or least number of train changes) is faster. The secondary encoding that prioritizes the first plan is faster in almost all environments and scenarios. The differences between the encodings are negligible in small environments, like \texttt{env\_3\_2} and \texttt{env\_2\_2}. However, in larger environments the secondary encoding prioritizing first plans is significantly more efficient. The difference is particularly pronounced in the largest environment \texttt{env\_6\_6} with the first plan encoding being almost 3 minutes faster.
+Secondary encoding that prioritizes the first plan is more efficient than the one prioritizes time. 
+Positive $\Delta T_{\mathrm{res}}$ values in Table \ref{tab:rescheduling_time_priority} indicate that the encoding prioritizing the first plan (or least number of train changes) is faster. 
+The differences between the encodings are negligible in small environments, like \texttt{env\_3\_2} and \texttt{env\_2\_2}. 
+However, in larger environments the secondary encoding prioritizing first plans is significantly more efficient. 
+The difference is particularly pronounced in the largest environment \texttt{env\_6\_6} with the first plan encoding being almost 3 minutes faster.
+This is explained by the fact that the first plan prioritization encoding creates most of the schedule with the planned atoms, however, 
+the time prioritization encoding needs to recreate a new schedule.
 
 \begin{table}[htbp]
 	\centering
@@ -822,7 +832,7 @@ Table \ref{tab:rescheduling_time_priority} reports the results from experiment 4
 
 Our proposed secondary encoding including a heuristic for prioritizing the least amount of changes improves running time compared to Redo Planning with the base encoding. The heuristic improves total calculation time significantly. However, by prioritizing the least amount of changes qualitative details can be missed.
 
-Figure \ref{fig:purple_train} illustrates this discrepancy. It shows snapshots from two rescheduling solutions: the secondary encoding with heuristic (left) and the secondary encoding prioritizing time (right). Part of this environment is a purple train (as shown in Figure \ref{fig:image5}). A malfunction is triggered from time step 70 to 90 (see Figure \ref{fig:image1} and \ref{fig:image2}). The heuristic prioritizes changing the least amount of trains which is why the purple train waits for 29 time steps on track (6,6) (see Figure \ref{fig:image1}). The westmost station is connected to the station northeast from it by only one track. Thus, the purple agent has to wait for the green train (see Figure \ref{fig:image3}) because it enters this section earlier.
+Figure \ref{fig:purple_train} illustrates this discrepancy. It shows snapshots from two rescheduling solutions: the secondary encoding with heuristic (left) and the secondary encoding prioritizing time (right). Part of this environment is a purple train (as shown in Figure \ref{fig:image5}). A malfunction is triggered from time step 70 to 90 (see Figure \ref{fig:image1} and \ref{fig:image2}). The heuristic prioritizes changing the least amount of trains which is why the purple train waits for 29 time steps on track (6,6) (see Figure \ref{fig:image1}). The westmost station is connected to the station northeast of it by only one track. Thus, the purple agent has to wait for the green train (see Figure \ref{fig:image3}) because it enters this section earlier.
 In the alternative encoding, both the red and the green agent disrupt their journey slightly by one and six seconds, respectively. The purple continues its journey without delay and can pass the green train ten seconds earlier (see Figure \ref{fig:image4}).
 
 In the given example, time prioritization offers the better solution in terms of total waiting time of agents (7s vs. 29s) and total time steps in the environment (136 vs. 146). It disrupts the plans of more trains but for shorter periods. In real-life application time prioritization would be the qualitatively preferable solution. It facilitates higher customer satisfaction, shortest total delay time across agents and therefore better chances for further connections.
@@ -924,7 +934,7 @@ Otherwise, the base encoding is faster.
 
 Combining all the conclusions derived above, we can create a flow that
 describes how to handle a malfunction. First, the secondary encoding with heuristic is run
-to derive aolution A. If there is no consequence, solution A is both the most
+to derive solution A. If there is no consequence, solution A is both the most
 optimized solution and the solution with the least amount of changed trains.
 If there is a consequence, the appropriate solution depends on the user's
 goal. If the goal is to minimize the number of changed trains, solution A can
@@ -953,7 +963,7 @@ Finally, we noticed that sometimes a malfunction can cause an environment to be 
 
 \bibliographystyle{splncs04}
 \bibliography{refs}
-
+\pagebreak
 \appendix
 %\pagebreak
 \section{Experiment Results}
@@ -962,7 +972,7 @@ Finally, we noticed that sometimes a malfunction can cause an environment to be 
 \setlength{\LTleft}{0pt}
 \setlength{\LTright}{0pt}
 \setlength{\tabcolsep}{4pt}
-
+\vspace{-0.7cm}
 \begin{longtable}{@{}
     l
     l
@@ -971,7 +981,6 @@ Finally, we noticed that sometimes a malfunction can cause an environment to be 
     r
     r
 @{}}
-
 \toprule
 \textbf{Environment} &
 \textbf{Malfunction type} &
@@ -1430,11 +1439,12 @@ Secondary, no heuristic
 \label{tab:rescheduling_times} \\
 
 \end{longtable}
-
+%\vspace{-0.8cm}
 \section{Decision process for selecting a rescheduling encoding}
 
-\begin{figure}
+\begin{wrapfigure}{c}{\textwidth}
 \centering
+\vspace{-1.2em}
 \begin{tikzpicture}[
 	node distance=0.3cm,
 	every node/.style={font=\small},
@@ -1508,9 +1518,10 @@ Secondary, no heuristic
 	-- node[above right] {Yes} (optimized);
 	
 \end{tikzpicture}
+
 \caption{Decision process for selecting a rescheduling encoding.}
 \label{fig:rescheduling-encoding-selection}
 
-\end{figure}
+\end{wrapfigure}
 
 \end{document}

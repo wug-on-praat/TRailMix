@@ -84,7 +84,7 @@ Universität Potsdam,
 \maketitle              % typeset the header of the contribution
 %
 \begin{abstract}
-Malfunctions on and around tracks of a railway system are a common real-world situation. While train malfunctions render the agent immovable, issues on the track often allow a small window for decisions and rerouting of agents. We propose an implementation of track malfunctions for the Flatland framework leveraging environment solving with answer set programming. It investigates whether a secondary encoding for rescheduling of agents after a track malfunction is preferable to Redo Planning. 
+Malfunctions on and around tracks of a railway system are a common real-world situation. While train malfunctions render the agent immovable, issues on the track often allow a small window for decisions and rerouting of agents. We propose an implementation of track malfunctions for the Flatland framework leveraging environment solving with answer set programming\footnote{\url{https://github.com/wug-on-praat/TRailMix}}. It investigates whether a secondary encoding for rescheduling of agents after a track malfunction is preferable to Redo Planning. 
 
 \keywords{ASP  \and Flatland \and MAPF \and Rescheduling \and VRSP.}
 \end{abstract}
@@ -96,12 +96,12 @@ Flatland is a framework developed by AICrowd and SBB for multi-agent path findin
 
 
 \subsection{Flatland and Answer Set Programming}
-Murphy has built a toolkit to integrate answer set programming solutions in the Flatland framework \cite{Murphy2026a}. The approach solves instances with Clingo \cite{gebser2018clingo} and then translates the solution to execute and visualize in Flatland. Environments are generated beforehand to adhere to Flatland prerequisites but also encode the instance for Clingo. The ASP encoding for solving has to generate action predicates which communicate all agents' steps to Flatland.  
+Murphy \cite{Murphy2026a} has built a toolkit to integrate answer set programming solutions in the Flatland framework. The approach solves instances with Clingo \cite{gebser2018clingo} and then translates the solution to execute and visualize in Flatland. Environments are generated beforehand to adhere to Flatland prerequisites but also encode the instance for Clingo. The ASP encoding for solving has to generate action predicates which communicate all agents' steps to Flatland.  
 
 
 \subsection{Malfunctions in Flatland}
 \label{flatland_mals}
-Flatland environments can natively include agent malfunctions. The aspect is called Stochasticity and defines how often and for how long trains will be disrupted \cite{Flatland2023}. Murphy included this aspect in the script for building new environments \cite{Murphy2026a}. The parameters in Code \ref{build_mals} define train malfunctions occurring in a new environment. The given \verb|malfunction_rate| sets the Poisson rate so that we can expect 10 malfunctions over 30 time steps.
+Flatland environments can natively include agent malfunctions. This aspect is called Stochasticity and defines how often and for how long trains will be disrupted \cite{Flatland2023}. Murphy included this aspect in the script for building new environments \cite{Murphy2026a}. The parameters in Code \ref{build_mals} define train malfunctions occurring in a new environment. The given \verb|malfunction_rate| sets the Poisson rate so that we can expect 10 malfunctions over 30 time steps.
 
 \begin{lstlisting}[style=mystyle, language=Python, caption={Generate train malfunctions in build.py.}, label={build_mals}]
 	
@@ -111,30 +111,26 @@ Flatland environments can natively include agent malfunctions. The aspect is cal
 	
 \end{lstlisting}
 
-Murphy's interface between Clingo and Flatland allows to define separate encodings \cite{Murphy2026a}. The first encoding derives the original schedule for all agents. The secondary encoding then solves the rescheduling after every train malfunction. It includes a feature for forwarding information from the scheduling encoding to be reused in the secondary encoding \cite{Murphy2026a} \cite{gilkra2025}. 
+Murphy's interface between Clingo and Flatland allows defining of separate encodings \cite{Murphy2026a}. The first encoding derives the original schedule for all agents. The secondary encoding then solves the rescheduling after every train malfunction. It includes a feature for forwarding information from the scheduling encoding to be reused in the secondary encoding \cite{Murphy2026a} \cite{gilkra2025}. 
 
-Gilkra have used these features to benchmark different attempts for secondary encodings after train malfunctions \cite{gilkra2025}. They have been able reuse calculated plans from the scheduling step and thus reduce computing time during rescheduling.
+Gili i Bueno \& Kratzsch have used these features to benchmark different attempts for secondary encodings after train malfunctions \cite{gilkra2025}. They have been able reuse calculated plans from the scheduling step and thus reduce computing time during rescheduling.
 
 Waldow approaches train malfunctions by identifying conflict points, cells where two agents can collide due to a train malfunction \cite{waldow2025}. Deltas then define the distance of an agent to such a conflict point and help deduce whether a given train malfunction can be "waited out" (triviality) or if multiple agents have to wait. He calls replanning by solving the environment anew with the same base encoding "Redo Planning" \cite[p.~24]{waldow2025}.
 
+\section{Track Malfunctions in Flatland}
 
 \subsection{Track Malfunctions}
 \label{trkmals}
 Track malfunctions are a common real world issue in railway systems. It negatively affects punctuality and interferes with scheduling of trains. Deutsche Bahn reports old facilities in need of repairs just as well as an intense, high-frequent use of existing infrastructure as reasons for malfunctions around the track \cite{DB2025}. Other factors can be weather incidents, such as flooding \cite{AusPunctuality2025} or fires \cite{DB2025}, or trespassing individuals that make railway sections temporarily unusable \cite{SZdelayarticle2023}.
 
-
-
-\section{Track Malfunctions in Flatland}
-
-
-Building on existing work about malfunctioning trains, we implement \cite{TRailMix2026} track malfunctions to simulate realistic scheduling challenges (see Sections \ref{flatland_mals} and \ref{trkmals}). We base our approach on previous work by Gilkra \cite{gilkra2025} and propose a similar structure for dealing with track-based disruptions in the original schedule. Flatland doesn't natively include track malfunctions. Alternatively, we generate track malfunctions in the main solving pipeline (see Section \ref{solve}). By reusing plans for trains from the original schedule,  we aimed to improve computation time during rescheduling through a secondary encoding (see Section \ref{encoding_2}).
+Building on existing work about malfunctioning trains, we implement \cite{TRailMix2026} track malfunctions to simulate realistic scheduling challenges (see Sections \ref{flatland_mals} and \ref{trkmals}). We base our approach on previous work by Gili i Bueno \& Kratzsch \cite{gilkra2025} and propose a similar structure for dealing with track-based disruptions in the original schedule. Flatland doesn't natively include track malfunctions. Alternatively, we generate track malfunctions in the main solving pipeline (see Section \ref{solve}). By reusing plans for trains from the original schedule,  we aimed to improve computation time during rescheduling through a secondary encoding (see Section \ref{encoding_2}).
 
 
 \subsection{Base Encoding} \label{encoding_1}
 
-The base encoding is Clingo code that solves a Flatland environment and schedules agents. It sets up the environment, generates sequential and valid positions for agents and then translates the positions into action atoms for Flatland (see Figure \ref{fig:overview_primary}). 
+The base encoding is a Clingo program that solves a Flatland environment and schedules agents. It sets up the environment, generates sequential and valid positions for agents and then translates the positions into action atoms for Flatland (see Figure \ref{fig:overview_primary}). 
 
-\subsubsection{Setting-up the environment} \label{setup_base}
+\subsubsection{Setting up the environment} \label{setup_base}
 The environment specifications are defined for Clingo during environment creation with \verb|build.py|. It consists of a global time limit, information about the trains including agent ID, start, end and speed, and the cells with their given track type.
 
 Our Base Encoding includes rules and additional information to represent the environment. First, it imports a fact file (\verb|connections_nswe.lp|) with additional world information applicable to all Flatland environments. It defines how track types translate to the directions north, south, west and east. For instance, the fact \verb|connection(4608, (s,w))| is track type 4608, a curve that connects south and west. Furthermore, it contains definitions for directions and turns, a move in a certain direction in terms of movement on the X- and Y-axis, relations between directions (e.g. west is the inverse of east) and which track types allow a choice in direction. The fact file has been taken from Murphy \cite{Murphy2026a} in big parts and expanded by us. Then, the Base Encoding creates a grid of adjacent cells and checks which are reachable by an agent.
@@ -209,7 +205,7 @@ Our Base Encoding includes rules and additional information to represent the env
 \subsubsection{Move Agents}\label{move_agents}
 The \verb|position(ID, CELL, TIME, DIRECTION)| argument handles the position of a train (ID) in the environment at any given time step and thus generates the sequential moves for that agent. A train is marked as \verb|finish(ID, TIME)| once it has reached its destination and doesn't move further. The position atoms are subsequently translated to action predicates containing necessary information, namely train ID and the required action at a given time step, for Flatland to visualise the solved environment.
 
-Our optimization objectives encourage trains to reach their destination as soon as possible and prefer one consecutive waiting period over repeated stop-and-go behaviour.
+Our optimization objectives specify that trains reach their destinations in as few steps as possible. One consecutive waiting period is preferable over repeated stop-and-go behaviour.
 
 \subsubsection{Constraints}
 We implemented two types of constraints on agent movements: single train constraints and train coordination constraints. Single train constraints ensure that a train behaves normally. They forbid multiple positions of one agent in the environment and ensure termination upon arrival at the destination.
@@ -232,7 +228,7 @@ The added code consists of the following parts:
     \item Depicting the malfunction in the Flatland output
 \end{itemize}
 
-\subsubsection{Track Malfunction Atom Definition}
+\subsubsection{Track Malfunction Definition}
 
 A track malfunction Python object is a tuple consisting of three components:
 
@@ -241,21 +237,35 @@ A track malfunction Python object is a tuple consisting of three components:
 \end{verbatim}
 
 The \texttt{CELL} is an \texttt{(X, Y)} tuple that defines where the track malfunction occurred.
-The \texttt{TIMESTEP} represents the timestep at which the track malfunction was triggered. During this timestep, the malfunction has not yet occurred but it starts in the following timestep. This was an architectural decision to ensure that trains cannot be on a malfunctioning track when the malfunction starts.
+The \texttt{TIMESTEP} represents the timestep at which the track malfunction was triggered. During this timestep, the malfunction has not yet occurred but it starts in the following timestep. This was an architectural decision to ensure that trains cannot be on a malfunctioning track when the malfunction starts. 
 The \texttt{DURATION} specifies the number of timesteps for which the track malfunction occurred.
 
-Track malfunctions can either be created randomly or predefined by the user. The variable \texttt{predefined\_malfunction} is used to store malfunctions that the user wants to enforce on the environment. If the variable is empty, there is a 1\% chance of a malfunction occurring at every timestep (this probability can be adjusted). In the current setup, only one malfunction can occur per timestep (see Section \ref{future-work}). Malfunctions are logged in a CSV file with the following parameters:
+In the current setup, only one malfunction can occur per timestep (see Section \ref{future-work}). Similar to a train malfunction, a track malfunction is depicted as a red \textbf{X} over the malfunctioning track. Malfunctions are logged in a CSV file with the following parameters:
 
 \begin{verbatim}
 	timestep;cell;duration
 \end{verbatim}
+
+
+\subsubsection{Trigger a Track Malfunction}
+Track malfunctions can either be created randomly or predefined by the user. The variable \texttt{predefined\_malfunction} is used to specify malfunctions that the user wants to enforce on the environment. If the variable is empty, there is a 1\% chance of a malfunction occurring at every timestep (this probability can be adjusted). 
+
+The \texttt{TrackMalManager} stores 
+\begin{enumerate}
+	\item a list of current malfunctions active at the given time step
+	\item the grid of tracks that could malfunction
+	\item a list of all track malfunctions, necessary to name track malfunctions correctly in the CSV log
+\end{enumerate}
+
+With each time step, the duration for each malfunction in the list of current malfunctions gets reduced by one and subsequently removed from the list. This is important for depicting the track malfunction correctly in the visualization image for each time step. Thus, our implementation can handle and visualize overlapping malfunctions while Clingo reschedules the environment only once for each malfunction.
+
 
 \subsubsection{Track malfunction Implementation in Clingo}\label{fwd_info_2_clingo}
 
 When a malfunction is triggered in Python, multiple atoms and rules are generated and forwarded to the program that calculates the rescheduling (Secondary Encoding - see Section \ref{encoding_2}).
 
 \begin{itemize}
-    \item \textbf{\texttt{action} constraint rules} -- To preserve the actions taken up to this point, a constraint rule is generated for each action, ensuring that all past actions must be present in the output of the rescheduling.
+    \item \textbf{\texttt{action} integrity constraints} -- To preserve the actions taken up to this point, an integrity constraint is generated for each action, ensuring that all past actions must be present in the output of the rescheduling.
 
     \item \textbf{\texttt{track\_malfunction} atoms} -- to provide the location, timestep and duration of the malfunction.
 
@@ -268,14 +278,10 @@ When a malfunction is triggered in Python, multiple atoms and rules are generate
     \item \textbf{\texttt{current\_position} atoms} -- Include all positions occupied at the timestep at which the malfunction occurred.
 \end{itemize}
 
-\subsubsection{Track malfunction Depiction}
-
-Similar to a train malfunction, a track malfunction is depicted as a red \textbf{X} over the malfunctioning track.
-
 
 \subsection{Secondary Encoding} \label{encoding_2}
 
-The secondary encoding reschedules the environment after a track malfunction. Our goal was to reduce computational cost by avoiding recalculation of the environment and agents. Our approach, similar to Gilkra \cite{gilkra2025}, reuses information and train schedules from the original plan unless the track malfunction interferes with an agent. 
+The secondary encoding reschedules the environment after a track malfunction. Our goal was to reduce computational cost by avoiding recalculation of the environment and agents. Our approach, similar to Gili i Bueno \& Kratzsch \cite{gilkra2025}, reuses information and train schedules from the original plan unless the track malfunction interferes with an agent. 
 
 \verb|secondary_encoding.lp| reuses ideas for solving from the base encoding, such as the general environment facts \verb|connections_nswe.lp| and \verb|trainjacent| atoms for finding valid movements (see Section \ref{setup_base}). Additionally, information is passed from the original schedule (see Section \ref{fwd_info_2_clingo}). Thus, the secondary encoding has access to 
 \begin{itemize}
@@ -285,9 +291,11 @@ The secondary encoding reschedules the environment after a track malfunction. Ou
 	\item {initial plan for agents (\verb|planned_action\3| and \verb|planned_position\4|)}
 \end{itemize}
 
-\begin{wrapfigure}[18]{r}{0.3\textwidth}
+First, the program sets up the required environment with \verb|connections_nswe.lp| and creates two time counters. \verb|time(T)| counts time from one step after the track malfunction. \verb|past_time(T)| counts time up until and including the step of the track malfunction. This distinction is required to restore actions up until the malfunction time. These past action atoms are necessary for Flatland to depict the solution correctly.
+
+\begin{wrapfigure}[17]{r}{0.3\textwidth}
 	\centering
-	\vspace{-2.5em}
+	\vspace{-2em}
 	\begin{tikzpicture}[
 		font=\sffamily,
 		>=Latex,
@@ -360,9 +368,15 @@ The secondary encoding reschedules the environment after a track malfunction. Ou
 	\label{fig:overview_secondary}
 \end{wrapfigure}
 
-First, the program sets up the required environment with \verb|connections_nswe.lp| and creates two time counters. \verb|time(T)| counts time from one step after the track malfunction. \verb|past_time(T)| counts time up until and including the step of the track malfunction. This distinction is required to restore actions up until the malfunction time. These past action atoms are necessary for Flatland to depict the solution correctly.
 
-If a track malfunction triggers before all trains of the environment have been initialized in their starting position, they have to be positioned during rescheduling by creating their starting \verb|position\4|. Then the replanning of trains starts. To identify whether an agent is affected by a track malfunction, it raises a \verb|consequence\3| (see Code \ref{consequence}). That means the train is planned to be on the malfunctioning track, it cannot continue on its original path and must adjust its behaviour. There are three scenarios our secondary encoding handles\footnote{If a track malfunction hits a cell while there is a train on its track, the simulation breaks, effectively corresponding to an accident on the track. We discovered this behaviour and decided to keep it instead of handling that exception as it also depicts a realistic scenario and could be inspiration for future work in this course.}: a) the track malfunction doesn't interfere with the planned routes of agents (no consequence), b) one train is affected by the track malfunction (simple consequence) and c) multiple trains are affected by the track malfunction (complex consequence).
+
+If a track malfunction triggers before all trains of the environment have been initialized in their starting position, they have to be positioned during rescheduling by creating their starting \verb|position\4|. Then the replanning of trains starts. To identify whether an agent is affected by a track malfunction, it raises a \verb|consequence\3| (see Code \ref{consequence}). That means the train is planned to be on the malfunctioning track, it cannot continue on its original path and must adjust its behaviour. There are three scenarios our secondary encoding handles\footnote{If a track malfunction hits a cell while there is a train on its track, the simulation breaks, effectively corresponding to an accident on the track. We discovered this behaviour and decided to keep it instead of handling that exception as it also depicts a realistic scenario and could be inspiration for future work in this course.}: 
+\renewcommand{\labelenumi}{\alph{enumi})}
+\begin{enumerate}
+	\item the track malfunction doesn't interfere with the planned routes of agents (no consequence)
+	\item one train is affected by the track malfunction (simple consequence)
+	\item multiple trains are affected by the track malfunction (complex consequence)
+\end{enumerate} 
 
 
 \begin{lstlisting}[style=mystyle, language=Clingo, caption={Definition of consequence: if a train is attempting to go into a malfunctioning cell it raises a consequence.}, label={consequence}]
@@ -434,47 +448,49 @@ Experiment 4 then evaluates how the Secondary Encoding + heuristic competes agai
 \subsection{Testing environments}
 Six testing environments of varying sizes and numbers of agents were used in each experiment (see Figure \ref{test_envs}). In each environment, we have identified tracks for the three types of track malfunctions (simple, complex, no consequence - see Section \ref{encoding_2}).
 
-% add crosses to show malfunction cells
-\begin{figure}[hbtp]
-	
-	\begin{subfigure}{.475\linewidth}
+
+\begin{figure}[phbt]
+	% Row 1
+	\begin{subfigure}{.45\linewidth}
 		\includegraphics[width=\linewidth]{env_3_2.png}
 		\caption{env\_3\_2, 20x20, 3 agents}
 		\label{3_2}
 	\end{subfigure}\hfill 
-	
-	\begin{subfigure}{.475\linewidth}
+	%
+	\begin{subfigure}{.45\linewidth}
 		\includegraphics[width=\linewidth]{env_6_6.png}
 		\caption{env\_6\_6, 50x50, 6 agents}
-		\label{6_6}
+		\label{fig:6_6}
 	\end{subfigure}
-
+	
+	% Row 2
 	\begin{subfigure}{.475\linewidth}
 		\includegraphics[width=\linewidth]{env_2_2.png}
 		\caption{env\_2\_2, 20x15, 2 agents}
-		\label{2_2}
+		\label{fig:2_2}
 	\end{subfigure}\hfill % <-- "\hfill"
 	~ % optional tilde b/t figures for readability.
 	% this solution will not work w/ empty lines b/t subfigures
 	\begin{subfigure}{.475\linewidth}
 		\includegraphics[width=\linewidth]{env_10_10.png}
 		\caption{env\_10\_10, 30x30, 10 agents}
-		\label{10_10}
+		\label{fig:10_10}
 	\end{subfigure}
 	
+	% Row 3
 	\begin{subfigure}{.475\linewidth}
 		\includegraphics[width=\linewidth]{env_5_4.png}
 		\caption{env\_5\_4, 25x40, 5 agents}
-		\label{5_4}
+		\label{fig:5_4}
 	\end{subfigure}\hfill % <-- "\hfill"
 	% or just a comment and no tilde
 	\begin{subfigure}{.475\linewidth}
 		\includegraphics[width=\linewidth]{env_10_8.png}
 		\caption{env\_10\_8, 25x40, 10 agents}
-		\label{10_8}
+		\label{fig:10_8}
 	\end{subfigure}
 	\caption{Testing environments.}
-	\label{test_envs}
+	\label{fig:test_envs}
 \end{figure}
 
 \subsection{Predictions}
